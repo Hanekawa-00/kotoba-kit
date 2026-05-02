@@ -128,6 +128,18 @@ abstract class AppLocalizations {
   /// **'关于'**
   String get navAbout;
 
+  /// No description provided for @navCollapseSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'折叠侧边栏'**
+  String get navCollapseSidebar;
+
+  /// No description provided for @navExpandSidebar.
+  ///
+  /// In zh, this message translates to:
+  /// **'展开侧边栏'**
+  String get navExpandSidebar;
+
   /// No description provided for @homeTitle.
   ///
   /// In zh, this message translates to:

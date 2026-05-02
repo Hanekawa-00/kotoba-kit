@@ -5,6 +5,8 @@
   "navSettings": "Settings",
   "navComponents": "Components",
   "navAbout": "About",
+  "navCollapseSidebar": "Collapse sidebar",
+  "navExpandSidebar": "Expand sidebar",
   "homeTitle": "Flutter Template",
   "homeSubtitle": "A cross-platform app template with common capabilities ready for real features.",
   "openSettingsTooltip": "Open settings",

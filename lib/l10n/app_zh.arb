@@ -5,6 +5,8 @@
   "navSettings": "设置",
   "navComponents": "组件",
   "navAbout": "关于",
+  "navCollapseSidebar": "折叠侧边栏",
+  "navExpandSidebar": "展开侧边栏",
   "homeTitle": "Flutter Template",
   "homeSubtitle": "跨平台应用模板，保留通用能力，业务功能从这里继续生长。",
   "openSettingsTooltip": "打开设置",

@@ -24,6 +24,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navAbout => 'About';
 
   @override
+  String get navCollapseSidebar => 'Collapse sidebar';
+
+  @override
+  String get navExpandSidebar => 'Expand sidebar';
+
+  @override
   String get homeTitle => 'Flutter Template';
 
   @override

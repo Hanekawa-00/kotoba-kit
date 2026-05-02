@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/localization_extensions.dart';
 import '../../core/theme/app_design_tokens.dart';
 
-class AppShell extends StatelessWidget {
+class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.location, required this.child});
 
   final String location;
@@ -34,42 +35,72 @@ class AppShell extends StatelessWidget {
   ];
 
   @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  bool? _desktopNavigationExpanded;
+
+  @override
   Widget build(BuildContext context) {
-    final selectedIndex = _selectedIndexFor(location);
+    final selectedIndex = _selectedIndexFor(widget.location);
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final useRail = constraints.maxWidth >= 760;
 
         if (useRail) {
-          final extended = constraints.maxWidth >= 1080;
+          final extended =
+              _desktopNavigationExpanded ?? (constraints.maxWidth >= 1080);
 
-          return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            body: _DesktopShellBackground(
-              child: Row(
-                children: [
-                  _DesktopNavigationPane(
-                    extended: extended,
-                    selectedIndex: selectedIndex,
-                    destinations: _destinations,
-                    onDestinationSelected: (index) {
-                      context.go(_destinations[index].path);
-                    },
+          return Shortcuts(
+            shortcuts: const {
+              SingleActivator(LogicalKeyboardKey.keyB, control: true):
+                  _ToggleDesktopNavigationIntent(),
+              SingleActivator(LogicalKeyboardKey.keyB, meta: true):
+                  _ToggleDesktopNavigationIntent(),
+            },
+            child: Actions(
+              actions: {
+                _ToggleDesktopNavigationIntent:
+                    CallbackAction<_ToggleDesktopNavigationIntent>(
+                      onInvoke: (_) {
+                        _toggleDesktopNavigation(extended);
+                        return null;
+                      },
+                    ),
+              },
+              child: Scaffold(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                body: _DesktopShellBackground(
+                  child: Row(
+                    children: [
+                      _DesktopNavigationPane(
+                        extended: extended,
+                        selectedIndex: selectedIndex,
+                        destinations: AppShell._destinations,
+                        onToggleExpanded: () {
+                          _toggleDesktopNavigation(extended);
+                        },
+                        onDestinationSelected: (index) {
+                          context.go(AppShell._destinations[index].path);
+                        },
+                      ),
+                      Expanded(child: _DesktopContentPane(child: widget.child)),
+                    ],
                   ),
-                  Expanded(child: _DesktopContentPane(child: child)),
-                ],
+                ),
               ),
             ),
           );
         }
 
         return Scaffold(
-          body: child,
+          body: widget.child,
           bottomNavigationBar: NavigationBar(
             selectedIndex: selectedIndex,
             destinations: [
-              for (final destination in _destinations)
+              for (final destination in AppShell._destinations)
                 NavigationDestination(
                   icon: Icon(destination.icon),
                   selectedIcon: Icon(destination.selectedIcon),
@@ -77,7 +108,7 @@ class AppShell extends StatelessWidget {
                 ),
             ],
             onDestinationSelected: (index) {
-              context.go(_destinations[index].path);
+              context.go(AppShell._destinations[index].path);
             },
           ),
         );
@@ -86,9 +117,21 @@ class AppShell extends StatelessWidget {
   }
 
   int _selectedIndexFor(String location) {
-    final index = _destinations.indexWhere((item) => item.path == location);
+    final index = AppShell._destinations.indexWhere(
+      (item) => item.path == location,
+    );
     return index < 0 ? 0 : index;
   }
+
+  void _toggleDesktopNavigation(bool extended) {
+    setState(() {
+      _desktopNavigationExpanded = !extended;
+    });
+  }
+}
+
+class _ToggleDesktopNavigationIntent extends Intent {
+  const _ToggleDesktopNavigationIntent();
 }
 
 class _DesktopShellBackground extends StatelessWidget {
@@ -121,12 +164,14 @@ class _DesktopNavigationPane extends StatelessWidget {
     required this.extended,
     required this.selectedIndex,
     required this.destinations,
+    required this.onToggleExpanded,
     required this.onDestinationSelected,
   });
 
   final bool extended;
   final int selectedIndex;
   final List<_ShellDestination> destinations;
+  final VoidCallback onToggleExpanded;
   final ValueChanged<int> onDestinationSelected;
 
   @override
@@ -147,7 +192,10 @@ class _DesktopNavigationPane extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _AppMark(extended: extended),
+          _DesktopNavigationHeader(
+            extended: extended,
+            onToggleExpanded: onToggleExpanded,
+          ),
           SizedBox(height: spacing.xxl),
           Expanded(
             child: ListView.separated(
@@ -168,6 +216,11 @@ class _DesktopNavigationPane extends StatelessWidget {
                 );
               },
             ),
+          ),
+          SizedBox(height: spacing.md),
+          _DesktopNavigationFooter(
+            extended: extended,
+            onToggleExpanded: onToggleExpanded,
           ),
         ],
       ),
@@ -289,6 +342,88 @@ class _DesktopNavItemState extends State<_DesktopNavItem> {
     }
 
     return Tooltip(message: widget.label, child: navItem);
+  }
+}
+
+class _DesktopNavigationHeader extends StatelessWidget {
+  const _DesktopNavigationHeader({
+    required this.extended,
+    required this.onToggleExpanded,
+  });
+
+  final bool extended;
+  final VoidCallback onToggleExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+
+    return Row(
+      children: [
+        Expanded(child: _AppMark(extended: extended)),
+        if (extended) ...[
+          SizedBox(width: spacing.sm),
+          _SidebarIconButton(
+            icon: Icons.keyboard_double_arrow_left_rounded,
+            tooltip: context.l10n.navCollapseSidebar,
+            onPressed: onToggleExpanded,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _DesktopNavigationFooter extends StatelessWidget {
+  const _DesktopNavigationFooter({
+    required this.extended,
+    required this.onToggleExpanded,
+  });
+
+  final bool extended;
+  final VoidCallback onToggleExpanded;
+
+  @override
+  Widget build(BuildContext context) {
+    if (extended) {
+      return const SizedBox.shrink();
+    }
+
+    return _SidebarIconButton(
+      icon: Icons.keyboard_double_arrow_right_rounded,
+      tooltip: context.l10n.navExpandSidebar,
+      onPressed: onToggleExpanded,
+    );
+  }
+}
+
+class _SidebarIconButton extends StatelessWidget {
+  const _SidebarIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return IconButton(
+      tooltip: tooltip,
+      onPressed: onPressed,
+      icon: Icon(icon),
+      style: IconButton.styleFrom(
+        foregroundColor: scheme.onSurfaceVariant,
+        backgroundColor: scheme.surfaceContainerHigh.withValues(alpha: 0.56),
+        hoverColor: scheme.primaryContainer.withValues(alpha: 0.72),
+        focusColor: scheme.primaryContainer.withValues(alpha: 0.72),
+      ),
+    );
   }
 }
 

@@ -24,6 +24,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navAbout => '关于';
 
   @override
+  String get navCollapseSidebar => '折叠侧边栏';
+
+  @override
+  String get navExpandSidebar => '展开侧边栏';
+
+  @override
   String get homeTitle => 'Flutter Template';
 
   @override
