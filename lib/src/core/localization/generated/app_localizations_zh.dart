@@ -227,6 +227,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commonCancel => '取消';
 
   @override
+  String get backAgainToExit => '再按一次返回退出应用';
+
+  @override
   String get commandPaletteSearchHint => '搜索页面或操作';
 
   @override

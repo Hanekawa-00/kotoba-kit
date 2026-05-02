@@ -78,6 +78,7 @@
   "commonDisabled": "Disabled",
   "commonConfirm": "Confirm",
   "commonCancel": "Cancel",
+  "backAgainToExit": "Press back again to exit",
   "commandPaletteSearchHint": "Search pages or actions",
   "commandPaletteNoResults": "No matching actions",
   "commandPaletteExecuted": "Action executed",

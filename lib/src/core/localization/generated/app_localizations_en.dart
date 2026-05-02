@@ -240,6 +240,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonCancel => 'Cancel';
 
   @override
+  String get backAgainToExit => 'Press back again to exit';
+
+  @override
   String get commandPaletteSearchHint => 'Search pages or actions';
 
   @override

@@ -78,6 +78,7 @@
   "commonDisabled": "关闭",
   "commonConfirm": "确认",
   "commonCancel": "取消",
+  "backAgainToExit": "再按一次返回退出应用",
   "commandPaletteSearchHint": "搜索页面或操作",
   "commandPaletteNoResults": "没有匹配的操作",
   "commandPaletteExecuted": "已执行操作",

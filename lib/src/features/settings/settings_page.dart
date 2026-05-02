@@ -45,11 +45,6 @@ class SettingsPage extends ConsumerWidget {
     return PageFrame(
       title: l10n.settingsTitle,
       subtitle: l10n.settingsSubtitle,
-      trailing: OutlinedButton.icon(
-        onPressed: resetSettings,
-        icon: const Icon(Icons.restart_alt),
-        label: Text(l10n.settingsResetAction),
-      ),
       children: [
         if (asyncSettings.hasError)
           _ErrorBanner(error: asyncSettings.error.toString()),
