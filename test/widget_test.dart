@@ -78,9 +78,65 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('About'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Settings'), findsWidgets);
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 
-  testWidgets('desktop page actions stay available after scrolling', (
+  testWidgets('mobile top-level back asks before exiting', (tester) async {
+    _setMobileViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsRepositoryProvider.overrideWithValue(
+            _FakeSettingsRepository(),
+          ),
+        ],
+        child: const AppBootstrap(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Press back again to exit'), findsOneWidget);
+  });
+
+  testWidgets('desktop settings keeps reset only in content', (tester) async {
+    _setDesktopViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsRepositoryProvider.overrideWithValue(
+            _FakeSettingsRepository(),
+          ),
+        ],
+        child: const AppBootstrap(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -900),
+      900,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset'), findsNothing);
+    expect(find.text('Reset preferences'), findsOneWidget);
+  });
+
+  testWidgets('desktop subpage actions stay available after scrolling', (
     tester,
   ) async {
     _setDesktopViewport(tester);
@@ -105,8 +161,16 @@ void main() {
       900,
     );
     await tester.pumpAndSettle();
+    await tester.tap(find.text('About').last);
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -900),
+      900,
+    );
+    await tester.pumpAndSettle();
 
-    expect(find.text('Reset'), findsWidgets);
+    expect(find.text('Back to settings'), findsOneWidget);
   });
 }
 

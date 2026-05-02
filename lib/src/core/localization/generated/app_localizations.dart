@@ -524,6 +524,12 @@ abstract class AppLocalizations {
   /// **'取消'**
   String get commonCancel;
 
+  /// No description provided for @backAgainToExit.
+  ///
+  /// In zh, this message translates to:
+  /// **'再按一次返回退出应用'**
+  String get backAgainToExit;
+
   /// No description provided for @commandPaletteSearchHint.
   ///
   /// In zh, this message translates to:
