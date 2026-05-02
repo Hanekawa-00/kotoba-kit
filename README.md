@@ -8,8 +8,10 @@
 - shared_preferences 设置持久化
 - `--dart-define` 环境配置：`development`、`staging`、`production`
 - 全局日志与异常入口
+- Dio 网络客户端、错误映射和 repository 约定
 - Flutter gen-l10n 中英文国际化基础设施
 - 加载、空状态、错误状态、确认弹窗等通用 UI 组件
+- GitHub Actions CI 与本地质量检查脚本
 - `core`、`features`、`shared` 分层目录
 
 ## 结构
@@ -20,6 +22,7 @@ lib/
   src/
     app/              # 应用启动与 MaterialApp
     core/             # 配置、日志、异常、i18n、路由、主题、设置
+    data/             # repository 约定与数据源入口
     features/         # 首页、设置、关于等功能入口
     shared/widgets/   # 可复用 UI 组件
 ```
@@ -36,6 +39,14 @@ flutter run
 ```bash
 flutter run --dart-define=APP_ENV=staging
 flutter run --dart-define=APP_ENV=production --dart-define=APP_NAME=MyApp
+```
+
+运行质量检查：
+
+```bash
+pwsh ./scripts/check.ps1
+# or
+bash ./scripts/check.sh
 ```
 
 生成本地化代码：
