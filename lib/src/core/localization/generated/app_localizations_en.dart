@@ -145,6 +145,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Make desktop and information-dense pages more restrained.';
 
   @override
+  String get settingsOtherTitle => 'Other';
+
+  @override
   String get settingsResetAction => 'Reset';
 
   @override
@@ -171,6 +174,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutSubtitle =>
       'A general, extensible, cross-platform-first Flutter template.';
+
+  @override
+  String get aboutBackToSettings => 'Back to settings';
 
   @override
   String get aboutStructureTitle => 'Project structure';

@@ -173,7 +173,7 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
         icon: Icons.info_outline,
         title: l10n.commandGoAbout,
         subtitle: l10n.aboutSubtitle,
-        action: () => widget.router.go('/about'),
+        action: () => widget.router.go('/settings/about'),
       ),
     ];
   }

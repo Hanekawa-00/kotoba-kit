@@ -27,11 +27,6 @@ class AppShell extends StatefulWidget {
       icon: Icons.widgets_outlined,
       selectedIcon: Icons.widgets,
     ),
-    _ShellDestination(
-      path: '/about',
-      icon: Icons.info_outline,
-      selectedIcon: Icons.info,
-    ),
   ];
 
   @override
@@ -117,9 +112,13 @@ class _AppShellState extends State<AppShell> {
   }
 
   int _selectedIndexFor(String location) {
-    final index = AppShell._destinations.indexWhere(
-      (item) => item.path == location,
-    );
+    final index = AppShell._destinations.indexWhere((item) {
+      if (item.path == '/') {
+        return location == '/';
+      }
+
+      return location == item.path || location.startsWith('${item.path}/');
+    });
     return index < 0 ? 0 : index;
   }
 
@@ -444,7 +443,6 @@ class _ShellDestination {
     return switch (path) {
       '/settings' => l10n.navSettings,
       '/components' => l10n.navComponents,
-      '/about' => l10n.navAbout,
       _ => l10n.navHome,
     };
   }

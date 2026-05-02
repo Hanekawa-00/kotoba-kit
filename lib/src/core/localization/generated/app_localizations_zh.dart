@@ -135,6 +135,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsCompactDensitySubtitle => '让桌面端和信息密集页面更克制。';
 
   @override
+  String get settingsOtherTitle => '其他';
+
+  @override
   String get settingsResetAction => '重置';
 
   @override
@@ -159,6 +162,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aboutSubtitle => '一个偏通用、可扩展、跨平台优先的 Flutter 模板。';
+
+  @override
+  String get aboutBackToSettings => '返回设置';
 
   @override
   String get aboutStructureTitle => '项目结构';

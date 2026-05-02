@@ -344,6 +344,12 @@ abstract class AppLocalizations {
   /// **'让桌面端和信息密集页面更克制。'**
   String get settingsCompactDensitySubtitle;
 
+  /// No description provided for @settingsOtherTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'其他'**
+  String get settingsOtherTitle;
+
   /// No description provided for @settingsResetAction.
   ///
   /// In zh, this message translates to:
@@ -391,6 +397,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'一个偏通用、可扩展、跨平台优先的 Flutter 模板。'**
   String get aboutSubtitle;
+
+  /// No description provided for @aboutBackToSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'返回设置'**
+  String get aboutBackToSettings;
 
   /// No description provided for @aboutStructureTitle.
   ///

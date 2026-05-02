@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/localization/localization_extensions.dart';
 import '../../core/settings/app_settings.dart';
@@ -125,6 +126,19 @@ class SettingsPage extends ConsumerWidget {
             ),
           ],
         ),
+        SectionCard(
+          title: l10n.settingsOtherTitle,
+          icon: Icons.more_horiz_rounded,
+          children: [
+            _PreferenceTile(
+              icon: Icons.info_outline,
+              title: Text(l10n.aboutTitle),
+              subtitle: Text(l10n.aboutSubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.go('/settings/about'),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -171,12 +185,14 @@ class _PreferenceTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.trailing,
+    this.onTap,
   });
 
   final IconData icon;
   final Widget title;
   final Widget subtitle;
   final Widget trailing;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -193,6 +209,7 @@ class _PreferenceTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(radii.lg),
         ),
         child: ListTile(
+          onTap: onTap,
           leading: Icon(icon, color: scheme.primary),
           title: title,
           subtitle: subtitle,
@@ -249,12 +266,16 @@ class _ColorPresetButton extends StatelessWidget {
                 : null,
           ),
           child: selected
-              ? Icon(Icons.check, color: scheme.onPrimary)
+              ? Icon(Icons.check, color: _foregroundFor(preset.seedColor))
               : const SizedBox.shrink(),
         ),
       ),
     );
   }
+}
+
+Color _foregroundFor(Color color) {
+  return color.computeLuminance() > 0.45 ? Colors.black : Colors.white;
 }
 
 class _ErrorBanner extends StatelessWidget {
