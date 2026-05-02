@@ -79,10 +79,46 @@ void main() {
     expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
     expect(find.text('About'), findsOneWidget);
   });
+
+  testWidgets('desktop page actions stay available after scrolling', (
+    tester,
+  ) async {
+    _setDesktopViewport(tester);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          settingsRepositoryProvider.overrideWithValue(
+            _FakeSettingsRepository(),
+          ),
+        ],
+        child: const AppBootstrap(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.fling(
+      find.byType(CustomScrollView),
+      const Offset(0, -900),
+      900,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Reset'), findsWidgets);
+  });
 }
 
 void _setMobileViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
+
+void _setDesktopViewport(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1200, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
