@@ -442,7 +442,7 @@ class _EntryCard extends StatelessWidget {
           ],
           SizedBox(height: spacing.md),
           Html(
-            data: _asHtmlFragment(entry.definitionHtml),
+            data: _prepareMdictHtml(entry.definitionHtml),
             shrinkWrap: true,
             onLinkTap: (url, attributes, element) {
               final linkedWord = _lookupWordFromUrl(url);
@@ -467,6 +467,12 @@ class _EntryCard extends StatelessWidget {
                 color: scheme.primary,
                 textDecoration: TextDecoration.underline,
               ),
+              '.mdict-key': Style(color: scheme.onSurface),
+              '.mdict-sense-number': Style(
+                color: scheme.primary,
+                fontWeight: FontWeight.w700,
+                margin: Margins.only(right: 3),
+              ),
               'p': Style(margin: Margins.only(bottom: 8)),
               'div': Style(margin: Margins.only(bottom: 6)),
               'table': Style(
@@ -484,15 +490,30 @@ class _EntryCard extends StatelessWidget {
   }
 }
 
-String _asHtmlFragment(String value) {
+String _prepareMdictHtml(String value) {
   if (RegExp(r'<[A-Za-z][^>]*>').hasMatch(value)) {
-    return value;
+    return _normalizeMdictTags(value);
   }
 
   return value
       .split('\n')
       .map((line) => const HtmlEscape().convert(line.trimRight()))
       .join('<br>');
+}
+
+String _normalizeMdictTags(String value) {
+  return value
+      .replaceAll(RegExp(r'<link\b[^>]*>', caseSensitive: false), '')
+      .replaceAll(
+        RegExp(r'<k\b[^>]*>', caseSensitive: false),
+        '<span class="mdict-key">',
+      )
+      .replaceAll(RegExp(r'</k>', caseSensitive: false), '</span>')
+      .replaceAll(
+        RegExp(r'<v\b[^>]*>', caseSensitive: false),
+        '<span class="mdict-sense-number">',
+      )
+      .replaceAll(RegExp(r'</v>', caseSensitive: false), '</span>');
 }
 
 String? _lookupWordFromUrl(String? url) {
