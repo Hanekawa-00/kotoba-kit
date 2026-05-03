@@ -76,21 +76,22 @@ void main() {
     expect(find.text('Press back again to exit'), findsOneWidget);
   });
 
-  testWidgets('mobile component gallery adapts to narrow screens', (
-    tester,
-  ) async {
-    _setMobileViewport(tester);
-
-    await tester.pumpWidget(_buildTestApp());
-
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Components'));
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text('Components'), findsWidgets);
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  // Components gallery removed
+  // testWidgets('mobile component gallery adapts to narrow screens', (
+  //   tester,
+  // ) async {
+  //   _setMobileViewport(tester);
+  //
+  //   await tester.pumpWidget(_buildTestApp());
+  //
+  //   await tester.pumpAndSettle();
+  //   await tester.tap(find.text('Components'));
+  //   await tester.pump(const Duration(milliseconds: 300));
+  //
+  //   expect(find.text('Components'), findsWidgets);
+  //   expect(find.byType(NavigationBar), findsOneWidget);
+  //   expect(tester.takeException(), isNull);
+  // });
 
   testWidgets('desktop settings keeps reset only in content', (tester) async {
     _setDesktopViewport(tester);

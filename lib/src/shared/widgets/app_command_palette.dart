@@ -169,12 +169,13 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
         subtitle: l10n.settingsSubtitle,
         action: () => widget.router.go('/settings'),
       ),
-      _PaletteCommand(
-        icon: Icons.widgets_outlined,
-        title: l10n.commandGoComponents,
-        subtitle: l10n.componentsSubtitle,
-        action: () => widget.router.go('/components'),
-      ),
+      // Components gallery removed
+      // _PaletteCommand(
+      //   icon: Icons.widgets_outlined,
+      //   title: l10n.commandGoComponents,
+      //   subtitle: l10n.componentsSubtitle,
+      //   action: () => widget.router.go('/components'),
+      // ),
       _PaletteCommand(
         icon: Icons.info_outline,
         title: l10n.commandGoAbout,

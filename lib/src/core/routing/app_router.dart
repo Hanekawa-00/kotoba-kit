@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/about/about_page.dart';
-import '../../features/components/component_gallery_page.dart';
+// import '../../features/components/component_gallery_page.dart';
 import '../../features/dictionary/dictionary_page.dart';
 import '../../features/home/home_page.dart';
 import '../../features/settings/settings_page.dart';
@@ -54,15 +54,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/components',
-                name: 'components',
-                builder: (context, state) => const ComponentGalleryPage(),
-              ),
-            ],
-          ),
+          // Components gallery removed — see template code at
+          // lib/src/features/components/component_gallery_page.dart
+          // StatefulShellBranch(
+          //   routes: [
+          //     GoRoute(
+          //       path: '/components',
+          //       name: 'components',
+          //       builder: (context, state) => const ComponentGalleryPage(),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     ],

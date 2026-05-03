@@ -32,11 +32,12 @@ class AppShell extends StatefulWidget {
       icon: Icons.tune_outlined,
       selectedIcon: Icons.tune,
     ),
-    _ShellDestination(
-      path: '/components',
-      icon: Icons.widgets_outlined,
-      selectedIcon: Icons.widgets,
-    ),
+    // Components gallery removed — see template code
+    // _ShellDestination(
+    //   path: '/components',
+    //   icon: Icons.widgets_outlined,
+    //   selectedIcon: Icons.widgets,
+    // ),
   ];
 
   @override
@@ -217,9 +218,9 @@ class _AppShellState extends State<AppShell> {
       return l10n.settingsTitle;
     }
 
-    if (location.startsWith('/components')) {
-      return l10n.componentsTitle;
-    }
+    // if (location.startsWith('/components')) {
+    //   return l10n.componentsTitle;
+    // }
 
     final destination = AppShell._destinations.firstWhere((item) {
       if (item.path == '/') {
@@ -607,7 +608,7 @@ class _ShellDestination {
     return switch (path) {
       '/dictionary' => l10n.navDictionary,
       '/settings' => l10n.navSettings,
-      '/components' => l10n.navComponents,
+      // '/components' => l10n.navComponents,
       _ => l10n.navHome,
     };
   }
