@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/localization_extensions.dart';
@@ -441,48 +441,10 @@ class _EntryCard extends StatelessWidget {
             ),
           ],
           SizedBox(height: spacing.md),
-          Html(
-            data: _prepareMdictHtml(entry.definitionHtml),
-            shrinkWrap: true,
-            onLinkTap: (url, attributes, element) {
-              final linkedWord = _lookupWordFromUrl(url);
-              if (linkedWord != null) {
-                onSearch(linkedWord);
-              }
-            },
-            style: {
-              'html': Style(
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-                color: scheme.onSurface,
-              ),
-              'body': Style(
-                margin: Margins.zero,
-                padding: HtmlPaddings.zero,
-                color: scheme.onSurface,
-                fontSize: FontSize(theme.textTheme.bodyMedium?.fontSize ?? 14),
-                lineHeight: const LineHeight(1.45),
-              ),
-              'a': Style(
-                color: scheme.primary,
-                textDecoration: TextDecoration.underline,
-              ),
-              '.mdict-key': Style(color: scheme.onSurface),
-              '.mdict-sense-number': Style(
-                color: scheme.primary,
-                fontWeight: FontWeight.w700,
-                margin: Margins.only(right: 3),
-              ),
-              'p': Style(margin: Margins.only(bottom: 8)),
-              'div': Style(margin: Margins.only(bottom: 6)),
-              'table': Style(
-                backgroundColor: scheme.surfaceContainerHighest.withValues(
-                  alpha: 0.24,
-                ),
-              ),
-              'th': Style(padding: HtmlPaddings.all(6)),
-              'td': Style(padding: HtmlPaddings.all(6)),
-            },
+          _MdictWebView(
+            html: entry.definitionHtml,
+            sourceDictionary: entry.sourceDictionary,
+            onSearch: onSearch,
           ),
         ],
       ),
@@ -490,30 +452,142 @@ class _EntryCard extends StatelessWidget {
   }
 }
 
-String _prepareMdictHtml(String value) {
-  if (RegExp(r'<[A-Za-z][^>]*>').hasMatch(value)) {
-    return _normalizeMdictTags(value);
-  }
+class _MdictWebView extends StatefulWidget {
+  const _MdictWebView({
+    required this.html,
+    required this.sourceDictionary,
+    required this.onSearch,
+  });
 
-  return value
-      .split('\n')
-      .map((line) => const HtmlEscape().convert(line.trimRight()))
-      .join('<br>');
+  final String html;
+  final String sourceDictionary;
+  final ValueChanged<String> onSearch;
+
+  @override
+  State<_MdictWebView> createState() => _MdictWebViewState();
 }
 
-String _normalizeMdictTags(String value) {
-  return value
-      .replaceAll(RegExp(r'<link\b[^>]*>', caseSensitive: false), '')
-      .replaceAll(
-        RegExp(r'<k\b[^>]*>', caseSensitive: false),
-        '<span class="mdict-key">',
-      )
-      .replaceAll(RegExp(r'</k>', caseSensitive: false), '</span>')
-      .replaceAll(
-        RegExp(r'<v\b[^>]*>', caseSensitive: false),
-        '<span class="mdict-sense-number">',
-      )
-      .replaceAll(RegExp(r'</v>', caseSensitive: false), '</span>');
+class _MdictWebViewState extends State<_MdictWebView> {
+  static const _minHeight = 160.0;
+  static const _maxHeight = 5000.0;
+
+  InAppWebViewController? _controller;
+  double _height = 360;
+
+  @override
+  void didUpdateWidget(covariant _MdictWebView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.html != widget.html) {
+      _height = 360;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 160),
+      curve: Curves.easeOutCubic,
+      height: _height,
+      clipBehavior: Clip.antiAlias,
+      decoration: const BoxDecoration(),
+      child: InAppWebView(
+        key: ValueKey(widget.html),
+        initialData: InAppWebViewInitialData(
+          data: _buildMdictDocument(context, widget.html),
+          baseUrl: WebUri('https://kotoba-kit.local/'),
+          encoding: 'utf8',
+          mimeType: 'text/html',
+        ),
+        initialSettings: InAppWebViewSettings(
+          transparentBackground: true,
+          javaScriptEnabled: true,
+          supportZoom: false,
+          useShouldOverrideUrlLoading: true,
+          verticalScrollBarEnabled: false,
+          horizontalScrollBarEnabled: false,
+          disableHorizontalScroll: true,
+        ),
+        onWebViewCreated: (controller) {
+          _controller = controller;
+          controller.addJavaScriptHandler(
+            handlerName: 'lunaSearchWord',
+            callback: (arguments) {
+              final word = arguments.isEmpty ? null : arguments.first;
+              if (word is String && word.trim().isNotEmpty) {
+                widget.onSearch(word.trim());
+              }
+            },
+          );
+          controller.addJavaScriptHandler(
+            handlerName: 'lunaResize',
+            callback: (arguments) {
+              final value = arguments.isEmpty ? null : arguments.first;
+              final height = value is num
+                  ? value.toDouble()
+                  : double.tryParse(value.toString());
+              if (height != null) {
+                _setContentHeight(height);
+              }
+            },
+          );
+        },
+        onLoadStop: (controller, url) {
+          _syncContentHeight(controller);
+        },
+        shouldOverrideUrlLoading: (controller, navigationAction) async {
+          final linkedWord = _lookupWordFromUrl(
+            navigationAction.request.url?.toString(),
+          );
+          if (linkedWord != null) {
+            widget.onSearch(linkedWord);
+          }
+          return NavigationActionPolicy.CANCEL;
+        },
+      ),
+    );
+  }
+
+  Future<void> _syncContentHeight([InAppWebViewController? controller]) async {
+    final webView = controller ?? _controller;
+    if (webView == null || !mounted) {
+      return;
+    }
+
+    final value = await webView.evaluateJavascript(
+      source: '''
+(() => {
+  const body = document.body;
+  const html = document.documentElement;
+  return Math.ceil(Math.max(
+    body ? body.scrollHeight : 0,
+    body ? body.offsetHeight : 0,
+    html ? html.clientHeight : 0,
+    html ? html.scrollHeight : 0,
+    html ? html.offsetHeight : 0
+  ));
+})()
+''',
+    );
+    final nextHeight = double.tryParse(value.toString());
+    if (nextHeight == null || !mounted) {
+      return;
+    }
+
+    _setContentHeight(nextHeight);
+  }
+
+  void _setContentHeight(double height) {
+    if (!mounted) {
+      return;
+    }
+
+    final clamped = height.clamp(_minHeight, _maxHeight);
+    if ((clamped - _height).abs() > 4) {
+      setState(() {
+        _height = clamped;
+      });
+    }
+  }
 }
 
 String? _lookupWordFromUrl(String? url) {
@@ -532,9 +606,237 @@ String? _lookupWordFromUrl(String? url) {
     }
   }
 
-  if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+  if (decoded.startsWith('http://') ||
+      decoded.startsWith('https://') ||
+      decoded.startsWith('data:') ||
+      decoded.startsWith('javascript:') ||
+      decoded.startsWith('mailto:')) {
     return null;
   }
 
   return decoded.replaceFirst(RegExp(r'^/+'), '');
+}
+
+String _buildMdictDocument(BuildContext context, String value) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final textStyle = theme.textTheme.bodyMedium;
+  final body = _prepareMdictHtml(value);
+  final foreground = _cssColor(scheme.onSurface);
+  final muted = _cssColor(scheme.onSurfaceVariant);
+  final primary = _cssColor(scheme.primary);
+  final surface = _cssColor(scheme.surfaceContainerHighest);
+  final fontSize = textStyle?.fontSize ?? 14;
+  final fontFamily = _cssString(
+    textStyle?.fontFamily ?? 'system-ui, "Yu Gothic UI", "Meiryo", sans-serif',
+  );
+
+  return '''
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+      color: $foreground;
+      font-family: $fontFamily;
+      font-size: ${fontSize}px;
+      line-height: 1.62;
+      letter-spacing: 0;
+      overflow-wrap: anywhere;
+      word-break: normal;
+    }
+    body {
+      box-sizing: border-box;
+      width: 100%;
+      overflow-x: hidden;
+    }
+    #luna_dict_internal_view {
+      background: transparent;
+    }
+    h1, h2, h3, h4 {
+      margin: 0 0 14px;
+      color: $foreground;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    h3 {
+      font-size: 1.28rem;
+    }
+    p, div, section {
+      max-width: 100%;
+    }
+    p {
+      margin: 0 0 10px;
+    }
+    a {
+      color: $primary;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    k, .mdict-key {
+      color: $primary;
+    }
+    v, .mdict-sense-number {
+      color: $primary;
+      font-weight: 700;
+      padding-right: 0.25em;
+    }
+    .hinshi {
+      color: $muted;
+      font-weight: 600;
+    }
+    .description {
+      display: block;
+    }
+    img, video, audio {
+      max-width: 100%;
+      height: auto;
+    }
+    table {
+      max-width: 100%;
+      border-collapse: collapse;
+      background: color-mix(in srgb, $surface 32%, transparent);
+    }
+    td, th {
+      padding: 6px 8px;
+      border: 1px solid color-mix(in srgb, $muted 28%, transparent);
+      vertical-align: top;
+    }
+    br {
+      line-height: 1.62;
+    }
+    .element-hover {
+      outline: 2px dashed #ffd700 !important;
+      outline-offset: 2px !important;
+    }
+    .hightlight {
+      background-color: yellow;
+      outline: 2px solid #ffd700 !important;
+      outline-offset: 2px !important;
+    }
+    .hightlight2 {
+      background-color: yellow;
+    }
+  </style>
+  <script>
+    var lastmusicplayer = false;
+
+    function luna_post_resize() {
+      const body = document.body;
+      const html = document.documentElement;
+      const height = Math.ceil(Math.max(
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        html ? html.clientHeight : 0,
+        html ? html.scrollHeight : 0,
+        html ? html.offsetHeight : 0
+      ));
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('lunaResize', height);
+      }
+    }
+
+    function safe_mdict_search_word(word) {
+      if (window.flutter_inappwebview) {
+        window.flutter_inappwebview.callHandler('lunaSearchWord', word);
+      }
+    }
+
+    function mdict_play_sound(ext, b64) {
+      const music = new Audio();
+      music.src = 'data:' + ext + ';base64,' + b64;
+      if (lastmusicplayer !== false) {
+        lastmusicplayer.pause();
+      }
+      lastmusicplayer = music;
+      music.play();
+    }
+
+    function replacelongvarsrcs(varval, varname) {
+      const type = varval[0];
+      const elements = document.querySelectorAll('[' + type + '="' + varname + '"]');
+      for (let i = 0; i < elements.length; i++) {
+        elements[i][type] = 'data:' + varval[1] + ';base64,' + varval[2];
+      }
+    }
+
+    function clear_hightlight() {
+      for (const klass of ['hightlight', 'hightlight2', 'element-hover']) {
+        while (true) {
+          const elements = document.getElementsByClassName(klass);
+          if (elements.length === 0) break;
+          elements[0].classList.remove(klass);
+        }
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      const target = e.target.closest('a');
+      if (!target) return;
+      const href = target.getAttribute('href') || '';
+      if (href.startsWith('entry://')) {
+        e.preventDefault();
+        e.stopPropagation();
+        safe_mdict_search_word(decodeURIComponent(href.substring(8)));
+      }
+    }, true);
+
+    window.addEventListener('load', function() {
+      luna_post_resize();
+      setTimeout(luna_post_resize, 80);
+      setTimeout(luna_post_resize, 320);
+    });
+
+    if (window.ResizeObserver) {
+      const observer = new ResizeObserver(luna_post_resize);
+      document.addEventListener('DOMContentLoaded', function() {
+        observer.observe(document.body);
+      });
+    }
+  </script>
+</head>
+<body>
+<div id="luna_dict_internal_view">
+$body
+</div>
+</body>
+</html>
+''';
+}
+
+String _prepareMdictHtml(String value) {
+  if (RegExp(r'<[A-Za-z][^>]*>').hasMatch(value)) {
+    return value;
+  }
+
+  return value
+      .split('\n')
+      .map((line) => const HtmlEscape().convert(line.trimRight()))
+      .join('<br>');
+}
+
+String _cssColor(Color color) {
+  final alpha = color.a;
+  final red = (color.r * 255).round();
+  final green = (color.g * 255).round();
+  final blue = (color.b * 255).round();
+
+  if (alpha >= 1) {
+    return 'rgb($red, $green, $blue)';
+  }
+
+  return 'rgba($red, $green, $blue, ${alpha.toStringAsFixed(3)})';
+}
+
+String _cssString(String value) {
+  if (value.contains(',')) {
+    return value;
+  }
+
+  return '"${value.replaceAll('"', r'\"')}"';
 }

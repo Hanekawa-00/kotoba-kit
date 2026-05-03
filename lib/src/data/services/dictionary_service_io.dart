@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dict_reader/dict_reader.dart';
@@ -10,6 +11,7 @@ import '../models/dictionary_entry.dart';
 
 class DictionaryService {
   final Map<String, DictReader> _readers = {};
+  final Map<String, DictReader> _mddReaders = {};
 
   bool get isSupported => true;
 
@@ -89,9 +91,9 @@ class DictionaryService {
       for (final match in matches) {
         entries.addAll(
           await _readResolvedEntries(
+            dictionary: dictionary,
             reader: reader,
             match: match,
-            sourceDictionary: dictionary.name,
             displayWord: match.keyText,
           ),
         );
@@ -116,6 +118,10 @@ class DictionaryService {
   Future<void> deleteDictionaryFiles(DictionaryConfig config) async {
     final reader = _readers.remove(config.mdxPath);
     await reader?.close();
+    final mddReader = config.mddPath == null
+        ? null
+        : _mddReaders.remove(config.mddPath);
+    await mddReader?.close();
 
     final directory = Directory(p.dirname(config.mdxPath));
     if (await directory.exists()) {
@@ -125,8 +131,13 @@ class DictionaryService {
 
   Future<void> dispose() async {
     final readers = _readers.values.toList(growable: false);
+    final mddReaders = _mddReaders.values.toList(growable: false);
     _readers.clear();
-    await Future.wait(readers.map((reader) => reader.close()));
+    _mddReaders.clear();
+    await Future.wait([
+      ...readers.map((reader) => reader.close()),
+      ...mddReaders.map((reader) => reader.close()),
+    ]);
   }
 
   Future<DictReader> _readerFor(DictionaryConfig config) async {
@@ -142,9 +153,9 @@ class DictionaryService {
   }
 
   Future<List<DictionaryEntry>> _readResolvedEntries({
+    required DictionaryConfig dictionary,
     required DictReader reader,
     required RecordOffsetInfo match,
-    required String sourceDictionary,
     required String displayWord,
     Set<String> visited = const {},
     List<String> redirectChain = const [],
@@ -154,12 +165,13 @@ class DictionaryService {
     final target = _extractMdictLink(definition);
 
     if (target == null || depth >= 8 || visited.contains(target)) {
+      final repairedDefinition = await _repairMdictHtml(definition, dictionary);
       return [
         DictionaryEntry(
           word: displayWord,
           resolvedWord: displayWord == match.keyText ? null : match.keyText,
-          definitionHtml: definition,
-          sourceDictionary: sourceDictionary,
+          definitionHtml: repairedDefinition,
+          sourceDictionary: dictionary.name,
           redirectChain: redirectChain,
         ),
       ];
@@ -167,12 +179,13 @@ class DictionaryService {
 
     final linkedMatches = await reader.locateAll(target);
     if (linkedMatches.isEmpty) {
+      final repairedDefinition = await _repairMdictHtml(definition, dictionary);
       return [
         DictionaryEntry(
           word: displayWord,
           resolvedWord: target,
-          definitionHtml: definition,
-          sourceDictionary: sourceDictionary,
+          definitionHtml: repairedDefinition,
+          sourceDictionary: dictionary.name,
           redirectChain: [...redirectChain, target],
         ),
       ];
@@ -184,7 +197,7 @@ class DictionaryService {
         await _readResolvedEntries(
           reader: reader,
           match: linkedMatch,
-          sourceDictionary: sourceDictionary,
+          dictionary: dictionary,
           displayWord: displayWord,
           visited: {...visited, match.keyText, target},
           redirectChain: [...redirectChain, target],
@@ -194,6 +207,192 @@ class DictionaryService {
     }
 
     return resolved;
+  }
+
+  Future<String> _repairMdictHtml(
+    String html,
+    DictionaryConfig dictionary,
+  ) async {
+    final collectedCss = <String>[];
+    final attributePattern = RegExp(
+      r'''(src|href)\s*=\s*(["'])(.*?)\2''',
+      caseSensitive: false,
+    );
+    final buffer = StringBuffer();
+    var cursor = 0;
+
+    for (final match in attributePattern.allMatches(html)) {
+      buffer.write(html.substring(cursor, match.start));
+      final replacement = await _repairMdictAttribute(
+        dictionary: dictionary,
+        attribute: match.group(1)!,
+        quote: match.group(2)!,
+        url: match.group(3)!,
+        collectedCss: collectedCss,
+      );
+      buffer.write(replacement);
+      cursor = match.end;
+    }
+
+    buffer.write(html.substring(cursor));
+    if (collectedCss.isEmpty) {
+      return buffer.toString();
+    }
+
+    return '${buffer.toString()}<style>\n${collectedCss.join('\n')}\n</style>';
+  }
+
+  Future<String> _repairMdictAttribute({
+    required DictionaryConfig dictionary,
+    required String attribute,
+    required String quote,
+    required String url,
+    required List<String> collectedCss,
+  }) async {
+    final normalizedAttribute = attribute.toLowerCase();
+    if (_shouldKeepMdictUrl(url)) {
+      return '$attribute=$quote$url$quote';
+    }
+
+    if (url.startsWith('entry://')) {
+      final target = url.substring('entry://'.length);
+      return '$attribute=$quote'
+          "javascript:safe_mdict_search_word('${_escapeJsString(target)}')"
+          '$quote';
+    }
+
+    if (url.startsWith('sound://')) {
+      final resource = await _readMddResource(
+        dictionary,
+        url.substring('sound://'.length),
+      );
+      if (resource == null) {
+        return '$attribute=$quote$url$quote';
+      }
+
+      final mime = _mimeType(url);
+      final encoded = _base64(resource);
+      return '$attribute=$quote'
+          "javascript:mdict_play_sound('$mime','$encoded')"
+          '$quote';
+    }
+
+    final isStylesheet =
+        normalizedAttribute == 'href' &&
+        url.split('?').first.toLowerCase().endsWith('.css');
+
+    final localResource = await _readLocalDictionaryResource(dictionary, url);
+    final mddResource =
+        localResource ?? await _readMddResource(dictionary, url);
+    if (mddResource == null) {
+      return '$attribute=$quote$url$quote';
+    }
+
+    if (isStylesheet) {
+      final css = await _repairCssUrls(
+        dictionary,
+        String.fromCharCodes(mddResource),
+      );
+      if (css.trim().isNotEmpty) {
+        collectedCss.add(css);
+      }
+      return '';
+    }
+
+    final mime = _mimeType(url);
+    return '$attribute=$quote'
+        'data:$mime;base64,${_base64(mddResource)}'
+        '$quote';
+  }
+
+  Future<String> _repairCssUrls(DictionaryConfig dictionary, String css) async {
+    final urlPattern = RegExp(
+      r'''url\(\s*(["']?)(.*?)\1\s*\)''',
+      caseSensitive: false,
+    );
+    final buffer = StringBuffer();
+    var cursor = 0;
+
+    for (final match in urlPattern.allMatches(css)) {
+      buffer.write(css.substring(cursor, match.start));
+      final url = match.group(2)!;
+      if (_shouldKeepMdictUrl(url)) {
+        buffer.write(match.group(0));
+      } else {
+        final resource =
+            await _readLocalDictionaryResource(dictionary, url) ??
+            await _readMddResource(dictionary, url);
+        if (resource == null) {
+          buffer.write(match.group(0));
+        } else {
+          buffer.write(
+            'url("data:${_mimeType(url)};base64,${_base64(resource)}")',
+          );
+        }
+      }
+      cursor = match.end;
+    }
+
+    buffer.write(css.substring(cursor));
+    return buffer.toString();
+  }
+
+  Future<List<int>?> _readLocalDictionaryResource(
+    DictionaryConfig dictionary,
+    String url,
+  ) async {
+    final normalizedUrl = _stripUrlQuery(url).replaceAll('/', p.separator);
+    final file = File(
+      p.normalize(p.join(p.dirname(dictionary.mdxPath), normalizedUrl)),
+    );
+    if (!await file.exists()) {
+      return null;
+    }
+
+    return file.readAsBytes();
+  }
+
+  Future<List<int>?> _readMddResource(
+    DictionaryConfig dictionary,
+    String url,
+  ) async {
+    final reader = await _mddReaderFor(dictionary);
+    if (reader == null) {
+      return null;
+    }
+
+    final normalized = _normalizeMddKey(url);
+    for (final candidate in {
+      normalized,
+      normalized.replaceAll('/', '\\'),
+      normalized.replaceAll('\\', '/'),
+      normalized.startsWith('/') ? normalized.substring(1) : '/$normalized',
+      normalized.startsWith('\\') ? normalized.substring(1) : '\\$normalized',
+    }) {
+      final matches = await reader.locateAll(candidate);
+      if (matches.isNotEmpty) {
+        return reader.readOneMdd(matches.first);
+      }
+    }
+
+    return null;
+  }
+
+  Future<DictReader?> _mddReaderFor(DictionaryConfig dictionary) async {
+    final mddPath = dictionary.mddPath;
+    if (mddPath == null || mddPath.isEmpty || !await File(mddPath).exists()) {
+      return null;
+    }
+
+    final cached = _mddReaders[mddPath];
+    if (cached != null) {
+      return cached;
+    }
+
+    final reader = DictReader(mddPath);
+    await reader.initDict();
+    _mddReaders[mddPath] = reader;
+    return reader;
   }
 
   String _cleanRecord(String value) {
@@ -220,5 +419,64 @@ class DictionaryService {
   String _safeSegment(String value) {
     final safe = value.replaceAll(RegExp(r'[^A-Za-z0-9_.-]+'), '_');
     return safe.isEmpty ? 'dictionary' : safe;
+  }
+
+  bool _shouldKeepMdictUrl(String url) {
+    final lower = url.toLowerCase();
+    return url.isEmpty ||
+        url.startsWith('#') ||
+        lower.startsWith('http://') ||
+        lower.startsWith('https://') ||
+        lower.startsWith('data:') ||
+        lower.startsWith('javascript:') ||
+        lower.startsWith('mailto:');
+  }
+
+  String _stripUrlQuery(String url) {
+    return url.replaceFirst(RegExp(r'[#?].*$'), '');
+  }
+
+  String _normalizeMddKey(String url) {
+    final normalized = Uri.decodeFull(
+      _stripUrlQuery(url),
+    ).replaceAll('\\', '/');
+    if (normalized.startsWith('./')) {
+      return normalized.substring(2);
+    }
+    return normalized;
+  }
+
+  String _base64(List<int> data) => base64Encode(data);
+
+  String _mimeType(String url) {
+    final extension = p.extension(_stripUrlQuery(url)).toLowerCase();
+    return switch (extension) {
+      '.css' => 'text/css',
+      '.js' => 'text/javascript',
+      '.png' => 'image/png',
+      '.jpg' || '.jpeg' => 'image/jpeg',
+      '.gif' => 'image/gif',
+      '.svg' => 'image/svg+xml',
+      '.webp' => 'image/webp',
+      '.mp3' => 'audio/mpeg',
+      '.wav' => 'audio/wav',
+      '.ogg' || '.oga' => 'audio/ogg',
+      '.aac' => 'audio/aac',
+      '.opus' => 'audio/opus',
+      '.spx' => 'audio/ogg',
+      '.ttf' => 'font/ttf',
+      '.otf' => 'font/otf',
+      '.woff' => 'font/woff',
+      '.woff2' => 'font/woff2',
+      _ => 'application/octet-stream',
+    };
+  }
+
+  String _escapeJsString(String value) {
+    return value
+        .replaceAll('\\', r'\\')
+        .replaceAll("'", r"\'")
+        .replaceAll('\r', r'\r')
+        .replaceAll('\n', r'\n');
   }
 }
