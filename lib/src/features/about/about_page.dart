@@ -66,7 +66,7 @@ class AboutPage extends ConsumerWidget {
                     _InfoRow(
                       label: l10n.aboutPackageLabel,
                       value:
-                          info?.packageName ?? 'com.example.flutter_template',
+                          info?.packageName ?? 'com.hanekawa.kotoba_kit',
                     ),
                     _InfoRow(
                       label: l10n.aboutVersionLabel,

@@ -1,5 +1,5 @@
-name: flutter_template
-description: A cross-platform Flutter application template.
+name: kotoba_kit
+description: Offline-first Japanese dictionary and learning toolkit.
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -44,6 +44,10 @@ dependencies:
   hive_ce: ^2.19.3
   hive_ce_flutter: ^2.3.4
   window_manager: ^0.5.1
+  dict_reader: ^1.6.0
+  file_selector: ^1.1.0
+  path_provider: ^2.1.5
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

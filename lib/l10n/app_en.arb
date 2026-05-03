@@ -1,30 +1,31 @@
 {
   "@@locale": "en",
-  "appTitle": "Flutter Template",
+  "appTitle": "Kotoba Kit",
   "navHome": "Home",
+  "navDictionary": "Dictionary",
   "navSettings": "Settings",
   "navComponents": "Components",
   "navAbout": "About",
   "navCollapseSidebar": "Collapse sidebar",
   "navExpandSidebar": "Expand sidebar",
-  "homeTitle": "Flutter Template",
-  "homeSubtitle": "A cross-platform app template with common capabilities ready for real features.",
+  "homeTitle": "Kotoba Kit",
+  "homeSubtitle": "An offline-first Japanese dictionary workspace, with learning tools growing around reliable local lookup.",
   "openSettingsTooltip": "Open settings",
   "homeStatusLoading": "Loading settings",
-  "homeStatusReady": "Template ready",
-  "homeStatusDescription": "This screen avoids fake business data and only shows template capabilities.",
-  "capabilityCrossPlatformTitle": "Cross-platform base",
-  "capabilityCrossPlatformDescription": "Android, iOS, Web, Windows, macOS, and Linux platform folders are ready.",
-  "capabilityThemeTitle": "Theme system",
-  "capabilityThemeDescription": "System, light, dark, seed colors, OLED dark mode, and compact density are supported.",
-  "capabilityRoutingTitle": "Routing shell",
-  "capabilityRoutingDescription": "go_router Shell is wired with bottom navigation on mobile and a rail on wide screens.",
-  "capabilityExtensionTitle": "Extension boundary",
-  "capabilityExtensionDescription": "core, features, and shared layers keep future modules easy to add.",
+  "homeStatusReady": "Dictionary core in progress",
+  "homeStatusDescription": "The first milestone is local MDict import, exact lookup, and stable dictionary management.",
+  "capabilityCrossPlatformTitle": "Offline-first base",
+  "capabilityCrossPlatformDescription": "Imported dictionaries live in the app data directory instead of bundled assets.",
+  "capabilityThemeTitle": "Local lookup",
+  "capabilityThemeDescription": "MDX files are opened locally, with readers cached for repeated searches.",
+  "capabilityRoutingTitle": "Dictionary-first route",
+  "capabilityRoutingDescription": "The app opens directly to the dictionary workspace while the MVP is being built.",
+  "capabilityExtensionTitle": "Later learning modules",
+  "capabilityExtensionDescription": "Sentence practice, TTS, and visual lookup can attach to the same lookup core later.",
   "nextStepsTitle": "Suggested next steps",
-  "nextStepFeature": "Place the first business page under lib/src/features/<feature_name>",
-  "nextStepRepository": "Add a repository for data sources and inject it with Riverpod providers",
-  "nextStepDesktop": "Add window, tray, or hotkey plugins only when desktop workflows need them",
+  "nextStepFeature": "Test real Japanese MDX files against dict_reader compatibility",
+  "nextStepRepository": "Add dictionary metadata and cached reader lifecycle around imports",
+  "nextStepDesktop": "Keep file import and search responsive for large dictionaries",
   "stateComponentsTitle": "UI state components",
   "settingsTitle": "Settings",
   "settingsSubtitle": "Only common preferences live here; feature settings can be added by section.",
@@ -83,6 +84,7 @@
   "commandPaletteNoResults": "No matching actions",
   "commandPaletteExecuted": "Action executed",
   "commandGoHome": "Go to Home",
+  "commandGoDictionary": "Go to Dictionary",
   "commandGoSettings": "Go to Settings",
   "commandGoComponents": "Go to Components",
   "commandGoAbout": "Go to About",
@@ -116,5 +118,55 @@
   "stateEmptyTitle": "Nothing here yet",
   "stateEmptyMessage": "There is no data to show right now.",
   "stateErrorTitle": "Something went wrong",
-  "stateErrorMessage": "Try again later or check the current environment configuration."
+  "stateErrorMessage": "Try again later or check the current environment configuration.",
+  "dictionaryTitle": "Dictionary",
+  "dictionarySubtitle": "Import local MDict files and query them without a network connection.",
+  "dictionaryImport": "Import MDX",
+  "dictionaryImporting": "Importing",
+  "dictionaryUnsupportedTitle": "Local dictionary unavailable",
+  "dictionaryUnsupportedMessage": "This platform cannot open local MDict files yet.",
+  "dictionarySearchTitle": "Lookup",
+  "dictionarySearchLabel": "Word",
+  "dictionarySearchHint": "食べる",
+  "dictionarySearchButton": "Search",
+  "dictionaryNoEnabledDictionaries": "Import or enable a dictionary before searching.",
+  "dictionaryInstalledTitle": "Installed dictionaries",
+  "dictionaryEmptyTitle": "No dictionaries imported",
+  "dictionaryEmptyMessage": "Import an .mdx file to start the compatibility check.",
+  "dictionaryEntryCount": "{count} entries",
+  "@dictionaryEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dictionaryDelete": "Delete dictionary",
+  "dictionaryResultsTitle": "Results",
+  "dictionaryResultsPlaceholder": "Search results will appear here.",
+  "dictionaryNoResults": "No exact match for \"{query}\".",
+  "@dictionaryNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "dictionarySuggestionsTitle": "Prefix matches",
+  "dictionaryImportSuccess": "Imported {name}",
+  "@dictionaryImportSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dictionaryOperationFailed": "Dictionary operation failed: {error}",
+  "@dictionaryOperationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

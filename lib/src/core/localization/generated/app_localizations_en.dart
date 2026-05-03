@@ -9,10 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Flutter Template';
+  String get appTitle => 'Kotoba Kit';
 
   @override
   String get navHome => 'Home';
+
+  @override
+  String get navDictionary => 'Dictionary';
 
   @override
   String get navSettings => 'Settings';
@@ -30,11 +33,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navExpandSidebar => 'Expand sidebar';
 
   @override
-  String get homeTitle => 'Flutter Template';
+  String get homeTitle => 'Kotoba Kit';
 
   @override
   String get homeSubtitle =>
-      'A cross-platform app template with common capabilities ready for real features.';
+      'An offline-first Japanese dictionary workspace, with learning tools growing around reliable local lookup.';
 
   @override
   String get openSettingsTooltip => 'Open settings';
@@ -43,54 +46,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeStatusLoading => 'Loading settings';
 
   @override
-  String get homeStatusReady => 'Template ready';
+  String get homeStatusReady => 'Dictionary core in progress';
 
   @override
   String get homeStatusDescription =>
-      'This screen avoids fake business data and only shows template capabilities.';
+      'The first milestone is local MDict import, exact lookup, and stable dictionary management.';
 
   @override
-  String get capabilityCrossPlatformTitle => 'Cross-platform base';
+  String get capabilityCrossPlatformTitle => 'Offline-first base';
 
   @override
   String get capabilityCrossPlatformDescription =>
-      'Android, iOS, Web, Windows, macOS, and Linux platform folders are ready.';
+      'Imported dictionaries live in the app data directory instead of bundled assets.';
 
   @override
-  String get capabilityThemeTitle => 'Theme system';
+  String get capabilityThemeTitle => 'Local lookup';
 
   @override
   String get capabilityThemeDescription =>
-      'System, light, dark, seed colors, OLED dark mode, and compact density are supported.';
+      'MDX files are opened locally, with readers cached for repeated searches.';
 
   @override
-  String get capabilityRoutingTitle => 'Routing shell';
+  String get capabilityRoutingTitle => 'Dictionary-first route';
 
   @override
   String get capabilityRoutingDescription =>
-      'go_router Shell is wired with bottom navigation on mobile and a rail on wide screens.';
+      'The app opens directly to the dictionary workspace while the MVP is being built.';
 
   @override
-  String get capabilityExtensionTitle => 'Extension boundary';
+  String get capabilityExtensionTitle => 'Later learning modules';
 
   @override
   String get capabilityExtensionDescription =>
-      'core, features, and shared layers keep future modules easy to add.';
+      'Sentence practice, TTS, and visual lookup can attach to the same lookup core later.';
 
   @override
   String get nextStepsTitle => 'Suggested next steps';
 
   @override
   String get nextStepFeature =>
-      'Place the first business page under lib/src/features/<feature_name>';
+      'Test real Japanese MDX files against dict_reader compatibility';
 
   @override
   String get nextStepRepository =>
-      'Add a repository for data sources and inject it with Riverpod providers';
+      'Add dictionary metadata and cached reader lifecycle around imports';
 
   @override
   String get nextStepDesktop =>
-      'Add window, tray, or hotkey plugins only when desktop workflows need them';
+      'Keep file import and search responsive for large dictionaries';
 
   @override
   String get stateComponentsTitle => 'UI state components';
@@ -255,6 +258,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandGoHome => 'Go to Home';
 
   @override
+  String get commandGoDictionary => 'Go to Dictionary';
+
+  @override
   String get commandGoSettings => 'Go to Settings';
 
   @override
@@ -361,4 +367,82 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get stateErrorMessage =>
       'Try again later or check the current environment configuration.';
+
+  @override
+  String get dictionaryTitle => 'Dictionary';
+
+  @override
+  String get dictionarySubtitle =>
+      'Import local MDict files and query them without a network connection.';
+
+  @override
+  String get dictionaryImport => 'Import MDX';
+
+  @override
+  String get dictionaryImporting => 'Importing';
+
+  @override
+  String get dictionaryUnsupportedTitle => 'Local dictionary unavailable';
+
+  @override
+  String get dictionaryUnsupportedMessage =>
+      'This platform cannot open local MDict files yet.';
+
+  @override
+  String get dictionarySearchTitle => 'Lookup';
+
+  @override
+  String get dictionarySearchLabel => 'Word';
+
+  @override
+  String get dictionarySearchHint => '食べる';
+
+  @override
+  String get dictionarySearchButton => 'Search';
+
+  @override
+  String get dictionaryNoEnabledDictionaries =>
+      'Import or enable a dictionary before searching.';
+
+  @override
+  String get dictionaryInstalledTitle => 'Installed dictionaries';
+
+  @override
+  String get dictionaryEmptyTitle => 'No dictionaries imported';
+
+  @override
+  String get dictionaryEmptyMessage =>
+      'Import an .mdx file to start the compatibility check.';
+
+  @override
+  String dictionaryEntryCount(int count) {
+    return '$count entries';
+  }
+
+  @override
+  String get dictionaryDelete => 'Delete dictionary';
+
+  @override
+  String get dictionaryResultsTitle => 'Results';
+
+  @override
+  String get dictionaryResultsPlaceholder => 'Search results will appear here.';
+
+  @override
+  String dictionaryNoResults(String query) {
+    return 'No exact match for \"$query\".';
+  }
+
+  @override
+  String get dictionarySuggestionsTitle => 'Prefix matches';
+
+  @override
+  String dictionaryImportSuccess(String name) {
+    return 'Imported $name';
+  }
+
+  @override
+  String dictionaryOperationFailed(String error) {
+    return 'Dictionary operation failed: $error';
+  }
 }

@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In zh, this message translates to:
-  /// **'Flutter Template'**
+  /// **'Kotoba Kit'**
   String get appTitle;
 
   /// No description provided for @navHome.
@@ -109,6 +109,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'首页'**
   String get navHome;
+
+  /// No description provided for @navDictionary.
+  ///
+  /// In zh, this message translates to:
+  /// **'字典'**
+  String get navDictionary;
 
   /// No description provided for @navSettings.
   ///
@@ -143,13 +149,13 @@ abstract class AppLocalizations {
   /// No description provided for @homeTitle.
   ///
   /// In zh, this message translates to:
-  /// **'Flutter Template'**
+  /// **'Kotoba Kit'**
   String get homeTitle;
 
   /// No description provided for @homeSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'跨平台应用模板，保留通用能力，业务功能从这里继续生长。'**
+  /// **'离线优先的日语字典工作台，先把可靠本地查词做稳，再向学习工具扩展。'**
   String get homeSubtitle;
 
   /// No description provided for @openSettingsTooltip.
@@ -167,61 +173,61 @@ abstract class AppLocalizations {
   /// No description provided for @homeStatusReady.
   ///
   /// In zh, this message translates to:
-  /// **'模板已就绪'**
+  /// **'字典核心开发中'**
   String get homeStatusReady;
 
   /// No description provided for @homeStatusDescription.
   ///
   /// In zh, this message translates to:
-  /// **'这里刻意不放业务假数据，只展示模板当前已经具备的通用能力。'**
+  /// **'第一阶段专注本地 MDict 导入、精确查词和稳定的词典管理。'**
   String get homeStatusDescription;
 
   /// No description provided for @capabilityCrossPlatformTitle.
   ///
   /// In zh, this message translates to:
-  /// **'跨平台基线'**
+  /// **'离线优先基线'**
   String get capabilityCrossPlatformTitle;
 
   /// No description provided for @capabilityCrossPlatformDescription.
   ///
   /// In zh, this message translates to:
-  /// **'Android、iOS、Web、Windows、macOS、Linux 平台目录已生成。'**
+  /// **'导入的词典放在应用数据目录，而不是打进 assets。'**
   String get capabilityCrossPlatformDescription;
 
   /// No description provided for @capabilityThemeTitle.
   ///
   /// In zh, this message translates to:
-  /// **'主题系统'**
+  /// **'本地查词'**
   String get capabilityThemeTitle;
 
   /// No description provided for @capabilityThemeDescription.
   ///
   /// In zh, this message translates to:
-  /// **'支持系统/浅色/深色、种子色、OLED 深色和紧凑密度。'**
+  /// **'MDX 文件在本地打开，Reader 会缓存以支持重复查询。'**
   String get capabilityThemeDescription;
 
   /// No description provided for @capabilityRoutingTitle.
   ///
   /// In zh, this message translates to:
-  /// **'路由骨架'**
+  /// **'字典优先入口'**
   String get capabilityRoutingTitle;
 
   /// No description provided for @capabilityRoutingDescription.
   ///
   /// In zh, this message translates to:
-  /// **'go_router Shell 已接好，移动端底栏，宽屏侧边导航。'**
+  /// **'MVP 阶段应用会直接进入字典工作台。'**
   String get capabilityRoutingDescription;
 
   /// No description provided for @capabilityExtensionTitle.
   ///
   /// In zh, this message translates to:
-  /// **'扩展边界'**
+  /// **'后续学习模块'**
   String get capabilityExtensionTitle;
 
   /// No description provided for @capabilityExtensionDescription.
   ///
   /// In zh, this message translates to:
-  /// **'core、features、shared 分层，便于后续拆模块和接业务。'**
+  /// **'造句、TTS 和拍照识词以后都可以复用这条查词核心。'**
   String get capabilityExtensionDescription;
 
   /// No description provided for @nextStepsTitle.
@@ -233,19 +239,19 @@ abstract class AppLocalizations {
   /// No description provided for @nextStepFeature.
   ///
   /// In zh, this message translates to:
-  /// **'把第一个业务页面放到 lib/src/features/<feature_name>'**
+  /// **'用真实日语 MDX 文件验证 dict_reader 兼容性'**
   String get nextStepFeature;
 
   /// No description provided for @nextStepRepository.
   ///
   /// In zh, this message translates to:
-  /// **'为数据源新增 repository，并在 Riverpod provider 中注入'**
+  /// **'围绕导入结果补词典元数据和 Reader 生命周期'**
   String get nextStepRepository;
 
   /// No description provided for @nextStepDesktop.
   ///
   /// In zh, this message translates to:
-  /// **'需要复杂桌面能力时，再按需引入窗口、托盘或热键插件'**
+  /// **'确保大词典导入和查询时界面不被卡住'**
   String get nextStepDesktop;
 
   /// No description provided for @stateComponentsTitle.
@@ -554,6 +560,12 @@ abstract class AppLocalizations {
   /// **'前往首页'**
   String get commandGoHome;
 
+  /// No description provided for @commandGoDictionary.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往字典'**
+  String get commandGoDictionary;
+
   /// No description provided for @commandGoSettings.
   ///
   /// In zh, this message translates to:
@@ -757,6 +769,138 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'请稍后重试，或检查当前环境配置。'**
   String get stateErrorMessage;
+
+  /// No description provided for @dictionaryTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'字典'**
+  String get dictionaryTitle;
+
+  /// No description provided for @dictionarySubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入本地 MDict 词典文件，无网络也能查词。'**
+  String get dictionarySubtitle;
+
+  /// No description provided for @dictionaryImport.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入 MDX'**
+  String get dictionaryImport;
+
+  /// No description provided for @dictionaryImporting.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入中'**
+  String get dictionaryImporting;
+
+  /// No description provided for @dictionaryUnsupportedTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'当前平台暂不可用'**
+  String get dictionaryUnsupportedTitle;
+
+  /// No description provided for @dictionaryUnsupportedMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'这个平台暂时不能打开本地 MDict 文件。'**
+  String get dictionaryUnsupportedMessage;
+
+  /// No description provided for @dictionarySearchTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'查词'**
+  String get dictionarySearchTitle;
+
+  /// No description provided for @dictionarySearchLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'单词'**
+  String get dictionarySearchLabel;
+
+  /// No description provided for @dictionarySearchHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'食べる'**
+  String get dictionarySearchHint;
+
+  /// No description provided for @dictionarySearchButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'查询'**
+  String get dictionarySearchButton;
+
+  /// No description provided for @dictionaryNoEnabledDictionaries.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先导入或启用一本词典。'**
+  String get dictionaryNoEnabledDictionaries;
+
+  /// No description provided for @dictionaryInstalledTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'已导入词典'**
+  String get dictionaryInstalledTitle;
+
+  /// No description provided for @dictionaryEmptyTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'还没有导入词典'**
+  String get dictionaryEmptyTitle;
+
+  /// No description provided for @dictionaryEmptyMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'导入 .mdx 文件后会立即做兼容性检查。'**
+  String get dictionaryEmptyMessage;
+
+  /// No description provided for @dictionaryEntryCount.
+  ///
+  /// In zh, this message translates to:
+  /// **'{count} 个词条'**
+  String dictionaryEntryCount(int count);
+
+  /// No description provided for @dictionaryDelete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除词典'**
+  String get dictionaryDelete;
+
+  /// No description provided for @dictionaryResultsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'查询结果'**
+  String get dictionaryResultsTitle;
+
+  /// No description provided for @dictionaryResultsPlaceholder.
+  ///
+  /// In zh, this message translates to:
+  /// **'查询结果会显示在这里。'**
+  String get dictionaryResultsPlaceholder;
+
+  /// No description provided for @dictionaryNoResults.
+  ///
+  /// In zh, this message translates to:
+  /// **'没有找到“{query}”的精确匹配。'**
+  String dictionaryNoResults(String query);
+
+  /// No description provided for @dictionarySuggestionsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'前缀匹配'**
+  String get dictionarySuggestionsTitle;
+
+  /// No description provided for @dictionaryImportSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'已导入 {name}'**
+  String dictionaryImportSuccess(String name);
+
+  /// No description provided for @dictionaryOperationFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'字典操作失败：{error}'**
+  String dictionaryOperationFailed(String error);
 }
 
 class _AppLocalizationsDelegate

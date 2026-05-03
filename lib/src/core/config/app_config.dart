@@ -10,7 +10,7 @@ class AppConfig {
     );
     const appName = String.fromEnvironment(
       'APP_NAME',
-      defaultValue: 'Flutter Template',
+      defaultValue: 'Kotoba Kit',
     );
 
     return AppConfig(

@@ -3,13 +3,14 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/about/about_page.dart';
 import '../../features/components/component_gallery_page.dart';
+import '../../features/dictionary/dictionary_page.dart';
 import '../../features/home/home_page.dart';
 import '../../features/settings/settings_page.dart';
 import '../../shared/widgets/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/',
+    initialLocation: '/dictionary',
     routes: [
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -25,6 +26,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: '/',
                 name: 'home',
                 builder: (context, state) => const HomePage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dictionary',
+                name: 'dictionary',
+                builder: (context, state) => const DictionaryPage(),
               ),
             ],
           ),

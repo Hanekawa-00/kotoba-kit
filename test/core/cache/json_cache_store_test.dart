@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_template/src/core/cache/json_cache_store.dart';
-import 'package:flutter_template/src/core/storage/key_value_store.dart';
+import 'package:kotoba_kit/src/core/cache/json_cache_store.dart';
+import 'package:kotoba_kit/src/core/storage/key_value_store.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

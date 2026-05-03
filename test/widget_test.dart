@@ -1,50 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_template/src/app/bootstrap.dart';
-import 'package:flutter_template/src/core/settings/app_settings.dart';
-import 'package:flutter_template/src/core/settings/settings_providers.dart';
-import 'package:flutter_template/src/core/settings/settings_repository.dart';
+import 'package:kotoba_kit/src/app/bootstrap.dart';
+import 'package:kotoba_kit/src/data/models/dictionary_config.dart';
+import 'package:kotoba_kit/src/data/models/dictionary_entry.dart';
+import 'package:kotoba_kit/src/data/repositories/dictionary_repository.dart';
+import 'package:kotoba_kit/src/core/settings/app_settings.dart';
+import 'package:kotoba_kit/src/core/settings/settings_providers.dart';
+import 'package:kotoba_kit/src/core/settings/settings_repository.dart';
+import 'package:kotoba_kit/src/features/dictionary/dictionary_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  testWidgets('renders the template home screen', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+  testWidgets('renders the dictionary workspace first', (tester) async {
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Flutter Template'), findsWidgets);
-    expect(find.text('Template ready'), findsOneWidget);
-    expect(find.byIcon(Icons.tune), findsWidgets);
+    expect(find.text('Dictionary'), findsWidgets);
+    expect(find.text('Lookup'), findsOneWidget);
+    expect(find.text('No dictionaries imported'), findsOneWidget);
   });
 
   testWidgets('mobile top-level pages keep bottom navigation', (tester) async {
     _setMobileViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
 
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Flutter Template'), findsWidgets);
+    expect(find.text('Dictionary'), findsWidgets);
   });
 
   testWidgets('mobile settings subpage hides bottom navigation', (
@@ -52,16 +38,7 @@ void main() {
   ) async {
     _setMobileViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
@@ -89,16 +66,7 @@ void main() {
   testWidgets('mobile top-level back asks before exiting', (tester) async {
     _setMobileViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.binding.handlePopRoute();
@@ -112,16 +80,7 @@ void main() {
   ) async {
     _setMobileViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Components'));
@@ -135,16 +94,7 @@ void main() {
   testWidgets('desktop settings keeps reset only in content', (tester) async {
     _setDesktopViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
@@ -166,16 +116,7 @@ void main() {
   ) async {
     _setDesktopViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
@@ -203,16 +144,7 @@ void main() {
   ) async {
     _setDesktopViewport(tester);
 
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          settingsRepositoryProvider.overrideWithValue(
-            _FakeSettingsRepository(),
-          ),
-        ],
-        child: const AppBootstrap(),
-      ),
-    );
+    await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
@@ -241,6 +173,18 @@ void main() {
 
     expect(_pageScrollOffset(tester), greaterThan(settingsOffset * 0.7));
   });
+}
+
+Widget _buildTestApp() {
+  return ProviderScope(
+    overrides: [
+      settingsRepositoryProvider.overrideWithValue(_FakeSettingsRepository()),
+      dictionaryRepositoryProvider.overrideWithValue(
+        _FakeDictionaryRepository(),
+      ),
+    ],
+    child: const AppBootstrap(),
+  );
 }
 
 void _setMobileViewport(WidgetTester tester) {
@@ -275,5 +219,56 @@ class _FakeSettingsRepository implements AppSettingsRepository {
   @override
   Future<void> save(AppSettings settings) async {
     _settings = settings;
+  }
+}
+
+class _FakeDictionaryRepository implements DictionaryRepository {
+  List<DictionaryConfig> _configs = const [];
+
+  @override
+  bool get isSupported => true;
+
+  @override
+  Future<void> deleteDictionary(
+    List<DictionaryConfig> configs,
+    DictionaryConfig config,
+  ) async {
+    _configs = configs.where((item) => item.id != config.id).toList();
+  }
+
+  @override
+  Future<void> dispose() async {}
+
+  @override
+  Future<DictionaryImportResult?> importDictionary() async => null;
+
+  @override
+  Future<List<DictionaryConfig>> loadConfigs() async => _configs;
+
+  @override
+  Future<void> saveConfigs(List<DictionaryConfig> configs) async {
+    _configs = configs;
+  }
+
+  @override
+  Future<DictionarySearchResult> search(
+    List<DictionaryConfig> configs,
+    String query,
+  ) async {
+    return DictionarySearchResult(
+      query: query,
+      entries: const [],
+      suggestions: const [],
+    );
+  }
+
+  @override
+  Future<List<DictionaryConfig>> setEnabled(
+    List<DictionaryConfig> configs,
+    String id,
+    bool enabled,
+  ) async {
+    _configs = configs;
+    return _configs;
   }
 }

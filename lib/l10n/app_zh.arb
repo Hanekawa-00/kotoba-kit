@@ -1,30 +1,31 @@
 {
   "@@locale": "zh",
-  "appTitle": "Flutter Template",
+  "appTitle": "Kotoba Kit",
   "navHome": "首页",
+  "navDictionary": "字典",
   "navSettings": "设置",
   "navComponents": "组件",
   "navAbout": "关于",
   "navCollapseSidebar": "折叠侧边栏",
   "navExpandSidebar": "展开侧边栏",
-  "homeTitle": "Flutter Template",
-  "homeSubtitle": "跨平台应用模板，保留通用能力，业务功能从这里继续生长。",
+  "homeTitle": "Kotoba Kit",
+  "homeSubtitle": "离线优先的日语字典工作台，先把可靠本地查词做稳，再向学习工具扩展。",
   "openSettingsTooltip": "打开设置",
   "homeStatusLoading": "正在加载设置",
-  "homeStatusReady": "模板已就绪",
-  "homeStatusDescription": "这里刻意不放业务假数据，只展示模板当前已经具备的通用能力。",
-  "capabilityCrossPlatformTitle": "跨平台基线",
-  "capabilityCrossPlatformDescription": "Android、iOS、Web、Windows、macOS、Linux 平台目录已生成。",
-  "capabilityThemeTitle": "主题系统",
-  "capabilityThemeDescription": "支持系统/浅色/深色、种子色、OLED 深色和紧凑密度。",
-  "capabilityRoutingTitle": "路由骨架",
-  "capabilityRoutingDescription": "go_router Shell 已接好，移动端底栏，宽屏侧边导航。",
-  "capabilityExtensionTitle": "扩展边界",
-  "capabilityExtensionDescription": "core、features、shared 分层，便于后续拆模块和接业务。",
+  "homeStatusReady": "字典核心开发中",
+  "homeStatusDescription": "第一阶段专注本地 MDict 导入、精确查词和稳定的词典管理。",
+  "capabilityCrossPlatformTitle": "离线优先基线",
+  "capabilityCrossPlatformDescription": "导入的词典放在应用数据目录，而不是打进 assets。",
+  "capabilityThemeTitle": "本地查词",
+  "capabilityThemeDescription": "MDX 文件在本地打开，Reader 会缓存以支持重复查询。",
+  "capabilityRoutingTitle": "字典优先入口",
+  "capabilityRoutingDescription": "MVP 阶段应用会直接进入字典工作台。",
+  "capabilityExtensionTitle": "后续学习模块",
+  "capabilityExtensionDescription": "造句、TTS 和拍照识词以后都可以复用这条查词核心。",
   "nextStepsTitle": "推荐下一步",
-  "nextStepFeature": "把第一个业务页面放到 lib/src/features/<feature_name>",
-  "nextStepRepository": "为数据源新增 repository，并在 Riverpod provider 中注入",
-  "nextStepDesktop": "需要复杂桌面能力时，再按需引入窗口、托盘或热键插件",
+  "nextStepFeature": "用真实日语 MDX 文件验证 dict_reader 兼容性",
+  "nextStepRepository": "围绕导入结果补词典元数据和 Reader 生命周期",
+  "nextStepDesktop": "确保大词典导入和查询时界面不被卡住",
   "stateComponentsTitle": "UI 状态组件",
   "settingsTitle": "设置",
   "settingsSubtitle": "模板只保留通用偏好，后续业务设置可以继续按分组追加。",
@@ -83,6 +84,7 @@
   "commandPaletteNoResults": "没有匹配的操作",
   "commandPaletteExecuted": "已执行操作",
   "commandGoHome": "前往首页",
+  "commandGoDictionary": "前往字典",
   "commandGoSettings": "前往设置",
   "commandGoComponents": "前往组件",
   "commandGoAbout": "前往关于",
@@ -116,5 +118,55 @@
   "stateEmptyTitle": "暂无内容",
   "stateEmptyMessage": "这里还没有可以展示的数据。",
   "stateErrorTitle": "出了点问题",
-  "stateErrorMessage": "请稍后重试，或检查当前环境配置。"
+  "stateErrorMessage": "请稍后重试，或检查当前环境配置。",
+  "dictionaryTitle": "字典",
+  "dictionarySubtitle": "导入本地 MDict 词典文件，无网络也能查词。",
+  "dictionaryImport": "导入 MDX",
+  "dictionaryImporting": "导入中",
+  "dictionaryUnsupportedTitle": "当前平台暂不可用",
+  "dictionaryUnsupportedMessage": "这个平台暂时不能打开本地 MDict 文件。",
+  "dictionarySearchTitle": "查词",
+  "dictionarySearchLabel": "单词",
+  "dictionarySearchHint": "食べる",
+  "dictionarySearchButton": "查询",
+  "dictionaryNoEnabledDictionaries": "请先导入或启用一本词典。",
+  "dictionaryInstalledTitle": "已导入词典",
+  "dictionaryEmptyTitle": "还没有导入词典",
+  "dictionaryEmptyMessage": "导入 .mdx 文件后会立即做兼容性检查。",
+  "dictionaryEntryCount": "{count} 个词条",
+  "@dictionaryEntryCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "dictionaryDelete": "删除词典",
+  "dictionaryResultsTitle": "查询结果",
+  "dictionaryResultsPlaceholder": "查询结果会显示在这里。",
+  "dictionaryNoResults": "没有找到“{query}”的精确匹配。",
+  "@dictionaryNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "dictionarySuggestionsTitle": "前缀匹配",
+  "dictionaryImportSuccess": "已导入 {name}",
+  "@dictionaryImportSuccess": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dictionaryOperationFailed": "字典操作失败：{error}",
+  "@dictionaryOperationFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

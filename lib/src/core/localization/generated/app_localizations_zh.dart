@@ -9,10 +9,13 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get appTitle => 'Flutter Template';
+  String get appTitle => 'Kotoba Kit';
 
   @override
   String get navHome => '首页';
+
+  @override
+  String get navDictionary => '字典';
 
   @override
   String get navSettings => '设置';
@@ -30,10 +33,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navExpandSidebar => '展开侧边栏';
 
   @override
-  String get homeTitle => 'Flutter Template';
+  String get homeTitle => 'Kotoba Kit';
 
   @override
-  String get homeSubtitle => '跨平台应用模板，保留通用能力，业务功能从这里继续生长。';
+  String get homeSubtitle => '离线优先的日语字典工作台，先把可靠本地查词做稳，再向学习工具扩展。';
 
   @override
   String get openSettingsTooltip => '打开设置';
@@ -42,49 +45,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeStatusLoading => '正在加载设置';
 
   @override
-  String get homeStatusReady => '模板已就绪';
+  String get homeStatusReady => '字典核心开发中';
 
   @override
-  String get homeStatusDescription => '这里刻意不放业务假数据，只展示模板当前已经具备的通用能力。';
+  String get homeStatusDescription => '第一阶段专注本地 MDict 导入、精确查词和稳定的词典管理。';
 
   @override
-  String get capabilityCrossPlatformTitle => '跨平台基线';
+  String get capabilityCrossPlatformTitle => '离线优先基线';
 
   @override
   String get capabilityCrossPlatformDescription =>
-      'Android、iOS、Web、Windows、macOS、Linux 平台目录已生成。';
+      '导入的词典放在应用数据目录，而不是打进 assets。';
 
   @override
-  String get capabilityThemeTitle => '主题系统';
+  String get capabilityThemeTitle => '本地查词';
 
   @override
-  String get capabilityThemeDescription => '支持系统/浅色/深色、种子色、OLED 深色和紧凑密度。';
+  String get capabilityThemeDescription => 'MDX 文件在本地打开，Reader 会缓存以支持重复查询。';
 
   @override
-  String get capabilityRoutingTitle => '路由骨架';
+  String get capabilityRoutingTitle => '字典优先入口';
 
   @override
-  String get capabilityRoutingDescription =>
-      'go_router Shell 已接好，移动端底栏，宽屏侧边导航。';
+  String get capabilityRoutingDescription => 'MVP 阶段应用会直接进入字典工作台。';
 
   @override
-  String get capabilityExtensionTitle => '扩展边界';
+  String get capabilityExtensionTitle => '后续学习模块';
 
   @override
-  String get capabilityExtensionDescription =>
-      'core、features、shared 分层，便于后续拆模块和接业务。';
+  String get capabilityExtensionDescription => '造句、TTS 和拍照识词以后都可以复用这条查词核心。';
 
   @override
   String get nextStepsTitle => '推荐下一步';
 
   @override
-  String get nextStepFeature => '把第一个业务页面放到 lib/src/features/<feature_name>';
+  String get nextStepFeature => '用真实日语 MDX 文件验证 dict_reader 兼容性';
 
   @override
-  String get nextStepRepository => '为数据源新增 repository，并在 Riverpod provider 中注入';
+  String get nextStepRepository => '围绕导入结果补词典元数据和 Reader 生命周期';
 
   @override
-  String get nextStepDesktop => '需要复杂桌面能力时，再按需引入窗口、托盘或热键插件';
+  String get nextStepDesktop => '确保大词典导入和查询时界面不被卡住';
 
   @override
   String get stateComponentsTitle => 'UI 状态组件';
@@ -242,6 +243,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commandGoHome => '前往首页';
 
   @override
+  String get commandGoDictionary => '前往字典';
+
+  @override
   String get commandGoSettings => '前往设置';
 
   @override
@@ -343,4 +347,78 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get stateErrorMessage => '请稍后重试，或检查当前环境配置。';
+
+  @override
+  String get dictionaryTitle => '字典';
+
+  @override
+  String get dictionarySubtitle => '导入本地 MDict 词典文件，无网络也能查词。';
+
+  @override
+  String get dictionaryImport => '导入 MDX';
+
+  @override
+  String get dictionaryImporting => '导入中';
+
+  @override
+  String get dictionaryUnsupportedTitle => '当前平台暂不可用';
+
+  @override
+  String get dictionaryUnsupportedMessage => '这个平台暂时不能打开本地 MDict 文件。';
+
+  @override
+  String get dictionarySearchTitle => '查词';
+
+  @override
+  String get dictionarySearchLabel => '单词';
+
+  @override
+  String get dictionarySearchHint => '食べる';
+
+  @override
+  String get dictionarySearchButton => '查询';
+
+  @override
+  String get dictionaryNoEnabledDictionaries => '请先导入或启用一本词典。';
+
+  @override
+  String get dictionaryInstalledTitle => '已导入词典';
+
+  @override
+  String get dictionaryEmptyTitle => '还没有导入词典';
+
+  @override
+  String get dictionaryEmptyMessage => '导入 .mdx 文件后会立即做兼容性检查。';
+
+  @override
+  String dictionaryEntryCount(int count) {
+    return '$count 个词条';
+  }
+
+  @override
+  String get dictionaryDelete => '删除词典';
+
+  @override
+  String get dictionaryResultsTitle => '查询结果';
+
+  @override
+  String get dictionaryResultsPlaceholder => '查询结果会显示在这里。';
+
+  @override
+  String dictionaryNoResults(String query) {
+    return '没有找到“$query”的精确匹配。';
+  }
+
+  @override
+  String get dictionarySuggestionsTitle => '前缀匹配';
+
+  @override
+  String dictionaryImportSuccess(String name) {
+    return '已导入 $name';
+  }
+
+  @override
+  String dictionaryOperationFailed(String error) {
+    return '字典操作失败：$error';
+  }
 }

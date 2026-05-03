@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_template/src/core/network/api_client.dart';
-import 'package:flutter_template/src/core/network/api_exception.dart';
+import 'package:kotoba_kit/src/core/network/api_client.dart';
+import 'package:kotoba_kit/src/core/network/api_exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

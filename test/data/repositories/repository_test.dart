@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_template/src/data/repositories/repository.dart';
+import 'package:kotoba_kit/src/data/repositories/repository.dart';
 
 void main() {
   test('BaseRepository.guard returns success data', () async {

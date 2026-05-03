@@ -6,7 +6,7 @@ Future<void> main() {
   return runTemplateApp(
     config: const AppConfig(
       environment: AppEnvironment.staging,
-      appName: 'Flutter Template Staging',
+      appName: 'Kotoba Kit Staging',
     ),
   );
 }

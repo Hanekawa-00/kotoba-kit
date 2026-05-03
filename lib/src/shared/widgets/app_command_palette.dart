@@ -158,6 +158,12 @@ class _CommandPaletteDialogState extends State<_CommandPaletteDialog> {
         action: () => widget.router.go('/'),
       ),
       _PaletteCommand(
+        icon: Icons.menu_book_outlined,
+        title: l10n.commandGoDictionary,
+        subtitle: l10n.dictionarySubtitle,
+        action: () => widget.router.go('/dictionary'),
+      ),
+      _PaletteCommand(
         icon: Icons.tune_outlined,
         title: l10n.commandGoSettings,
         subtitle: l10n.settingsSubtitle,

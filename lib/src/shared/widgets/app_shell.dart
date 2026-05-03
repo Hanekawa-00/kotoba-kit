@@ -23,6 +23,11 @@ class AppShell extends StatefulWidget {
       selectedIcon: Icons.dashboard,
     ),
     _ShellDestination(
+      path: '/dictionary',
+      icon: Icons.menu_book_outlined,
+      selectedIcon: Icons.menu_book_rounded,
+    ),
+    _ShellDestination(
       path: '/settings',
       icon: Icons.tune_outlined,
       selectedIcon: Icons.tune,
@@ -198,6 +203,10 @@ class _AppShellState extends State<AppShell> {
 
     if (location == '/') {
       return l10n.homeTitle;
+    }
+
+    if (location.startsWith('/dictionary')) {
+      return l10n.dictionaryTitle;
     }
 
     if (location.startsWith('/settings/about')) {
@@ -596,6 +605,7 @@ class _ShellDestination {
     final l10n = context.l10n;
 
     return switch (path) {
+      '/dictionary' => l10n.navDictionary,
       '/settings' => l10n.navSettings,
       '/components' => l10n.navComponents,
       _ => l10n.navHome,
@@ -629,7 +639,10 @@ class _AppMark extends StatelessWidget {
               color: scheme.primaryContainer,
               borderRadius: BorderRadius.circular(radii.md),
             ),
-            child: Icon(Icons.layers_rounded, color: scheme.onPrimaryContainer),
+            child: Icon(
+              Icons.menu_book_rounded,
+              color: scheme.onPrimaryContainer,
+            ),
           ),
           if (extended) ...[
             SizedBox(width: spacing.md),

@@ -6,7 +6,7 @@ Future<void> main() {
   return runTemplateApp(
     config: const AppConfig(
       environment: AppEnvironment.development,
-      appName: 'Flutter Template Dev',
+      appName: 'Kotoba Kit Dev',
     ),
   );
 }

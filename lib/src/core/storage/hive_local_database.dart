@@ -7,7 +7,7 @@ import 'local_database.dart';
 class HiveLocalDatabase implements LocalDatabase {
   HiveLocalDatabase({
     required AppLogger logger,
-    this.subDirectory = 'flutter_template',
+    this.subDirectory = 'kotoba_kit',
   }) : _logger = logger;
 
   final AppLogger _logger;
