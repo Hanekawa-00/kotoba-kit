@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/localization_extensions.dart';
@@ -81,6 +84,16 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
           ref.read(dictionaryControllerProvider.notifier).importDictionary();
         },
         onSearch: (query) {
+          final normalizedQuery = query.trim();
+          if (normalizedQuery.isNotEmpty &&
+              normalizedQuery != _searchController.text) {
+            _searchController.value = TextEditingValue(
+              text: normalizedQuery,
+              selection: TextSelection.collapsed(
+                offset: normalizedQuery.length,
+              ),
+            );
+          }
           ref.read(dictionaryControllerProvider.notifier).search(query);
         },
         onToggle: (config, enabled) {
@@ -155,6 +168,7 @@ class _DictionaryContent extends StatelessWidget {
         _SearchResultsSection(
           result: state.result,
           isSearching: state.isSearching,
+          onSearch: onSearch,
         ),
       ],
     );
@@ -307,10 +321,12 @@ class _SearchResultsSection extends StatelessWidget {
   const _SearchResultsSection({
     required this.result,
     required this.isSearching,
+    required this.onSearch,
   });
 
   final DictionarySearchResult result;
   final bool isSearching;
+  final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -325,18 +341,20 @@ class _SearchResultsSection extends StatelessWidget {
         else if (result.query.isEmpty)
           Text(l10n.dictionaryResultsPlaceholder)
         else if (result.entries.isEmpty)
-          _NoResults(result: result)
+          _NoResults(result: result, onSearch: onSearch)
         else
-          for (final entry in result.entries) _EntryCard(entry: entry),
+          for (final entry in result.entries)
+            _EntryCard(entry: entry, onSearch: onSearch),
       ],
     );
   }
 }
 
 class _NoResults extends StatelessWidget {
-  const _NoResults({required this.result});
+  const _NoResults({required this.result, required this.onSearch});
 
   final DictionarySearchResult result;
+  final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -358,7 +376,10 @@ class _NoResults extends StatelessWidget {
             runSpacing: 8,
             children: [
               for (final suggestion in result.suggestions)
-                InputChip(label: Text(suggestion)),
+                InputChip(
+                  label: Text(suggestion),
+                  onPressed: () => onSearch(suggestion),
+                ),
             ],
           ),
         ],
@@ -368,9 +389,10 @@ class _NoResults extends StatelessWidget {
 }
 
 class _EntryCard extends StatelessWidget {
-  const _EntryCard({required this.entry});
+  const _EntryCard({required this.entry, required this.onSearch});
 
   final DictionaryEntry entry;
+  final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -408,10 +430,53 @@ class _EntryCard extends StatelessWidget {
               ),
             ],
           ),
+          if (entry.isRedirected) ...[
+            SizedBox(height: spacing.xs),
+            Text(
+              '${entry.word} -> ${entry.resolvedWord}',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: scheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
           SizedBox(height: spacing.md),
-          SelectableText(
-            _stripHtml(entry.definitionHtml),
-            style: theme.textTheme.bodyMedium,
+          Html(
+            data: _asHtmlFragment(entry.definitionHtml),
+            shrinkWrap: true,
+            onLinkTap: (url, attributes, element) {
+              final linkedWord = _lookupWordFromUrl(url);
+              if (linkedWord != null) {
+                onSearch(linkedWord);
+              }
+            },
+            style: {
+              'html': Style(
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+                color: scheme.onSurface,
+              ),
+              'body': Style(
+                margin: Margins.zero,
+                padding: HtmlPaddings.zero,
+                color: scheme.onSurface,
+                fontSize: FontSize(theme.textTheme.bodyMedium?.fontSize ?? 14),
+                lineHeight: const LineHeight(1.45),
+              ),
+              'a': Style(
+                color: scheme.primary,
+                textDecoration: TextDecoration.underline,
+              ),
+              'p': Style(margin: Margins.only(bottom: 8)),
+              'div': Style(margin: Margins.only(bottom: 6)),
+              'table': Style(
+                backgroundColor: scheme.surfaceContainerHighest.withValues(
+                  alpha: 0.24,
+                ),
+              ),
+              'th': Style(padding: HtmlPaddings.all(6)),
+              'td': Style(padding: HtmlPaddings.all(6)),
+            },
           ),
         ],
       ),
@@ -419,12 +484,36 @@ class _EntryCard extends StatelessWidget {
   }
 }
 
-String _stripHtml(String value) {
+String _asHtmlFragment(String value) {
+  if (RegExp(r'<[A-Za-z][^>]*>').hasMatch(value)) {
+    return value;
+  }
+
   return value
-      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
-      .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n')
-      .replaceAll(RegExp(r'<[^>]+>'), ' ')
-      .replaceAll(RegExp(r'[ \t]+'), ' ')
-      .replaceAll(RegExp(r'\n\s+'), '\n')
-      .trim();
+      .split('\n')
+      .map((line) => const HtmlEscape().convert(line.trimRight()))
+      .join('<br>');
+}
+
+String? _lookupWordFromUrl(String? url) {
+  if (url == null) {
+    return null;
+  }
+
+  final decoded = Uri.decodeFull(url).trim();
+  if (decoded.isEmpty || decoded.startsWith('#')) {
+    return null;
+  }
+
+  for (final scheme in ['entry://', 'mdict://', 'bword://']) {
+    if (decoded.startsWith(scheme)) {
+      return decoded.substring(scheme.length).replaceFirst(RegExp(r'^/+'), '');
+    }
+  }
+
+  if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+    return null;
+  }
+
+  return decoded.replaceFirst(RegExp(r'^/+'), '');
 }

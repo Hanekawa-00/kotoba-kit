@@ -8,11 +8,17 @@ class DictionaryEntry {
     required this.word,
     required this.definitionHtml,
     required this.sourceDictionary,
+    this.resolvedWord,
+    this.redirectChain = const [],
   });
 
   final String word;
   final String definitionHtml;
   final String sourceDictionary;
+  final String? resolvedWord;
+  final List<String> redirectChain;
+
+  bool get isRedirected => resolvedWord != null && resolvedWord != word;
 }
 
 @immutable

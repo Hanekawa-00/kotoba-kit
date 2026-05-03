@@ -87,12 +87,12 @@ class DictionaryService {
       final matches = await reader.locateAll(normalizedQuery);
 
       for (final match in matches) {
-        final definition = await reader.readOneMdx(match);
-        entries.add(
-          DictionaryEntry(
-            word: match.keyText,
-            definitionHtml: definition,
+        entries.addAll(
+          await _readResolvedEntries(
+            reader: reader,
+            match: match,
             sourceDictionary: dictionary.name,
+            displayWord: match.keyText,
           ),
         );
       }
@@ -139,6 +139,82 @@ class DictionaryService {
     await reader.initDict();
     _readers[config.mdxPath] = reader;
     return reader;
+  }
+
+  Future<List<DictionaryEntry>> _readResolvedEntries({
+    required DictReader reader,
+    required RecordOffsetInfo match,
+    required String sourceDictionary,
+    required String displayWord,
+    Set<String> visited = const {},
+    List<String> redirectChain = const [],
+    int depth = 0,
+  }) async {
+    final definition = _cleanRecord(await reader.readOneMdx(match));
+    final target = _extractMdictLink(definition);
+
+    if (target == null || depth >= 8 || visited.contains(target)) {
+      return [
+        DictionaryEntry(
+          word: displayWord,
+          resolvedWord: displayWord == match.keyText ? null : match.keyText,
+          definitionHtml: definition,
+          sourceDictionary: sourceDictionary,
+          redirectChain: redirectChain,
+        ),
+      ];
+    }
+
+    final linkedMatches = await reader.locateAll(target);
+    if (linkedMatches.isEmpty) {
+      return [
+        DictionaryEntry(
+          word: displayWord,
+          resolvedWord: target,
+          definitionHtml: definition,
+          sourceDictionary: sourceDictionary,
+          redirectChain: [...redirectChain, target],
+        ),
+      ];
+    }
+
+    final resolved = <DictionaryEntry>[];
+    for (final linkedMatch in linkedMatches) {
+      resolved.addAll(
+        await _readResolvedEntries(
+          reader: reader,
+          match: linkedMatch,
+          sourceDictionary: sourceDictionary,
+          displayWord: displayWord,
+          visited: {...visited, match.keyText, target},
+          redirectChain: [...redirectChain, target],
+          depth: depth + 1,
+        ),
+      );
+    }
+
+    return resolved;
+  }
+
+  String _cleanRecord(String value) {
+    return value.replaceAll('\u0000', '').trim();
+  }
+
+  String? _extractMdictLink(String value) {
+    final firstLine = value
+        .replaceAll('\r\n', '\n')
+        .split('\n')
+        .first
+        .replaceAll('\u0000', '')
+        .trim();
+    final match = RegExp(r'^@@@LINK=(.+)$').firstMatch(firstLine);
+    final target = match?.group(1)?.trim();
+
+    if (target == null || target.isEmpty) {
+      return null;
+    }
+
+    return target;
   }
 
   String _safeSegment(String value) {
