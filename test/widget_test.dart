@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:kotoba_kit/src/app/bootstrap.dart';
 import 'package:kotoba_kit/src/data/models/dictionary_config.dart';
 import 'package:kotoba_kit/src/data/models/dictionary_entry.dart';
+import 'package:kotoba_kit/src/data/models/online_dictionary_config.dart';
 import 'package:kotoba_kit/src/data/repositories/dictionary_repository.dart';
+import 'package:kotoba_kit/src/data/services/online_sources/online_dictionary_source.dart';
 import 'package:kotoba_kit/src/core/settings/app_settings.dart';
 import 'package:kotoba_kit/src/core/settings/settings_providers.dart';
 import 'package:kotoba_kit/src/core/settings/settings_repository.dart';
@@ -18,7 +20,6 @@ void main() {
 
     expect(find.text('Dictionary'), findsWidgets);
     expect(find.text('Lookup'), findsOneWidget);
-    expect(find.text('No dictionaries imported'), findsOneWidget);
   });
 
   testWidgets('mobile top-level pages keep bottom navigation', (tester) async {
@@ -270,5 +271,32 @@ class _FakeDictionaryRepository implements DictionaryRepository {
   ) async {
     _configs = configs;
     return _configs;
+  }
+
+  @override
+  Future<DictionarySearchResult> searchOnline(
+    OnlineDictionarySource source,
+    String query,
+  ) async {
+    return DictionarySearchResult(
+      query: query,
+      entries: const [],
+      suggestions: const [],
+    );
+  }
+
+  @override
+  Future<List<OnlineDictionaryConfig>> loadOnlineConfigs() async => const [];
+
+  @override
+  Future<void> saveOnlineConfigs(List<OnlineDictionaryConfig> configs) async {}
+
+  @override
+  Future<List<OnlineDictionaryConfig>> setOnlineEnabled(
+    List<OnlineDictionaryConfig> configs,
+    String id,
+    bool enabled,
+  ) async {
+    return configs;
   }
 }

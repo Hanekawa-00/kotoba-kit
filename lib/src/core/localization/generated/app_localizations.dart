@@ -779,8 +779,14 @@ abstract class AppLocalizations {
   /// No description provided for @dictionarySubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'导入本地 MDict 词典文件，无网络也能查词。'**
+  /// **'跨本地词典和在线源查词。在设置中管理词典。'**
   String get dictionarySubtitle;
+
+  /// No description provided for @dictionarySettingsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'词典管理'**
+  String get dictionarySettingsTitle;
 
   /// No description provided for @dictionaryImport.
   ///

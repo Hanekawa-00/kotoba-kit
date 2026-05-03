@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/localization_extensions.dart';
 import '../../core/theme/app_design_tokens.dart';
-import '../../data/models/dictionary_config.dart';
 import '../../data/models/dictionary_entry.dart';
 import '../../shared/services/app_messenger.dart';
 import '../../shared/widgets/app_state_views.dart';
@@ -80,9 +79,6 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
       data: (state) => _DictionaryContent(
         state: state,
         searchController: _searchController,
-        onImport: () {
-          ref.read(dictionaryControllerProvider.notifier).importDictionary();
-        },
         onSearch: (query) {
           final normalizedQuery = query.trim();
           if (normalizedQuery.isNotEmpty &&
@@ -96,16 +92,6 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
           }
           ref.read(dictionaryControllerProvider.notifier).search(query);
         },
-        onToggle: (config, enabled) {
-          ref
-              .read(dictionaryControllerProvider.notifier)
-              .setEnabled(config.id, enabled);
-        },
-        onDelete: (config) {
-          ref
-              .read(dictionaryControllerProvider.notifier)
-              .deleteDictionary(config);
-        },
       ),
     );
   }
@@ -115,39 +101,22 @@ class _DictionaryContent extends StatelessWidget {
   const _DictionaryContent({
     required this.state,
     required this.searchController,
-    required this.onImport,
     required this.onSearch,
-    required this.onToggle,
-    required this.onDelete,
   });
 
   final DictionaryState state;
   final TextEditingController searchController;
-  final VoidCallback onImport;
   final ValueChanged<String> onSearch;
-  final void Function(DictionaryConfig config, bool enabled) onToggle;
-  final ValueChanged<DictionaryConfig> onDelete;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final hasAnySource = state.hasEnabledDictionary;
 
     return PageFrame(
       storageId: 'dictionary',
       title: l10n.dictionaryTitle,
       subtitle: l10n.dictionarySubtitle,
-      trailing: FilledButton.icon(
-        onPressed: state.isImporting || !state.isSupported ? null : onImport,
-        icon: state.isImporting
-            ? const SizedBox.square(
-                dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : const Icon(Icons.upload_file_rounded),
-        label: Text(
-          state.isImporting ? l10n.dictionaryImporting : l10n.dictionaryImport,
-        ),
-      ),
       children: [
         if (!state.isSupported)
           SectionCard(
@@ -160,16 +129,16 @@ class _DictionaryContent extends StatelessWidget {
           controller: searchController,
           onSearch: onSearch,
         ),
-        _InstalledDictionariesSection(
-          configs: state.configs,
-          onToggle: onToggle,
-          onDelete: onDelete,
-        ),
-        _SearchResultsSection(
-          result: state.result,
-          isSearching: state.isSearching,
-          onSearch: onSearch,
-        ),
+        if (!hasAnySource && state.query.isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(top: Theme.of(context).spacing.md),
+            child: AppEmptyState(
+              title: l10n.dictionaryEmptyTitle,
+              message: l10n.dictionaryNoEnabledDictionaries,
+            ),
+          )
+        else
+          _TabbedResults(state: state, onSearch: onSearch),
       ],
     );
   }
@@ -239,112 +208,117 @@ class _SearchSection extends StatelessWidget {
   }
 }
 
-class _InstalledDictionariesSection extends StatelessWidget {
-  const _InstalledDictionariesSection({
-    required this.configs,
-    required this.onToggle,
-    required this.onDelete,
-  });
+class _TabbedResults extends ConsumerWidget {
+  const _TabbedResults({required this.state, required this.onSearch});
 
-  final List<DictionaryConfig> configs;
-  final void Function(DictionaryConfig config, bool enabled) onToggle;
-  final ValueChanged<DictionaryConfig> onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return SectionCard(
-      title: l10n.dictionaryInstalledTitle,
-      icon: Icons.library_books_outlined,
-      children: [
-        if (configs.isEmpty)
-          AppEmptyState(
-            title: l10n.dictionaryEmptyTitle,
-            message: l10n.dictionaryEmptyMessage,
-          )
-        else
-          for (final config in configs)
-            _DictionaryTile(
-              config: config,
-              onToggle: (enabled) => onToggle(config, enabled),
-              onDelete: () => onDelete(config),
-            ),
-      ],
-    );
-  }
-}
-
-class _DictionaryTile extends StatelessWidget {
-  const _DictionaryTile({
-    required this.config,
-    required this.onToggle,
-    required this.onDelete,
-  });
-
-  final DictionaryConfig config;
-  final ValueChanged<bool> onToggle;
-  final VoidCallback onDelete;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.menu_book_rounded),
-      title: Text(config.name),
-      subtitle: Text(
-        config.entryCount == null
-            ? config.mdxPath
-            : l10n.dictionaryEntryCount(config.entryCount!),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: Wrap(
-        spacing: 4,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        children: [
-          Switch(value: config.enabled, onChanged: onToggle),
-          IconButton(
-            tooltip: l10n.dictionaryDelete,
-            onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline_rounded),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SearchResultsSection extends StatelessWidget {
-  const _SearchResultsSection({
-    required this.result,
-    required this.isSearching,
-    required this.onSearch,
-  });
-
-  final DictionarySearchResult result;
-  final bool isSearching;
+  final DictionaryState state;
   final ValueChanged<String> onSearch;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+    final entriesBySource = state.result.entriesBySource;
+
+    if (state.isSearching) {
+      return const SizedBox(height: 180, child: AppLoadingView());
+    }
+
+    if (state.result.query.isEmpty) {
+      return SectionCard(
+        title: l10n.dictionaryResultsTitle,
+        icon: Icons.article_outlined,
+        children: [Text(l10n.dictionaryResultsPlaceholder)],
+      );
+    }
+
+    if (entriesBySource.isEmpty) {
+      return _NoResults(result: state.result, onSearch: onSearch);
+    }
+
+    final sourceKeys = entriesBySource.keys.toList();
+    final safeIndex = state.selectedSourceIndex.clamp(0, sourceKeys.length - 1);
+    final selectedKey = sourceKeys[safeIndex];
+    final entriesForSource = entriesBySource[selectedKey]!;
+    final safeEntryIndex = state.selectedEntryIndex.clamp(
+      0,
+      entriesForSource.length - 1,
+    );
+    final currentEntry = entriesForSource[safeEntryIndex];
 
     return SectionCard(
-      title: l10n.dictionaryResultsTitle,
+      title: '${l10n.dictionaryResultsTitle} (${state.result.entries.length})',
       icon: Icons.article_outlined,
       children: [
-        if (isSearching)
-          const SizedBox(height: 180, child: AppLoadingView())
-        else if (result.query.isEmpty)
-          Text(l10n.dictionaryResultsPlaceholder)
-        else if (result.entries.isEmpty)
-          _NoResults(result: result, onSearch: onSearch)
-        else
-          for (final entry in result.entries)
-            _EntryCard(entry: entry, onSearch: onSearch),
+        // Source selector chips
+        Padding(
+          padding: EdgeInsets.only(bottom: spacing.sm),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 4,
+            children: [
+              for (var i = 0; i < sourceKeys.length; i++)
+                ChoiceChip(
+                  label: Text(
+                    '${sourceKeys[i]} (${entriesBySource[sourceKeys[i]]!.length})',
+                  ),
+                  selected: i == safeIndex,
+                  onSelected: (_) {
+                    ref
+                        .read(dictionaryControllerProvider.notifier)
+                        .selectSource(i);
+                  },
+                ),
+            ],
+          ),
+        ),
+        // Entry index chips (only if >1 entry in current source)
+        if (entriesForSource.length > 1) ...[
+          Padding(
+            padding: EdgeInsets.only(bottom: spacing.sm),
+            child: Row(
+              children: [
+                Text(
+                  '${l10n.dictionaryResultsTitle}: ',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < entriesForSource.length; i++)
+                          Padding(
+                            padding: EdgeInsets.only(right: 6),
+                            child: ActionChip(
+                              label: Text(
+                                '${i + 1}',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  fontWeight: i == safeEntryIndex
+                                      ? FontWeight.w700
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                              onPressed: () {
+                                ref
+                                    .read(dictionaryControllerProvider.notifier)
+                                    .selectEntry(i);
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        // Current entry card
+        _EntryCard(entry: currentEntry, onSearch: onSearch),
       ],
     );
   }
@@ -360,8 +334,9 @@ class _NoResults extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return SectionCard(
+      title: l10n.dictionaryResultsTitle,
+      icon: Icons.article_outlined,
       children: [
         Text(l10n.dictionaryNoResults(result.query)),
         if (result.suggestions.isNotEmpty) ...[
@@ -604,6 +579,24 @@ String? _lookupWordFromUrl(String? url) {
     if (decoded.startsWith(scheme)) {
       return decoded.substring(scheme.length).replaceFirst(RegExp(r'^/+'), '');
     }
+  }
+
+  // Recognize Weblio content page links
+  final weblioMatch = RegExp(
+    r'^https?://www\.weblio\.jp/content/(.+)$',
+  ).firstMatch(decoded);
+  if (weblioMatch != null) {
+    return Uri.decodeComponent(weblioMatch.group(1)!);
+  }
+
+  // Recognize Jisho search/word links
+  final jishoMatch = RegExp(
+    r'^https?://jisho\.org/(?:search|word)/(.+)$',
+  ).firstMatch(decoded);
+  if (jishoMatch != null) {
+    final word = Uri.decodeComponent(jishoMatch.group(1)!);
+    // Jisho /word/ paths may have additional segments
+    return word.split('/').first;
   }
 
   if (decoded.startsWith('http://') ||

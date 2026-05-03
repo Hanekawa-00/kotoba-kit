@@ -373,7 +373,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dictionarySubtitle =>
-      'Import local MDict files and query them without a network connection.';
+      'Look up words across local dictionaries and online sources. Manage dictionaries in Settings.';
+
+  @override
+  String get dictionarySettingsTitle => 'Dictionaries';
 
   @override
   String get dictionaryImport => 'Import MDX';

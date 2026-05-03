@@ -6,6 +6,9 @@ import '../../core/localization/localization_extensions.dart';
 import '../../core/settings/app_settings.dart';
 import '../../core/settings/settings_providers.dart';
 import '../../core/theme/app_design_tokens.dart';
+import '../../data/models/dictionary_config.dart';
+import '../../data/models/online_dictionary_config.dart';
+import '../../features/dictionary/dictionary_providers.dart';
 import '../../shared/services/app_messenger.dart';
 import '../../shared/widgets/confirm_action_dialog.dart';
 import '../../shared/widgets/page_frame.dart';
@@ -129,6 +132,8 @@ class SettingsPage extends ConsumerWidget {
             ),
           ],
         ),
+        // Dictionary management
+        _DictionaryManagementSection(),
         SectionCard(
           title: l10n.settingsOtherTitle,
           icon: Icons.more_horiz_rounded,
@@ -150,6 +155,153 @@ class SettingsPage extends ConsumerWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+class _DictionaryManagementSection extends ConsumerWidget {
+  const _DictionaryManagementSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final asyncDict = ref.watch(dictionaryControllerProvider);
+    final dictState = asyncDict.asData?.value;
+    final controller = ref.read(dictionaryControllerProvider.notifier);
+
+    if (dictState == null) {
+      return const SizedBox.shrink();
+    }
+
+    return SectionCard(
+      title: l10n.dictionarySettingsTitle,
+      icon: Icons.library_books_outlined,
+      children: [
+        // Online dictionary sources
+        ...dictState.onlineConfigs.map(
+          (config) => _OnlineSourceTile(
+            config: config,
+            onToggle: (enabled) {
+              controller.setOnlineEnabled(config.id, enabled);
+            },
+          ),
+        ),
+        if (dictState.onlineConfigs.isNotEmpty) const Divider(),
+        // Import local dictionary
+        if (dictState.isSupported)
+          Padding(
+            padding: EdgeInsets.only(
+              top: Theme.of(context).spacing.sm,
+              bottom: Theme.of(context).spacing.md,
+            ),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: dictState.isImporting
+                  ? const SizedBox(
+                      height: 36,
+                      width: 36,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : FilledButton.icon(
+                      onPressed: () => controller.importDictionary(),
+                      icon: const Icon(Icons.upload_file_rounded),
+                      label: Text(l10n.dictionaryImport),
+                    ),
+            ),
+          ),
+        // Local dictionary list
+        if (dictState.configs.isEmpty)
+          Padding(
+            padding: EdgeInsets.only(top: Theme.of(context).spacing.sm),
+            child: Text(
+              l10n.dictionaryEmptyTitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          ...dictState.configs.map(
+            (config) => _DictionarySettingsTile(
+              config: config,
+              onToggle: (enabled) => controller.setEnabled(config.id, enabled),
+              onDelete: () => controller.deleteDictionary(config),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _OnlineSourceTile extends StatelessWidget {
+  const _OnlineSourceTile({required this.config, required this.onToggle});
+
+  final OnlineDictionaryConfig config;
+  final ValueChanged<bool> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
+    return SwitchListTile(
+      contentPadding: EdgeInsets.zero,
+      secondary: Icon(Icons.language, color: scheme.primary),
+      title: Text(config.name),
+      subtitle: Text(config.id),
+      value: config.enabled,
+      onChanged: onToggle,
+    );
+  }
+}
+
+class _DictionarySettingsTile extends StatelessWidget {
+  const _DictionarySettingsTile({
+    required this.config,
+    required this.onToggle,
+    required this.onDelete,
+  });
+
+  final DictionaryConfig config;
+  final ValueChanged<bool> onToggle;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final spacing = theme.spacing;
+    final radii = theme.radii;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: spacing.sm),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(radii.lg),
+        ),
+        child: ListTile(
+          leading: Icon(Icons.menu_book_rounded, color: scheme.primary),
+          title: Text(config.name),
+          subtitle: Text(
+            config.entryCount == null
+                ? config.mdxPath
+                : context.l10n.dictionaryEntryCount(config.entryCount!),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Switch(value: config.enabled, onChanged: onToggle),
+              IconButton(
+                tooltip: context.l10n.dictionaryDelete,
+                onPressed: onDelete,
+                icon: const Icon(Icons.delete_outline_rounded),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

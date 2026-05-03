@@ -38,6 +38,14 @@ class DictionarySearchResult {
     entries: [],
     suggestions: [],
   );
+
+  Map<String, List<DictionaryEntry>> get entriesBySource {
+    final grouped = <String, List<DictionaryEntry>>{};
+    for (final entry in entries) {
+      grouped.putIfAbsent(entry.sourceDictionary, () => []).add(entry);
+    }
+    return grouped;
+  }
 }
 
 @immutable

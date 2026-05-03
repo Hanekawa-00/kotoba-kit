@@ -4,7 +4,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/dictionary_config.dart';
 import '../models/dictionary_entry.dart';
+import '../models/online_dictionary_config.dart';
 import '../services/dictionary_service.dart';
+import '../services/online_sources/online_dictionary_source.dart';
 
 abstract class DictionaryRepository {
   bool get isSupported;
@@ -20,6 +22,11 @@ abstract class DictionaryRepository {
     String query,
   );
 
+  Future<DictionarySearchResult> searchOnline(
+    OnlineDictionarySource source,
+    String query,
+  );
+
   Future<void> deleteDictionary(
     List<DictionaryConfig> configs,
     DictionaryConfig config,
@@ -27,6 +34,16 @@ abstract class DictionaryRepository {
 
   Future<List<DictionaryConfig>> setEnabled(
     List<DictionaryConfig> configs,
+    String id,
+    bool enabled,
+  );
+
+  Future<List<OnlineDictionaryConfig>> loadOnlineConfigs();
+
+  Future<void> saveOnlineConfigs(List<OnlineDictionaryConfig> configs);
+
+  Future<List<OnlineDictionaryConfig>> setOnlineEnabled(
+    List<OnlineDictionaryConfig> configs,
     String id,
     bool enabled,
   );
@@ -41,6 +58,7 @@ class LocalDictionaryRepository implements DictionaryRepository {
   final DictionaryService _service;
 
   static const _configsKey = 'dictionary.configs';
+  static const _onlineConfigsKey = 'dictionary.onlineConfigs';
 
   @override
   bool get isSupported => _service.isSupported;
@@ -111,7 +129,92 @@ class LocalDictionaryRepository implements DictionaryRepository {
   }
 
   @override
+  Future<DictionarySearchResult> searchOnline(
+    OnlineDictionarySource source,
+    String query,
+  ) {
+    return source.search(query);
+  }
+
+  @override
+  Future<List<OnlineDictionaryConfig>> loadOnlineConfigs() async {
+    final raw = await _preferences.getString(_onlineConfigsKey);
+    List<OnlineDictionaryConfig> saved;
+    if (raw == null || raw.isEmpty) {
+      saved = const [];
+    } else {
+      final decoded = jsonDecode(raw) as List<dynamic>;
+      saved = decoded
+          .cast<Map<String, Object?>>()
+          .map(OnlineDictionaryConfig.fromJson)
+          .toList(growable: false);
+    }
+
+    final savedMap = {for (final c in saved) c.id: c};
+    final sources = [weblioSourceConfig, jishoSourceConfig];
+
+    final merged = <OnlineDictionaryConfig>[];
+    for (final source in sources) {
+      final existing = savedMap[source.id];
+      merged.add(
+        existing ??
+            OnlineDictionaryConfig(
+              id: source.id,
+              name: source.name,
+              enabled: true,
+              baseUrl: source.baseUrl,
+            ),
+      );
+    }
+
+    return merged;
+  }
+
+  @override
+  Future<void> saveOnlineConfigs(List<OnlineDictionaryConfig> configs) {
+    final raw = jsonEncode(configs.map((c) => c.toJson()).toList());
+    return _preferences.setString(_onlineConfigsKey, raw);
+  }
+
+  @override
+  Future<List<OnlineDictionaryConfig>> setOnlineEnabled(
+    List<OnlineDictionaryConfig> configs,
+    String id,
+    bool enabled,
+  ) async {
+    final next = [
+      for (final c in configs)
+        if (c.id == id) c.copyWith(enabled: enabled) else c,
+    ];
+    await saveOnlineConfigs(next);
+    return next;
+  }
+
+  @override
   Future<void> dispose() {
     return _service.dispose();
   }
 }
+
+class _SourceMeta {
+  final String id;
+  final String name;
+  final String baseUrl;
+
+  const _SourceMeta({
+    required this.id,
+    required this.name,
+    required this.baseUrl,
+  });
+}
+
+const weblioSourceConfig = _SourceMeta(
+  id: 'weblio',
+  name: 'Weblio',
+  baseUrl: 'https://www.weblio.jp',
+);
+const jishoSourceConfig = _SourceMeta(
+  id: 'jisho',
+  name: 'Jisho',
+  baseUrl: 'https://jisho.org',
+);

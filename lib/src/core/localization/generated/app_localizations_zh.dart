@@ -352,7 +352,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dictionaryTitle => '字典';
 
   @override
-  String get dictionarySubtitle => '导入本地 MDict 词典文件，无网络也能查词。';
+  String get dictionarySubtitle => '跨本地词典和在线源查词。在设置中管理词典。';
+
+  @override
+  String get dictionarySettingsTitle => '词典管理';
 
   @override
   String get dictionaryImport => '导入 MDX';
