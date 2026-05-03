@@ -3,6 +3,10 @@
 This template is organized around stable boundaries so new business code can
 grow without leaking infrastructure details into screens.
 
+Kotoba Kit's product-specific dictionary architecture is documented in
+`docs/kotoba_kit_design_architecture.md`. Use that document for MDX/MDD import,
+lookup, resource repair, WebView rendering, and compatibility strategy.
+
 For agent-specific workflow expectations, start with `AGENTS.md` and
 `docs/agent_development.md`.
 
