@@ -26,7 +26,6 @@ class AboutPage extends ConsumerWidget {
             context.pop();
             return;
           }
-
           context.go('/settings');
         },
         icon: const Icon(Icons.arrow_back_rounded),
@@ -34,29 +33,20 @@ class AboutPage extends ConsumerWidget {
       ),
       children: [
         SectionCard(
-          title: l10n.aboutStructureTitle,
-          icon: Icons.account_tree_outlined,
+          title: l10n.aboutDescriptionTitle,
+          icon: Icons.info_outline,
           children: [
-            _InfoRow(label: l10n.aboutCoreLabel, value: l10n.aboutCoreValue),
-            _InfoRow(
-              label: l10n.aboutFeaturesLabel,
-              value: l10n.aboutFeaturesValue,
-            ),
-            _InfoRow(
-              label: l10n.aboutSharedLabel,
-              value: l10n.aboutSharedValue,
-            ),
+            _DescriptionText(l10n.aboutDescriptionText),
           ],
         ),
         SectionCard(
           title: l10n.aboutVersionTitle,
-          icon: Icons.info_outline,
+          icon: Icons.tag_outlined,
           children: [
             FutureBuilder<PackageInfo>(
               future: PackageInfo.fromPlatform(),
               builder: (context, snapshot) {
                 final info = snapshot.data;
-
                 return Column(
                   children: [
                     _InfoRow(
@@ -82,6 +72,17 @@ class AboutPage extends ConsumerWidget {
           ],
         ),
         SectionCard(
+          title: l10n.aboutTechStackTitle,
+          icon: Icons.code_outlined,
+          children: [
+            _InfoRow(label: 'Framework', value: 'Flutter'),
+            _InfoRow(label: 'Design', value: 'Material 3'),
+            _InfoRow(label: 'State', value: 'Riverpod'),
+            _InfoRow(label: 'Routing', value: 'GoRouter'),
+            _InfoRow(label: 'Platforms', value: 'Windows, macOS, Linux, Android, iOS, Web'),
+          ],
+        ),
+        SectionCard(
           title: l10n.aboutEnvironmentTitle,
           icon: Icons.settings_applications_outlined,
           children: [
@@ -89,19 +90,25 @@ class AboutPage extends ConsumerWidget {
               label: l10n.aboutEnvironmentLabel,
               value: config.environment.label,
             ),
-            _InfoRow(
-              label: l10n.aboutApiBaseUrlLabel,
-              value: config.apiBaseUrl,
-            ),
-            _InfoRow(
-              label: l10n.aboutVerboseLogsLabel,
-              value: config.enableVerboseLogs
-                  ? l10n.commonEnabled
-                  : l10n.commonDisabled,
-            ),
           ],
         ),
       ],
+    );
+  }
+}
+
+class _DescriptionText extends StatelessWidget {
+  const _DescriptionText(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
     );
   }
 }

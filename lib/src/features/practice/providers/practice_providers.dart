@@ -19,8 +19,12 @@ final practiceAiServiceProvider = Provider<PracticeAiService?>((ref) {
 });
 
 final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
-  final box = Hive.box<HistoryItem>('practiceHistory');
-  return HistoryRepository(box);
+  try {
+    final box = Hive.box<HistoryItem>('practiceHistory');
+    return HistoryRepository(box);
+  } catch (_) {
+    return HistoryRepository.empty();
+  }
 });
 
 final practiceControllerProvider =

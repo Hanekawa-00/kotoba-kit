@@ -125,7 +125,7 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.byKey(const PageStorageKey<String>('lookup-desktop-results')),
+      find.byKey(const ValueKey('lookup-desktop-588')),
       findsOneWidget,
     );
     expect(tester.takeException(), isNull);
@@ -139,7 +139,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
     await tester.scrollUntilVisible(find.text('About'), 520);
     await Scrollable.ensureVisible(
@@ -196,7 +196,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
 
     await tester.fling(
@@ -218,7 +218,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
     await tester.fling(
       find.byType(CustomScrollView),
@@ -246,7 +246,7 @@ void main() {
     await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
     await tester.fling(
       find.byType(CustomScrollView),
@@ -260,7 +260,7 @@ void main() {
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
 
     expect(_pageScrollOffset(tester), greaterThan(settingsOffset * 0.7));

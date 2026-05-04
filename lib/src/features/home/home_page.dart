@@ -3,11 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/localization_extensions.dart';
-import '../../core/settings/settings_providers.dart';
 import '../../core/theme/app_design_tokens.dart';
-import '../../shared/widgets/app_state_views.dart';
 import '../../shared/widgets/page_frame.dart';
 import '../../shared/widgets/section_card.dart';
+import '../practice/providers/practice_providers.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -15,44 +14,47 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final settings = ref.watch(appSettingsControllerProvider);
-    final scheme = Theme.of(context).colorScheme;
-    final spacing = Theme.of(context).spacing;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final spacing = theme.spacing;
 
     return PageFrame(
       storageId: 'home',
-      title: l10n.homeTitle,
+      title: l10n.appTitle,
       subtitle: l10n.homeSubtitle,
-      trailing: IconButton.filledTonal(
-        tooltip: l10n.openSettingsTooltip,
-        onPressed: () => context.go('/settings'),
-        icon: const Icon(Icons.tune),
-      ),
       children: [
-        _StatusPanel(isLoading: settings.isLoading),
+        _WelcomeBanner(),
         LayoutBuilder(
           builder: (context, constraints) {
-            final twoColumns = constraints.maxWidth >= 720;
+            final twoColumns = constraints.maxWidth >= 640;
             final cards = [
-              _CapabilityCard(
-                icon: Icons.devices_rounded,
-                title: l10n.capabilityCrossPlatformTitle,
-                description: l10n.capabilityCrossPlatformDescription,
+              _FeatureCard(
+                icon: Icons.menu_book_rounded,
+                title: l10n.navDictionary,
+                subtitle: l10n.dictionarySubtitle,
+                color: scheme.primary,
+                onTap: () => context.go('/dictionary'),
               ),
-              _CapabilityCard(
-                icon: Icons.palette_outlined,
-                title: l10n.capabilityThemeTitle,
-                description: l10n.capabilityThemeDescription,
+              _FeatureCard(
+                icon: Icons.edit_note_outlined,
+                title: l10n.navPractice,
+                subtitle: l10n.practiceSubtitle,
+                color: scheme.tertiary,
+                onTap: () => context.go('/practice'),
               ),
-              _CapabilityCard(
-                icon: Icons.route_outlined,
-                title: l10n.capabilityRoutingTitle,
-                description: l10n.capabilityRoutingDescription,
+              _FeatureCard(
+                icon: Icons.school_outlined,
+                title: l10n.practiceGrammarTitle,
+                subtitle: l10n.practiceGrammarSubtitle,
+                color: scheme.secondary,
+                onTap: () => context.go('/practice/grammar'),
               ),
-              _CapabilityCard(
-                icon: Icons.extension_outlined,
-                title: l10n.capabilityExtensionTitle,
-                description: l10n.capabilityExtensionDescription,
+              _FeatureCard(
+                icon: Icons.tune_outlined,
+                title: l10n.navSettings,
+                subtitle: l10n.settingsSubtitle,
+                color: scheme.primaryContainer,
+                onTap: () => context.go('/settings'),
               ),
             ];
 
@@ -73,38 +75,18 @@ class HomePage extends ConsumerWidget {
               mainAxisSpacing: spacing.md,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 2.5,
+              childAspectRatio: 2.2,
               children: cards,
             );
           },
         ),
-        SectionCard(
-          title: l10n.nextStepsTitle,
-          icon: Icons.checklist_rounded,
-          children: [
-            _NextStepTile(color: scheme.primary, label: l10n.nextStepFeature),
-            _NextStepTile(
-              color: scheme.tertiary,
-              label: l10n.nextStepRepository,
-            ),
-            _NextStepTile(color: scheme.secondary, label: l10n.nextStepDesktop),
-          ],
-        ),
-        SectionCard(
-          title: l10n.stateComponentsTitle,
-          icon: Icons.widgets_outlined,
-          children: const [SizedBox(height: 220, child: AppEmptyState())],
-        ),
+        _RecentActivity(),
       ],
     );
   }
 }
 
-class _StatusPanel extends StatelessWidget {
-  const _StatusPanel({required this.isLoading});
-
-  final bool isLoading;
-
+class _WelcomeBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -116,39 +98,40 @@ class _StatusPanel extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(spacing.xl),
       decoration: BoxDecoration(
-        color: scheme.primaryContainer,
+        color: scheme.primaryContainer.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(radii.xl),
       ),
       child: Row(
         children: [
           Container(
-            width: 72,
-            height: 72,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
               color: scheme.primary.withValues(alpha: 0.14),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isLoading ? Icons.sync_rounded : Icons.layers_rounded,
+              Icons.menu_book_rounded,
               color: scheme.primary,
-              size: 34,
+              size: 32,
             ),
           ),
-          SizedBox(width: spacing.xl),
+          SizedBox(width: spacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isLoading ? l10n.homeStatusLoading : l10n.homeStatusReady,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  l10n.appTitle,
+                  style: theme.textTheme.titleLarge?.copyWith(
                     color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 SizedBox(height: spacing.sm),
                 Text(
-                  l10n.homeStatusDescription,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  l10n.homeSubtitle,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     color: scheme.onPrimaryContainer,
                   ),
                 ),
@@ -161,16 +144,20 @@ class _StatusPanel extends StatelessWidget {
   }
 }
 
-class _CapabilityCard extends StatelessWidget {
-  const _CapabilityCard({
+class _FeatureCard extends StatelessWidget {
+  const _FeatureCard({
     required this.icon,
     required this.title,
-    required this.description,
+    required this.subtitle,
+    required this.color,
+    required this.onTap,
   });
 
   final IconData icon;
   final String title;
-  final String description;
+  final String subtitle;
+  final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -179,66 +166,145 @@ class _CapabilityCard extends StatelessWidget {
     final spacing = theme.spacing;
     final radii = theme.radii;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainer,
+    return Material(
+      color: scheme.surfaceContainer,
+      borderRadius: BorderRadius.circular(radii.xl),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(radii.xl),
-        border: Border.all(
-          color: scheme.outlineVariant.withValues(alpha: 0.35),
-        ),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(spacing.lg),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: scheme.primary),
-            SizedBox(width: spacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: spacing.sm),
-                  Text(
-                    description,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+        child: Padding(
+          padding: EdgeInsets.all(spacing.lg),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(radii.md),
+                ),
+                child: Icon(icon, color: color),
               ),
-            ),
-          ],
+              SizedBox(width: spacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: spacing.sm),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _NextStepTile extends StatelessWidget {
-  const _NextStepTile({required this.color, required this.label});
-
-  final Color color;
-  final String label;
-
+class _RecentActivity extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
-      child: Row(
-        children: [
-          Icon(Icons.radio_button_checked, color: color, size: 18),
-          const SizedBox(width: 12),
-          Expanded(child: Text(label)),
-        ],
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+    final l10n = context.l10n;
+    final repository = ref.watch(historyRepositoryProvider);
+    final items = repository.loadAll().take(3).toList();
+
+    return SectionCard(
+      title: l10n.practiceHistoryTitle,
+      icon: Icons.history_rounded,
+      children: [
+        if (items.isEmpty)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: spacing.md),
+            child: Text(
+              l10n.practiceHistoryEmpty,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else
+          ...items.map((item) {
+            final date = DateTime.fromMillisecondsSinceEpoch(item.timestamp);
+            final dateStr =
+                '${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
+                '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+            final scoreColor = item.score >= 80
+                ? Colors.green
+                : item.score >= 60
+                    ? Colors.orange
+                    : Colors.red;
+
+            return Padding(
+              padding: EdgeInsets.only(bottom: spacing.sm),
+              child: Material(
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius:
+                    BorderRadius.circular(theme.radii.lg),
+                child: Padding(
+                  padding: EdgeInsets.all(spacing.md),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: scoreColor.withValues(alpha: 0.18),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '${item.score}',
+                          style: TextStyle(
+                            color: scoreColor,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: spacing.sm),
+                      Expanded(
+                        child: Text(
+                          item.chineseSentence ??
+                              item.userSentence ??
+                              '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      SizedBox(width: spacing.sm),
+                      Text(
+                        dateStr,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+      ],
     );
   }
 }

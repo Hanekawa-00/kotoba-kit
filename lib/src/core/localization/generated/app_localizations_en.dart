@@ -176,32 +176,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutSubtitle =>
-      'A general, extensible, cross-platform-first Flutter template.';
+      'An offline-first Japanese dictionary and learning toolkit.';
 
   @override
   String get aboutBackToSettings => 'Back to settings';
 
   @override
-  String get aboutStructureTitle => 'Project structure';
+  String get aboutDescriptionTitle => 'About Kotoba Kit';
 
   @override
-  String get aboutCoreLabel => 'core';
+  String get aboutDescriptionText =>
+      'Kotoba Kit is an offline-first Japanese dictionary and learning toolkit built with Flutter, targeting all major platforms. It features local MDict dictionary lookup, AI-powered sentence practice with multi-provider LLM support, a comprehensive JLPT grammar library, and practice history tracking.';
 
   @override
-  String get aboutCoreValue =>
-      'Routing, theme, settings, and other infrastructure';
-
-  @override
-  String get aboutFeaturesLabel => 'features';
-
-  @override
-  String get aboutFeaturesValue => 'Pages and state split by feature';
-
-  @override
-  String get aboutSharedLabel => 'shared';
-
-  @override
-  String get aboutSharedValue => 'Reusable UI shared across features';
+  String get aboutTechStackTitle => 'Tech Stack';
 
   @override
   String get aboutVersionTitle => 'Version';
@@ -223,12 +211,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutEnvironmentLabel => 'Environment';
-
-  @override
-  String get aboutApiBaseUrlLabel => 'API base URL';
-
-  @override
-  String get aboutVerboseLogsLabel => 'Verbose logs';
 
   @override
   String get commonEnabled => 'Enabled';

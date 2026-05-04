@@ -288,14 +288,18 @@ class _DesktopLookupLayout extends StatelessWidget {
             ),
             SizedBox(width: spacing.lg),
             Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: onDismissSearchFocus,
-                child: Padding(
-                  key: const PageStorageKey<String>('lookup-desktop-results'),
-                  padding: EdgeInsets.only(bottom: spacing.xxl),
-                  child: _ResultPane(state: state, onSearch: onSearch),
-                ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: onDismissSearchFocus,
+                    child: Padding(
+                      key: ValueKey('lookup-desktop-${constraints.maxWidth.toInt()}'),
+                      padding: EdgeInsets.only(bottom: spacing.xxl),
+                      child: _ResultPane(state: state, onSearch: onSearch),
+                    ),
+                  );
+                },
               ),
             ),
           ],

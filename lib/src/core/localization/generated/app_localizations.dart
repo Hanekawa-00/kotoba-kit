@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutSubtitle.
   ///
   /// In zh, this message translates to:
-  /// **'一个偏通用、可扩展、跨平台优先的 Flutter 模板。'**
+  /// **'一款离线优先的日语字典与学习工具集。'**
   String get aboutSubtitle;
 
   /// No description provided for @aboutBackToSettings.
@@ -410,47 +410,23 @@ abstract class AppLocalizations {
   /// **'返回设置'**
   String get aboutBackToSettings;
 
-  /// No description provided for @aboutStructureTitle.
+  /// No description provided for @aboutDescriptionTitle.
   ///
   /// In zh, this message translates to:
-  /// **'项目结构'**
-  String get aboutStructureTitle;
+  /// **'关于 Kotoba Kit'**
+  String get aboutDescriptionTitle;
 
-  /// No description provided for @aboutCoreLabel.
+  /// No description provided for @aboutDescriptionText.
   ///
   /// In zh, this message translates to:
-  /// **'core'**
-  String get aboutCoreLabel;
+  /// **'Kotoba Kit 是一款离线优先的日语字典与学习工具集，基于 Flutter 构建，覆盖所有主流平台。支持本地 MDict 词典查询、AI 辅助造句练习（多提供商 LLM 支持）、完整的 JLPT 语法库以及练习历史记录。'**
+  String get aboutDescriptionText;
 
-  /// No description provided for @aboutCoreValue.
+  /// No description provided for @aboutTechStackTitle.
   ///
   /// In zh, this message translates to:
-  /// **'路由、主题、设置等基础设施'**
-  String get aboutCoreValue;
-
-  /// No description provided for @aboutFeaturesLabel.
-  ///
-  /// In zh, this message translates to:
-  /// **'features'**
-  String get aboutFeaturesLabel;
-
-  /// No description provided for @aboutFeaturesValue.
-  ///
-  /// In zh, this message translates to:
-  /// **'按业务功能拆分页面与状态'**
-  String get aboutFeaturesValue;
-
-  /// No description provided for @aboutSharedLabel.
-  ///
-  /// In zh, this message translates to:
-  /// **'shared'**
-  String get aboutSharedLabel;
-
-  /// No description provided for @aboutSharedValue.
-  ///
-  /// In zh, this message translates to:
-  /// **'跨功能复用的通用组件'**
-  String get aboutSharedValue;
+  /// **'技术栈'**
+  String get aboutTechStackTitle;
 
   /// No description provided for @aboutVersionTitle.
   ///
@@ -493,18 +469,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'环境'**
   String get aboutEnvironmentLabel;
-
-  /// No description provided for @aboutApiBaseUrlLabel.
-  ///
-  /// In zh, this message translates to:
-  /// **'API 地址'**
-  String get aboutApiBaseUrlLabel;
-
-  /// No description provided for @aboutVerboseLogsLabel.
-  ///
-  /// In zh, this message translates to:
-  /// **'详细日志'**
-  String get aboutVerboseLogsLabel;
 
   /// No description provided for @commonEnabled.
   ///

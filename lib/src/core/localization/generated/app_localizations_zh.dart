@@ -162,31 +162,20 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutTitle => '关于';
 
   @override
-  String get aboutSubtitle => '一个偏通用、可扩展、跨平台优先的 Flutter 模板。';
+  String get aboutSubtitle => '一款离线优先的日语字典与学习工具集。';
 
   @override
   String get aboutBackToSettings => '返回设置';
 
   @override
-  String get aboutStructureTitle => '项目结构';
+  String get aboutDescriptionTitle => '关于 Kotoba Kit';
 
   @override
-  String get aboutCoreLabel => 'core';
+  String get aboutDescriptionText =>
+      'Kotoba Kit 是一款离线优先的日语字典与学习工具集，基于 Flutter 构建，覆盖所有主流平台。支持本地 MDict 词典查询、AI 辅助造句练习（多提供商 LLM 支持）、完整的 JLPT 语法库以及练习历史记录。';
 
   @override
-  String get aboutCoreValue => '路由、主题、设置等基础设施';
-
-  @override
-  String get aboutFeaturesLabel => 'features';
-
-  @override
-  String get aboutFeaturesValue => '按业务功能拆分页面与状态';
-
-  @override
-  String get aboutSharedLabel => 'shared';
-
-  @override
-  String get aboutSharedValue => '跨功能复用的通用组件';
+  String get aboutTechStackTitle => '技术栈';
 
   @override
   String get aboutVersionTitle => '版本';
@@ -208,12 +197,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aboutEnvironmentLabel => '环境';
-
-  @override
-  String get aboutApiBaseUrlLabel => 'API 地址';
-
-  @override
-  String get aboutVerboseLogsLabel => '详细日志';
 
   @override
   String get commonEnabled => '启用';

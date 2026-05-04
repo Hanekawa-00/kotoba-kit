@@ -143,10 +143,13 @@ class _DesktopLayout extends ConsumerWidget {
                               for (final d in Difficulty.values)
                                 ButtonSegment(
                                   value: d,
-                                  label: Text(d.name.toUpperCase()),
+                                  label: Text(d.name.substring(1)),
                                 ),
                             ],
                             selected: {state.difficulty},
+                            style: const ButtonStyle(
+                              visualDensity: VisualDensity.compact,
+                            ),
                             onSelectionChanged: (value) {
                               controller.selectDifficulty(value.first);
                             },
@@ -337,7 +340,7 @@ class _MobileLayout extends ConsumerWidget {
                       for (final d in Difficulty.values)
                         ButtonSegment(
                           value: d,
-                          label: Text(d.name.toUpperCase()),
+                          label: Text(d.name.substring(1)),
                         ),
                     ],
                     selected: {state.difficulty},
