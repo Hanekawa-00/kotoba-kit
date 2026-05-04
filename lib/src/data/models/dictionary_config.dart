@@ -8,16 +8,27 @@ class DictionaryConfig {
     required this.mdxPath,
     required this.importedAt,
     required this.enabled,
-    this.mddPath,
+    this.mddPaths = const [],
     this.entryCount,
   });
 
   factory DictionaryConfig.fromJson(Map<String, Object?> json) {
+    final rawMddPaths = json['mddPaths'];
+    final mddPaths = rawMddPaths is List
+        ? rawMddPaths
+              .whereType<String>()
+              .where((path) => path.isNotEmpty)
+              .toList(growable: false)
+        : [
+            if (json['mddPath'] case final String path when path.isNotEmpty)
+              path,
+          ];
+
     return DictionaryConfig(
       id: json['id'] as String,
       name: json['name'] as String,
       mdxPath: json['mdxPath'] as String,
-      mddPath: json['mddPath'] as String?,
+      mddPaths: mddPaths,
       importedAt: DateTime.parse(json['importedAt'] as String),
       enabled: json['enabled'] as bool? ?? true,
       entryCount: json['entryCount'] as int?,
@@ -27,16 +38,18 @@ class DictionaryConfig {
   final String id;
   final String name;
   final String mdxPath;
-  final String? mddPath;
+  final List<String> mddPaths;
   final DateTime importedAt;
   final bool enabled;
   final int? entryCount;
+
+  String? get mddPath => mddPaths.isEmpty ? null : mddPaths.first;
 
   DictionaryConfig copyWith({
     String? id,
     String? name,
     String? mdxPath,
-    String? mddPath,
+    List<String>? mddPaths,
     DateTime? importedAt,
     bool? enabled,
     int? entryCount,
@@ -45,7 +58,7 @@ class DictionaryConfig {
       id: id ?? this.id,
       name: name ?? this.name,
       mdxPath: mdxPath ?? this.mdxPath,
-      mddPath: mddPath ?? this.mddPath,
+      mddPaths: mddPaths ?? this.mddPaths,
       importedAt: importedAt ?? this.importedAt,
       enabled: enabled ?? this.enabled,
       entryCount: entryCount ?? this.entryCount,
@@ -58,6 +71,7 @@ class DictionaryConfig {
       'name': name,
       'mdxPath': mdxPath,
       'mddPath': mddPath,
+      'mddPaths': mddPaths,
       'importedAt': importedAt.toIso8601String(),
       'enabled': enabled,
       'entryCount': entryCount,

@@ -17,6 +17,13 @@ class DictionaryService {
     return DictionarySearchResult.empty;
   }
 
+  Future<List<String>> suggest(
+    List<DictionaryConfig> dictionaries,
+    String query,
+  ) async {
+    return const [];
+  }
+
   Future<void> deleteDictionaryFiles(DictionaryConfig config) async {}
 
   Future<void> dispose() async {}

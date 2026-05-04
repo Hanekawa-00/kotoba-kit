@@ -113,7 +113,7 @@ abstract class AppLocalizations {
   /// No description provided for @navDictionary.
   ///
   /// In zh, this message translates to:
-  /// **'字典'**
+  /// **'查词'**
   String get navDictionary;
 
   /// No description provided for @navSettings.
@@ -563,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @commandGoDictionary.
   ///
   /// In zh, this message translates to:
-  /// **'前往字典'**
+  /// **'前往查词'**
   String get commandGoDictionary;
 
   /// No description provided for @commandGoSettings.
@@ -773,7 +773,7 @@ abstract class AppLocalizations {
   /// No description provided for @dictionaryTitle.
   ///
   /// In zh, this message translates to:
-  /// **'字典'**
+  /// **'查词'**
   String get dictionaryTitle;
 
   /// No description provided for @dictionarySubtitle.
@@ -895,6 +895,18 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'前缀匹配'**
   String get dictionarySuggestionsTitle;
+
+  /// No description provided for @dictionaryHistoryTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'检索历史'**
+  String get dictionaryHistoryTitle;
+
+  /// No description provided for @dictionarySourceFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'{source} 暂时不可用：{error}'**
+  String dictionarySourceFailed(String source, String error);
 
   /// No description provided for @dictionaryImportSuccess.
   ///

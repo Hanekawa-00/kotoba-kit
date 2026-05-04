@@ -2,7 +2,7 @@
   "@@locale": "zh",
   "appTitle": "Kotoba Kit",
   "navHome": "首页",
-  "navDictionary": "字典",
+  "navDictionary": "查词",
   "navSettings": "设置",
   "navComponents": "组件",
   "navAbout": "关于",
@@ -84,7 +84,7 @@
   "commandPaletteNoResults": "没有匹配的操作",
   "commandPaletteExecuted": "已执行操作",
   "commandGoHome": "前往首页",
-  "commandGoDictionary": "前往字典",
+  "commandGoDictionary": "前往查词",
   "commandGoSettings": "前往设置",
   "commandGoComponents": "前往组件",
   "commandGoAbout": "前往关于",
@@ -119,7 +119,7 @@
   "stateEmptyMessage": "这里还没有可以展示的数据。",
   "stateErrorTitle": "出了点问题",
   "stateErrorMessage": "请稍后重试，或检查当前环境配置。",
-  "dictionaryTitle": "字典",
+  "dictionaryTitle": "查词",
   "dictionarySubtitle": "跨本地词典和在线源查词。在设置中管理词典。",
   "dictionarySettingsTitle": "词典管理",
   "dictionaryImport": "导入 MDX",
@@ -154,6 +154,18 @@
     }
   },
   "dictionarySuggestionsTitle": "前缀匹配",
+  "dictionaryHistoryTitle": "检索历史",
+  "dictionarySourceFailed": "{source} 暂时不可用：{error}",
+  "@dictionarySourceFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "dictionaryImportSuccess": "已导入 {name}",
   "@dictionaryImportSuccess": {
     "placeholders": {

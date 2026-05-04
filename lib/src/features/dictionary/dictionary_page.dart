@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/localization_extensions.dart';
@@ -9,9 +6,8 @@ import '../../core/theme/app_design_tokens.dart';
 import '../../data/models/dictionary_entry.dart';
 import '../../shared/services/app_messenger.dart';
 import '../../shared/widgets/app_state_views.dart';
-import '../../shared/widgets/page_frame.dart';
-import '../../shared/widgets/section_card.dart';
 import 'dictionary_providers.dart';
+import 'mdict_web_view.dart';
 
 class DictionaryPage extends ConsumerStatefulWidget {
   const DictionaryPage({super.key});
@@ -22,17 +18,33 @@ class DictionaryPage extends ConsumerStatefulWidget {
 
 class _DictionaryPageState extends ConsumerState<DictionaryPage> {
   late final TextEditingController _searchController;
+  late final FocusNode _searchFocusNode;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController();
+    _searchFocusNode = FocusNode();
+    _searchFocusNode.addListener(_handleSearchFocusChanged);
   }
 
   @override
   void dispose() {
+    _searchFocusNode
+      ..removeListener(_handleSearchFocusChanged)
+      ..dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _handleSearchFocusChanged() {
+    setState(() {});
+  }
+
+  void _dismissSearchFocus() {
+    if (_searchFocusNode.hasFocus) {
+      _searchFocusNode.unfocus();
+    }
   }
 
   @override
@@ -61,25 +73,21 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
     });
 
     final asyncState = ref.watch(dictionaryControllerProvider);
-    final l10n = context.l10n;
 
     return asyncState.when(
-      loading: () => PageFrame(
-        storageId: 'dictionary',
-        title: l10n.dictionaryTitle,
-        subtitle: l10n.dictionarySubtitle,
-        children: const [SizedBox(height: 280, child: AppLoadingView())],
-      ),
-      error: (error, stackTrace) => PageFrame(
-        storageId: 'dictionary',
-        title: l10n.dictionaryTitle,
-        subtitle: l10n.dictionarySubtitle,
-        children: [AppErrorView(message: error.toString())],
-      ),
-      data: (state) => _DictionaryContent(
+      loading: () => const _LoadingLookupPage(),
+      error: (error, stackTrace) => _ErrorLookupPage(message: error.toString()),
+      data: (state) => _LookupWorkspace(
         state: state,
         searchController: _searchController,
+        searchFocusNode: _searchFocusNode,
+        searchHasFocus: _searchFocusNode.hasFocus,
+        onDismissSearchFocus: _dismissSearchFocus,
+        onDraftChanged: (query) {
+          ref.read(dictionaryControllerProvider.notifier).updateDraft(query);
+        },
         onSearch: (query) {
+          _dismissSearchFocus();
           final normalizedQuery = query.trim();
           if (normalizedQuery.isNotEmpty &&
               normalizedQuery != _searchController.text) {
@@ -97,121 +105,291 @@ class _DictionaryPageState extends ConsumerState<DictionaryPage> {
   }
 }
 
-class _DictionaryContent extends StatelessWidget {
-  const _DictionaryContent({
+class _LoadingLookupPage extends StatelessWidget {
+  const _LoadingLookupPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SafeArea(
+      top: false,
+      bottom: false,
+      child: Center(child: AppLoadingView()),
+    );
+  }
+}
+
+class _ErrorLookupPage extends StatelessWidget {
+  const _ErrorLookupPage({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.all(Theme.of(context).spacing.lg),
+        child: AppErrorView(message: message),
+      ),
+    );
+  }
+}
+
+class _LookupWorkspace extends StatelessWidget {
+  const _LookupWorkspace({
     required this.state,
     required this.searchController,
+    required this.searchFocusNode,
+    required this.searchHasFocus,
+    required this.onDismissSearchFocus,
+    required this.onDraftChanged,
     required this.onSearch,
   });
 
   final DictionaryState state;
   final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final bool searchHasFocus;
+  final VoidCallback onDismissSearchFocus;
+  final ValueChanged<String> onDraftChanged;
   final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final hasAnySource = state.hasEnabledDictionary;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useDesktop = constraints.maxWidth >= 900;
+        if (useDesktop) {
+          return _DesktopLookupLayout(
+            state: state,
+            searchController: searchController,
+            searchFocusNode: searchFocusNode,
+            searchHasFocus: searchHasFocus,
+            onDismissSearchFocus: onDismissSearchFocus,
+            onDraftChanged: onDraftChanged,
+            onSearch: onSearch,
+          );
+        }
 
-    return PageFrame(
-      storageId: 'dictionary',
-      title: l10n.dictionaryTitle,
-      subtitle: l10n.dictionarySubtitle,
-      children: [
-        if (!state.isSupported)
-          SectionCard(
-            title: l10n.dictionaryUnsupportedTitle,
-            icon: Icons.info_outline_rounded,
-            children: [Text(l10n.dictionaryUnsupportedMessage)],
-          ),
-        _SearchSection(
+        return _MobileLookupLayout(
           state: state,
-          controller: searchController,
+          searchController: searchController,
+          searchFocusNode: searchFocusNode,
+          searchHasFocus: searchHasFocus,
+          onDismissSearchFocus: onDismissSearchFocus,
+          onDraftChanged: onDraftChanged,
           onSearch: onSearch,
-        ),
-        if (!hasAnySource && state.query.isNotEmpty)
-          Padding(
-            padding: EdgeInsets.only(top: Theme.of(context).spacing.md),
-            child: AppEmptyState(
-              title: l10n.dictionaryEmptyTitle,
-              message: l10n.dictionaryNoEnabledDictionaries,
-            ),
-          )
-        else
-          _TabbedResults(state: state, onSearch: onSearch),
-      ],
+        );
+      },
     );
   }
 }
 
-class _SearchSection extends StatelessWidget {
-  const _SearchSection({
+class _MobileLookupLayout extends StatelessWidget {
+  const _MobileLookupLayout({
+    required this.state,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.searchHasFocus,
+    required this.onDismissSearchFocus,
+    required this.onDraftChanged,
+    required this.onSearch,
+  });
+
+  final DictionaryState state;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final bool searchHasFocus;
+  final VoidCallback onDismissSearchFocus;
+  final ValueChanged<String> onDraftChanged;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = Theme.of(context).spacing;
+
+    return SafeArea(
+      top: false,
+      bottom: false,
+      child: Column(
+        children: [
+          _TopSearchBar(
+            state: state,
+            controller: searchController,
+            focusNode: searchFocusNode,
+            showAssist: searchHasFocus,
+            onDraftChanged: onDraftChanged,
+            onSearch: onSearch,
+          ),
+          Expanded(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: onDismissSearchFocus,
+              child: Padding(
+                key: const PageStorageKey<String>('lookup-mobile-results'),
+                padding: EdgeInsets.fromLTRB(
+                  spacing.lg,
+                  spacing.md,
+                  spacing.lg,
+                  spacing.xxl,
+                ),
+                child: _ResultPane(state: state, onSearch: onSearch),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DesktopLookupLayout extends StatelessWidget {
+  const _DesktopLookupLayout({
+    required this.state,
+    required this.searchController,
+    required this.searchFocusNode,
+    required this.searchHasFocus,
+    required this.onDismissSearchFocus,
+    required this.onDraftChanged,
+    required this.onSearch,
+  });
+
+  final DictionaryState state;
+  final TextEditingController searchController;
+  final FocusNode searchFocusNode;
+  final bool searchHasFocus;
+  final VoidCallback onDismissSearchFocus;
+  final ValueChanged<String> onDraftChanged;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = Theme.of(context).spacing;
+
+    return SafeArea(
+      top: true,
+      bottom: false,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(spacing.xl, spacing.lg, spacing.xl, 0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 316,
+              child: _LookupSidePanel(
+                state: state,
+                controller: searchController,
+                focusNode: searchFocusNode,
+                showAssist: searchHasFocus,
+                onDraftChanged: onDraftChanged,
+                onSearch: onSearch,
+              ),
+            ),
+            SizedBox(width: spacing.lg),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: onDismissSearchFocus,
+                child: Padding(
+                  key: const PageStorageKey<String>('lookup-desktop-results'),
+                  padding: EdgeInsets.only(bottom: spacing.xxl),
+                  child: _ResultPane(state: state, onSearch: onSearch),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopSearchBar extends StatelessWidget {
+  const _TopSearchBar({
     required this.state,
     required this.controller,
+    required this.focusNode,
+    required this.showAssist,
+    required this.onDraftChanged,
     required this.onSearch,
   });
 
   final DictionaryState state;
   final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool showAssist;
+  final ValueChanged<String> onDraftChanged;
   final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+    final scheme = theme.colorScheme;
+    final assistMaxHeight = _searchAssistMaxHeight(context);
 
-    return SectionCard(
-      title: l10n.dictionarySearchTitle,
-      icon: Icons.manage_search_rounded,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return DecoratedBox(
+      key: const ValueKey('lookup-mobile-search-bar'),
+      decoration: BoxDecoration(
+        color: scheme.surface.withValues(alpha: 0.98),
+        border: Border(
+          bottom: BorderSide(
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          spacing.lg,
+          spacing.md,
+          spacing.lg,
+          spacing.sm,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                enabled: state.hasEnabledDictionary,
-                decoration: InputDecoration(
-                  labelText: l10n.dictionarySearchLabel,
-                  hintText: l10n.dictionarySearchHint,
-                  prefixIcon: const Icon(Icons.search_rounded),
-                ),
-                textInputAction: TextInputAction.search,
-                onSubmitted: onSearch,
+            _SearchRow(
+              state: state,
+              controller: controller,
+              focusNode: focusNode,
+              onDraftChanged: onDraftChanged,
+              onSearch: onSearch,
+              compact: true,
+            ),
+            if (showAssist &&
+                _searchAssistItems(state, controller.text).isNotEmpty) ...[
+              SizedBox(height: spacing.sm),
+              _SearchAssistList(
+                state: state,
+                query: controller.text,
+                onSearch: onSearch,
+                maxItems: 18,
+                maxHeight: assistMaxHeight,
               ),
-            ),
-            const SizedBox(width: 12),
-            FilledButton.icon(
-              onPressed: state.hasEnabledDictionary
-                  ? () => onSearch(controller.text)
-                  : null,
-              icon: state.isSearching
-                  ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.arrow_forward_rounded),
-              label: Text(l10n.dictionarySearchButton),
-            ),
+            ],
           ],
         ),
-        if (!state.hasEnabledDictionary) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.dictionaryNoEnabledDictionaries,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 }
 
-class _TabbedResults extends ConsumerWidget {
-  const _TabbedResults({required this.state, required this.onSearch});
+class _LookupSidePanel extends ConsumerWidget {
+  const _LookupSidePanel({
+    required this.state,
+    required this.controller,
+    required this.focusNode,
+    required this.showAssist,
+    required this.onDraftChanged,
+    required this.onSearch,
+  });
 
   final DictionaryState state;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool showAssist;
+  final ValueChanged<String> onDraftChanged;
   final ValueChanged<String> onSearch;
 
   @override
@@ -219,18 +397,382 @@ class _TabbedResults extends ConsumerWidget {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final spacing = theme.spacing;
+    final scheme = theme.colorScheme;
     final entriesBySource = state.result.entriesBySource;
+    final sourceKeys = entriesBySource.keys.toList();
 
-    if (state.isSearching) {
-      return const SizedBox(height: 180, child: AppLoadingView());
+    return DecoratedBox(
+      key: const ValueKey('lookup-desktop-side-panel'),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.32),
+        borderRadius: BorderRadius.circular(theme.radii.lg),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.28),
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(spacing.lg),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Text(
+              l10n.dictionaryTitle,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            SizedBox(height: spacing.xs),
+            Text(
+              l10n.dictionarySubtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: spacing.lg),
+            _SearchRow(
+              state: state,
+              controller: controller,
+              focusNode: focusNode,
+              onDraftChanged: onDraftChanged,
+              onSearch: onSearch,
+              compact: false,
+            ),
+            if (showAssist &&
+                _searchAssistItems(state, controller.text).isNotEmpty) ...[
+              SizedBox(height: spacing.md),
+              _SearchAssistList(
+                state: state,
+                query: controller.text,
+                onSearch: onSearch,
+                maxItems: 18,
+                maxHeight: 236,
+              ),
+            ],
+            if (sourceKeys.isNotEmpty) ...[
+              SizedBox(height: spacing.xl),
+              Text(
+                l10n.dictionaryResultsTitle,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: spacing.sm),
+              for (var i = 0; i < sourceKeys.length; i++)
+                Padding(
+                  padding: EdgeInsets.only(bottom: spacing.xs),
+                  child: ChoiceChip(
+                    label: Text(
+                      '${sourceKeys[i]} (${entriesBySource[sourceKeys[i]]!.length})',
+                    ),
+                    selected:
+                        i ==
+                        state.selectedSourceIndex
+                            .clamp(0, sourceKeys.length - 1)
+                            .toInt(),
+                    onSelected: (_) {
+                      ref
+                          .read(dictionaryControllerProvider.notifier)
+                          .selectSource(i);
+                    },
+                  ),
+                ),
+            ],
+            if (state.searchHistory.isNotEmpty) ...[
+              SizedBox(height: spacing.xl),
+              Text(
+                l10n.dictionaryHistoryTitle,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: spacing.sm),
+              for (final item in state.searchHistory.take(10))
+                ListTile(
+                  dense: true,
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.history_rounded),
+                  title: Text(
+                    item,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onTap: () => onSearch(item),
+                ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchRow extends StatelessWidget {
+  const _SearchRow({
+    required this.state,
+    required this.controller,
+    required this.focusNode,
+    required this.onDraftChanged,
+    required this.onSearch,
+    required this.compact,
+  });
+
+  final DictionaryState state;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onDraftChanged;
+  final ValueChanged<String> onSearch;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final spacing = Theme.of(context).spacing;
+    final input = TextField(
+      controller: controller,
+      focusNode: focusNode,
+      enabled: state.hasEnabledDictionary,
+      decoration: InputDecoration(
+        labelText: l10n.dictionarySearchLabel,
+        hintText: l10n.dictionarySearchHint,
+        prefixIcon: const Icon(Icons.search_rounded),
+        isDense: true,
+      ),
+      textInputAction: TextInputAction.search,
+      onChanged: onDraftChanged,
+      onSubmitted: onSearch,
+    );
+    final button = FilledButton(
+      onPressed: state.hasEnabledDictionary
+          ? () => onSearch(controller.text)
+          : null,
+      child: state.isSearching
+          ? const SizedBox.square(
+              dimension: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : Icon(
+              compact
+                  ? Icons.arrow_forward_rounded
+                  : Icons.manage_search_rounded,
+            ),
+    );
+
+    if (compact) {
+      return Row(
+        children: [
+          Expanded(child: input),
+          SizedBox(width: spacing.sm),
+          SizedBox.square(dimension: 48, child: button),
+        ],
+      );
     }
 
-    if (state.result.query.isEmpty) {
-      return SectionCard(
-        title: l10n.dictionaryResultsTitle,
-        icon: Icons.article_outlined,
-        children: [Text(l10n.dictionaryResultsPlaceholder)],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        input,
+        SizedBox(height: spacing.sm),
+        FilledButton.icon(
+          onPressed: state.hasEnabledDictionary
+              ? () => onSearch(controller.text)
+              : null,
+          icon: state.isSearching
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.manage_search_rounded),
+          label: Text(l10n.dictionarySearchButton),
+        ),
+      ],
+    );
+  }
+}
+
+class _SearchAssistList extends StatelessWidget {
+  const _SearchAssistList({
+    required this.state,
+    required this.query,
+    required this.onSearch,
+    required this.maxItems,
+    required this.maxHeight,
+  });
+
+  final DictionaryState state;
+  final String query;
+  final ValueChanged<String> onSearch;
+  final int maxItems;
+  final double maxHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final items = _searchAssistItems(state, query).take(maxItems).toList();
+    if (items.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final height = (items.length * 38.0 + theme.spacing.xs * 2)
+        .clamp(0.0, maxHeight)
+        .toDouble();
+
+    return DecoratedBox(
+      key: const ValueKey('lookup-search-assist-list'),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.42),
+        borderRadius: BorderRadius.circular(theme.radii.md),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.32),
+        ),
+      ),
+      child: SizedBox(
+        height: height,
+        child: Scrollbar(
+          child: ListView.builder(
+            key: const ValueKey('lookup-search-assist-scroll'),
+            padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
+            itemExtent: 38,
+            itemBuilder: (context, index) =>
+                _SearchAssistTile(item: items[index], onSearch: onSearch),
+            itemCount: items.length,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchAssistTile extends StatelessWidget {
+  const _SearchAssistTile({required this.item, required this.onSearch});
+
+  final _SearchAssistItem item;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: () => onSearch(item.value),
+      borderRadius: BorderRadius.circular(theme.radii.sm),
+      child: SizedBox(
+        height: 38,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
+          child: Row(
+            children: [
+              Icon(
+                item.fromHistory
+                    ? Icons.history_rounded
+                    : Icons.manage_search_rounded,
+                size: 18,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              SizedBox(width: theme.spacing.sm),
+              Expanded(
+                child: Text(
+                  item.value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.north_west_rounded,
+                size: 16,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+List<_SearchAssistItem> _searchAssistItems(
+  DictionaryState state,
+  String query,
+) {
+  final normalized = query.trim().toLowerCase();
+  final items = <_SearchAssistItem>[];
+  final seen = <String>{};
+
+  void add(String value, {required bool fromHistory}) {
+    final trimmed = value.trim();
+    final key = trimmed.toLowerCase();
+    if (trimmed.isEmpty || seen.contains(key)) {
+      return;
+    }
+    items.add(_SearchAssistItem(trimmed, fromHistory: fromHistory));
+    seen.add(key);
+  }
+
+  if (normalized.isEmpty) {
+    for (final item in state.searchHistory) {
+      add(item, fromHistory: true);
+    }
+  } else {
+    for (final item in state.searchHistory.where(
+      (item) => item.toLowerCase().contains(normalized),
+    )) {
+      add(item, fromHistory: true);
+    }
+    for (final item in state.draftSuggestions) {
+      add(item, fromHistory: state.searchHistory.contains(item));
+    }
+    for (final item in state.searchHistory) {
+      add(item, fromHistory: true);
+    }
+  }
+
+  return items;
+}
+
+class _SearchAssistItem {
+  const _SearchAssistItem(this.value, {required this.fromHistory});
+
+  final String value;
+  final bool fromHistory;
+}
+
+double _searchAssistMaxHeight(BuildContext context) {
+  final media = MediaQuery.of(context);
+  final availableHeight = media.size.height - media.viewInsets.bottom;
+  if (availableHeight < 460) {
+    return 132;
+  }
+  if (availableHeight < 620) {
+    return 172;
+  }
+
+  return 236;
+}
+
+class _ResultPane extends ConsumerWidget {
+  const _ResultPane({required this.state, required this.onSearch});
+
+  final DictionaryState state;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!state.isSupported) {
+      return _MessagePanel(
+        icon: Icons.info_outline_rounded,
+        title: context.l10n.dictionaryUnsupportedTitle,
+        message: context.l10n.dictionaryUnsupportedMessage,
       );
+    }
+
+    if (!state.hasEnabledDictionary && state.query.isNotEmpty) {
+      return AppEmptyState(
+        title: context.l10n.dictionaryEmptyTitle,
+        message: context.l10n.dictionaryNoEnabledDictionaries,
+      );
+    }
+
+    if (state.isSearching) {
+      return const SizedBox(height: 220, child: AppLoadingView());
+    }
+
+    final entriesBySource = state.result.entriesBySource;
+    if (state.result.query.isEmpty) {
+      return _StartPanel(state: state, onSearch: onSearch);
     }
 
     if (entriesBySource.isEmpty) {
@@ -238,88 +780,87 @@ class _TabbedResults extends ConsumerWidget {
     }
 
     final sourceKeys = entriesBySource.keys.toList();
-    final safeIndex = state.selectedSourceIndex.clamp(0, sourceKeys.length - 1);
-    final selectedKey = sourceKeys[safeIndex];
-    final entriesForSource = entriesBySource[selectedKey]!;
-    final safeEntryIndex = state.selectedEntryIndex.clamp(
-      0,
-      entriesForSource.length - 1,
-    );
+    final safeSourceIndex = state.selectedSourceIndex
+        .clamp(0, sourceKeys.length - 1)
+        .toInt();
+    final selectedSource = sourceKeys[safeSourceIndex];
+    final entriesForSource = entriesBySource[selectedSource]!;
+    final safeEntryIndex = state.selectedEntryIndex
+        .clamp(0, entriesForSource.length - 1)
+        .toInt();
     final currentEntry = entriesForSource[safeEntryIndex];
 
-    return SectionCard(
-      title: '${l10n.dictionaryResultsTitle} (${state.result.entries.length})',
-      icon: Icons.article_outlined,
-      children: [
-        // Source selector chips
-        Padding(
-          padding: EdgeInsets.only(bottom: spacing.sm),
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 4,
-            children: [
-              for (var i = 0; i < sourceKeys.length; i++)
-                ChoiceChip(
-                  label: Text(
-                    '${sourceKeys[i]} (${entriesBySource[sourceKeys[i]]!.length})',
-                  ),
-                  selected: i == safeIndex,
-                  onSelected: (_) {
-                    ref
-                        .read(dictionaryControllerProvider.notifier)
-                        .selectSource(i);
-                  },
-                ),
-            ],
-          ),
-        ),
-        // Entry index chips (only if >1 entry in current source)
-        if (entriesForSource.length > 1) ...[
-          Padding(
-            padding: EdgeInsets.only(bottom: spacing.sm),
-            child: Row(
-              children: [
-                Text(
-                  '${l10n.dictionaryResultsTitle}: ',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        for (var i = 0; i < entriesForSource.length; i++)
-                          Padding(
-                            padding: EdgeInsets.only(right: 6),
-                            child: ActionChip(
-                              label: Text(
-                                '${i + 1}',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  fontWeight: i == safeEntryIndex
-                                      ? FontWeight.w700
-                                      : FontWeight.w400,
-                                ),
-                              ),
-                              onPressed: () {
-                                ref
-                                    .read(dictionaryControllerProvider.notifier)
-                                    .selectEntry(i);
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+    return _ReadingPanel(
+      entry: currentEntry,
+      result: state.result,
+      sourceKeys: sourceKeys,
+      selectedSourceIndex: safeSourceIndex,
+      entriesForSource: entriesForSource,
+      selectedEntryIndex: safeEntryIndex,
+      onSourceSelected: (index) {
+        ref.read(dictionaryControllerProvider.notifier).selectSource(index);
+      },
+      onEntrySelected: (index) {
+        ref.read(dictionaryControllerProvider.notifier).selectEntry(index);
+      },
+      onSearch: onSearch,
+    );
+  }
+}
+
+class _StartPanel extends StatelessWidget {
+  const _StartPanel({required this.state, required this.onSearch});
+
+  final DictionaryState state;
+  final ValueChanged<String> onSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+
+    return _PanelShell(
+      key: const ValueKey('lookup-reading-panel'),
+      expand: true,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.dictionaryResultsTitle,
+              style: theme.textTheme.titleLarge,
             ),
-          ),
-        ],
-        // Current entry card
-        _EntryCard(entry: currentEntry, onSearch: onSearch),
-      ],
+            SizedBox(height: spacing.sm),
+            Text(
+              l10n.dictionaryResultsPlaceholder,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (state.searchHistory.isNotEmpty) ...[
+              SizedBox(height: spacing.lg),
+              Text(
+                l10n.dictionaryHistoryTitle,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: spacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final item in state.searchHistory.take(12))
+                    InputChip(
+                      avatar: const Icon(Icons.history_rounded, size: 16),
+                      label: Text(item),
+                      onPressed: () => onSearch(item),
+                    ),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -333,93 +874,291 @@ class _NoResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
 
-    return SectionCard(
-      title: l10n.dictionaryResultsTitle,
-      icon: Icons.article_outlined,
-      children: [
-        Text(l10n.dictionaryNoResults(result.query)),
-        if (result.suggestions.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          Text(
-            l10n.dictionarySuggestionsTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final suggestion in result.suggestions)
-                InputChip(
-                  label: Text(suggestion),
-                  onPressed: () => onSearch(suggestion),
-                ),
+    return _PanelShell(
+      expand: true,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SourceErrors(errors: result.sourceErrors),
+            Text(l10n.dictionaryNoResults(result.query)),
+            if (result.suggestions.isNotEmpty) ...[
+              SizedBox(height: spacing.md),
+              Text(
+                l10n.dictionarySuggestionsTitle,
+                style: theme.textTheme.titleSmall,
+              ),
+              SizedBox(height: spacing.sm),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  for (final suggestion in result.suggestions)
+                    InputChip(
+                      label: Text(suggestion),
+                      onPressed: () => onSearch(suggestion),
+                    ),
+                ],
+              ),
             ],
-          ),
-        ],
-      ],
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _EntryCard extends StatelessWidget {
-  const _EntryCard({required this.entry, required this.onSearch});
+class _ReadingPanel extends StatelessWidget {
+  const _ReadingPanel({
+    required this.entry,
+    required this.result,
+    required this.sourceKeys,
+    required this.selectedSourceIndex,
+    required this.entriesForSource,
+    required this.selectedEntryIndex,
+    required this.onSourceSelected,
+    required this.onEntrySelected,
+    required this.onSearch,
+  });
 
   final DictionaryEntry entry;
+  final DictionarySearchResult result;
+  final List<String> sourceKeys;
+  final int selectedSourceIndex;
+  final List<DictionaryEntry> entriesForSource;
+  final int selectedEntryIndex;
+  final ValueChanged<int> onSourceSelected;
+  final ValueChanged<int> onEntrySelected;
   final ValueChanged<String> onSearch;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final spacing = theme.spacing;
-    final radii = theme.radii;
+    final scheme = theme.colorScheme;
 
-    return Container(
-      margin: EdgeInsets.only(bottom: spacing.md),
-      padding: EdgeInsets.all(spacing.lg),
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest.withValues(alpha: 0.42),
-        borderRadius: BorderRadius.circular(radii.lg),
-        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return _PanelShell(
+      key: const ValueKey('lookup-reading-panel'),
+      expand: true,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final headerMaxHeight = (constraints.maxHeight * 0.42)
+              .clamp(76.0, 220.0)
+              .toDouble();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  entry.word,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: headerMaxHeight),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SourceErrors(errors: result.sourceErrors),
+                      if (sourceKeys.length > 1) ...[
+                        _SourceSwitcher(
+                          sourceKeys: sourceKeys,
+                          selectedIndex: selectedSourceIndex,
+                          entriesBySource: result.entriesBySource,
+                          onSelected: onSourceSelected,
+                        ),
+                        SizedBox(height: spacing.md),
+                      ],
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  entry.word,
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                if (entry.isRedirected) ...[
+                                  SizedBox(height: spacing.xs),
+                                  Text(
+                                    '${entry.word} -> ${entry.resolvedWord}',
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: scheme.primary,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: spacing.md),
+                          Text(
+                            entry.sourceDictionary,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (entriesForSource.length > 1) ...[
+                        SizedBox(height: spacing.md),
+                        SizedBox(
+                          height: 36,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemBuilder: (context, index) => ChoiceChip(
+                              label: Text('${index + 1}'),
+                              selected: index == selectedEntryIndex,
+                              onSelected: (_) => onEntrySelected(index),
+                            ),
+                            separatorBuilder: (context, index) =>
+                                SizedBox(width: spacing.xs),
+                            itemCount: entriesForSource.length,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
-              Text(
-                entry.sourceDictionary,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
+              SizedBox(height: spacing.md),
+              Expanded(
+                child: MdictWebView(
+                  html: entry.definitionHtml,
+                  sourceDictionary: entry.sourceDictionary,
+                  expand: true,
+                  onSearch: onSearch,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SourceSwitcher extends StatelessWidget {
+  const _SourceSwitcher({
+    required this.sourceKeys,
+    required this.selectedIndex,
+    required this.entriesBySource,
+    required this.onSelected,
+  });
+
+  final List<String> sourceKeys;
+  final int selectedIndex;
+  final Map<String, List<DictionaryEntry>> entriesBySource;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = Theme.of(context).spacing;
+
+    return SizedBox(
+      key: const ValueKey('lookup-source-switcher'),
+      height: 38,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          final source = sourceKeys[index];
+          final count = entriesBySource[source]?.length ?? 0;
+          return ChoiceChip(
+            label: Text('$source · $count'),
+            selected: index == selectedIndex,
+            onSelected: (_) => onSelected(index),
+          );
+        },
+        separatorBuilder: (context, index) => SizedBox(width: spacing.xs),
+        itemCount: sourceKeys.length,
+      ),
+    );
+  }
+}
+
+class _SourceErrors extends StatelessWidget {
+  const _SourceErrors({required this.errors});
+
+  final Map<String, String> errors;
+
+  @override
+  Widget build(BuildContext context) {
+    if (errors.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: EdgeInsets.only(bottom: theme.spacing.md),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.errorContainer.withValues(alpha: 0.58),
+          borderRadius: BorderRadius.circular(theme.radii.md),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(theme.spacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.cloud_off_rounded, color: scheme.onErrorContainer),
+              SizedBox(width: theme.spacing.sm),
+              Expanded(
+                child: Text(
+                  errors.entries
+                      .map(
+                        (item) => context.l10n.dictionarySourceFailed(
+                          item.key,
+                          item.value,
+                        ),
+                      )
+                      .join('\n'),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onErrorContainer,
+                  ),
                 ),
               ),
             ],
           ),
-          if (entry.isRedirected) ...[
-            SizedBox(height: spacing.xs),
-            Text(
-              '${entry.word} -> ${entry.resolvedWord}',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.primary,
-                fontWeight: FontWeight.w600,
-              ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MessagePanel extends StatelessWidget {
+  const _MessagePanel({
+    required this.icon,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return _PanelShell(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary),
+          SizedBox(width: theme.spacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleMedium),
+                SizedBox(height: theme.spacing.xs),
+                Text(message),
+              ],
             ),
-          ],
-          SizedBox(height: spacing.md),
-          _MdictWebView(
-            html: entry.definitionHtml,
-            sourceDictionary: entry.sourceDictionary,
-            onSearch: onSearch,
           ),
         ],
       ),
@@ -427,409 +1166,30 @@ class _EntryCard extends StatelessWidget {
   }
 }
 
-class _MdictWebView extends StatefulWidget {
-  const _MdictWebView({
-    required this.html,
-    required this.sourceDictionary,
-    required this.onSearch,
-  });
+class _PanelShell extends StatelessWidget {
+  const _PanelShell({super.key, required this.child, this.expand = false});
 
-  final String html;
-  final String sourceDictionary;
-  final ValueChanged<String> onSearch;
-
-  @override
-  State<_MdictWebView> createState() => _MdictWebViewState();
-}
-
-class _MdictWebViewState extends State<_MdictWebView> {
-  static const _minHeight = 160.0;
-  static const _maxHeight = 5000.0;
-
-  InAppWebViewController? _controller;
-  double _height = 360;
-
-  @override
-  void didUpdateWidget(covariant _MdictWebView oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.html != widget.html) {
-      _height = 360;
-    }
-  }
+  final Widget child;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOutCubic,
-      height: _height,
-      clipBehavior: Clip.antiAlias,
-      decoration: const BoxDecoration(),
-      child: InAppWebView(
-        key: ValueKey(widget.html),
-        initialData: InAppWebViewInitialData(
-          data: _buildMdictDocument(context, widget.html),
-          baseUrl: WebUri('https://kotoba-kit.local/'),
-          encoding: 'utf8',
-          mimeType: 'text/html',
-        ),
-        initialSettings: InAppWebViewSettings(
-          transparentBackground: true,
-          javaScriptEnabled: true,
-          supportZoom: false,
-          useShouldOverrideUrlLoading: true,
-          verticalScrollBarEnabled: false,
-          horizontalScrollBarEnabled: false,
-          disableHorizontalScroll: true,
-        ),
-        onWebViewCreated: (controller) {
-          _controller = controller;
-          controller.addJavaScriptHandler(
-            handlerName: 'lunaSearchWord',
-            callback: (arguments) {
-              final word = arguments.isEmpty ? null : arguments.first;
-              if (word is String && word.trim().isNotEmpty) {
-                widget.onSearch(word.trim());
-              }
-            },
-          );
-          controller.addJavaScriptHandler(
-            handlerName: 'lunaResize',
-            callback: (arguments) {
-              final value = arguments.isEmpty ? null : arguments.first;
-              final height = value is num
-                  ? value.toDouble()
-                  : double.tryParse(value.toString());
-              if (height != null) {
-                _setContentHeight(height);
-              }
-            },
-          );
-        },
-        onLoadStop: (controller, url) {
-          _syncContentHeight(controller);
-        },
-        shouldOverrideUrlLoading: (controller, navigationAction) async {
-          final linkedWord = _lookupWordFromUrl(
-            navigationAction.request.url?.toString(),
-          );
-          if (linkedWord != null) {
-            widget.onSearch(linkedWord);
-          }
-          return NavigationActionPolicy.CANCEL;
-        },
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    final panel = DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest.withValues(alpha: 0.34),
+        borderRadius: BorderRadius.circular(theme.radii.lg),
+        border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
       ),
+      child: Padding(padding: EdgeInsets.all(theme.spacing.lg), child: child),
     );
+
+    if (expand) {
+      return SizedBox.expand(child: panel);
+    }
+
+    return panel;
   }
-
-  Future<void> _syncContentHeight([InAppWebViewController? controller]) async {
-    final webView = controller ?? _controller;
-    if (webView == null || !mounted) {
-      return;
-    }
-
-    final value = await webView.evaluateJavascript(
-      source: '''
-(() => {
-  const body = document.body;
-  const html = document.documentElement;
-  return Math.ceil(Math.max(
-    body ? body.scrollHeight : 0,
-    body ? body.offsetHeight : 0,
-    html ? html.clientHeight : 0,
-    html ? html.scrollHeight : 0,
-    html ? html.offsetHeight : 0
-  ));
-})()
-''',
-    );
-    final nextHeight = double.tryParse(value.toString());
-    if (nextHeight == null || !mounted) {
-      return;
-    }
-
-    _setContentHeight(nextHeight);
-  }
-
-  void _setContentHeight(double height) {
-    if (!mounted) {
-      return;
-    }
-
-    final clamped = height.clamp(_minHeight, _maxHeight);
-    if ((clamped - _height).abs() > 4) {
-      setState(() {
-        _height = clamped;
-      });
-    }
-  }
-}
-
-String? _lookupWordFromUrl(String? url) {
-  if (url == null) {
-    return null;
-  }
-
-  final decoded = Uri.decodeFull(url).trim();
-  if (decoded.isEmpty || decoded.startsWith('#')) {
-    return null;
-  }
-
-  for (final scheme in ['entry://', 'mdict://', 'bword://']) {
-    if (decoded.startsWith(scheme)) {
-      return decoded.substring(scheme.length).replaceFirst(RegExp(r'^/+'), '');
-    }
-  }
-
-  // Recognize Weblio content page links
-  final weblioMatch = RegExp(
-    r'^https?://www\.weblio\.jp/content/(.+)$',
-  ).firstMatch(decoded);
-  if (weblioMatch != null) {
-    return Uri.decodeComponent(weblioMatch.group(1)!);
-  }
-
-  // Recognize Jisho search/word links
-  final jishoMatch = RegExp(
-    r'^https?://jisho\.org/(?:search|word)/(.+)$',
-  ).firstMatch(decoded);
-  if (jishoMatch != null) {
-    final word = Uri.decodeComponent(jishoMatch.group(1)!);
-    // Jisho /word/ paths may have additional segments
-    return word.split('/').first;
-  }
-
-  if (decoded.startsWith('http://') ||
-      decoded.startsWith('https://') ||
-      decoded.startsWith('data:') ||
-      decoded.startsWith('javascript:') ||
-      decoded.startsWith('mailto:')) {
-    return null;
-  }
-
-  return decoded.replaceFirst(RegExp(r'^/+'), '');
-}
-
-String _buildMdictDocument(BuildContext context, String value) {
-  final theme = Theme.of(context);
-  final scheme = theme.colorScheme;
-  final textStyle = theme.textTheme.bodyMedium;
-  final body = _prepareMdictHtml(value);
-  final foreground = _cssColor(scheme.onSurface);
-  final muted = _cssColor(scheme.onSurfaceVariant);
-  final primary = _cssColor(scheme.primary);
-  final surface = _cssColor(scheme.surfaceContainerHighest);
-  final fontSize = textStyle?.fontSize ?? 14;
-  final fontFamily = _cssString(
-    textStyle?.fontFamily ?? 'system-ui, "Yu Gothic UI", "Meiryo", sans-serif',
-  );
-
-  return '''
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-      color: $foreground;
-      font-family: $fontFamily;
-      font-size: ${fontSize}px;
-      line-height: 1.62;
-      letter-spacing: 0;
-      overflow-wrap: anywhere;
-      word-break: normal;
-    }
-    body {
-      box-sizing: border-box;
-      width: 100%;
-      overflow-x: hidden;
-    }
-    #luna_dict_internal_view {
-      background: transparent;
-    }
-    h1, h2, h3, h4 {
-      margin: 0 0 14px;
-      color: $foreground;
-      line-height: 1.25;
-      font-weight: 700;
-    }
-    h3 {
-      font-size: 1.28rem;
-    }
-    p, div, section {
-      max-width: 100%;
-    }
-    p {
-      margin: 0 0 10px;
-    }
-    a {
-      color: $primary;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    k, .mdict-key {
-      color: $primary;
-    }
-    v, .mdict-sense-number {
-      color: $primary;
-      font-weight: 700;
-      padding-right: 0.25em;
-    }
-    .hinshi {
-      color: $muted;
-      font-weight: 600;
-    }
-    .description {
-      display: block;
-    }
-    img, video, audio {
-      max-width: 100%;
-      height: auto;
-    }
-    table {
-      max-width: 100%;
-      border-collapse: collapse;
-      background: color-mix(in srgb, $surface 32%, transparent);
-    }
-    td, th {
-      padding: 6px 8px;
-      border: 1px solid color-mix(in srgb, $muted 28%, transparent);
-      vertical-align: top;
-    }
-    br {
-      line-height: 1.62;
-    }
-    .element-hover {
-      outline: 2px dashed #ffd700 !important;
-      outline-offset: 2px !important;
-    }
-    .hightlight {
-      background-color: yellow;
-      outline: 2px solid #ffd700 !important;
-      outline-offset: 2px !important;
-    }
-    .hightlight2 {
-      background-color: yellow;
-    }
-  </style>
-  <script>
-    var lastmusicplayer = false;
-
-    function luna_post_resize() {
-      const body = document.body;
-      const html = document.documentElement;
-      const height = Math.ceil(Math.max(
-        body ? body.scrollHeight : 0,
-        body ? body.offsetHeight : 0,
-        html ? html.clientHeight : 0,
-        html ? html.scrollHeight : 0,
-        html ? html.offsetHeight : 0
-      ));
-      if (window.flutter_inappwebview) {
-        window.flutter_inappwebview.callHandler('lunaResize', height);
-      }
-    }
-
-    function safe_mdict_search_word(word) {
-      if (window.flutter_inappwebview) {
-        window.flutter_inappwebview.callHandler('lunaSearchWord', word);
-      }
-    }
-
-    function mdict_play_sound(ext, b64) {
-      const music = new Audio();
-      music.src = 'data:' + ext + ';base64,' + b64;
-      if (lastmusicplayer !== false) {
-        lastmusicplayer.pause();
-      }
-      lastmusicplayer = music;
-      music.play();
-    }
-
-    function replacelongvarsrcs(varval, varname) {
-      const type = varval[0];
-      const elements = document.querySelectorAll('[' + type + '="' + varname + '"]');
-      for (let i = 0; i < elements.length; i++) {
-        elements[i][type] = 'data:' + varval[1] + ';base64,' + varval[2];
-      }
-    }
-
-    function clear_hightlight() {
-      for (const klass of ['hightlight', 'hightlight2', 'element-hover']) {
-        while (true) {
-          const elements = document.getElementsByClassName(klass);
-          if (elements.length === 0) break;
-          elements[0].classList.remove(klass);
-        }
-      }
-    }
-
-    document.addEventListener('click', function(e) {
-      const target = e.target.closest('a');
-      if (!target) return;
-      const href = target.getAttribute('href') || '';
-      if (href.startsWith('entry://')) {
-        e.preventDefault();
-        e.stopPropagation();
-        safe_mdict_search_word(decodeURIComponent(href.substring(8)));
-      }
-    }, true);
-
-    window.addEventListener('load', function() {
-      luna_post_resize();
-      setTimeout(luna_post_resize, 80);
-      setTimeout(luna_post_resize, 320);
-    });
-
-    if (window.ResizeObserver) {
-      const observer = new ResizeObserver(luna_post_resize);
-      document.addEventListener('DOMContentLoaded', function() {
-        observer.observe(document.body);
-      });
-    }
-  </script>
-</head>
-<body>
-<div id="luna_dict_internal_view">
-$body
-</div>
-</body>
-</html>
-''';
-}
-
-String _prepareMdictHtml(String value) {
-  if (RegExp(r'<[A-Za-z][^>]*>').hasMatch(value)) {
-    return value;
-  }
-
-  return value
-      .split('\n')
-      .map((line) => const HtmlEscape().convert(line.trimRight()))
-      .join('<br>');
-}
-
-String _cssColor(Color color) {
-  final alpha = color.a;
-  final red = (color.r * 255).round();
-  final green = (color.g * 255).round();
-  final blue = (color.b * 255).round();
-
-  if (alpha >= 1) {
-    return 'rgb($red, $green, $blue)';
-  }
-
-  return 'rgba($red, $green, $blue, ${alpha.toStringAsFixed(3)})';
-}
-
-String _cssString(String value) {
-  if (value.contains(',')) {
-    return value;
-  }
-
-  return '"${value.replaceAll('"', r'\"')}"';
 }

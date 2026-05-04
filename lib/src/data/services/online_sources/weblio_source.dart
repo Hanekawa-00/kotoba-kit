@@ -57,12 +57,17 @@ class WeblioSource implements OnlineDictionarySource {
 
       _cache.put(trimmed, result);
       return result;
-    } on DioException {
-      return DictionarySearchResult(
-        query: trimmed,
-        entries: const [],
-        suggestions: const [],
-      );
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 404) {
+        final result = DictionarySearchResult(
+          query: trimmed,
+          entries: const [],
+          suggestions: const [],
+        );
+        _cache.put(trimmed, result);
+        return result;
+      }
+      throw OnlineDictionaryException(name, _messageForDio(error));
     }
   }
 
@@ -166,6 +171,18 @@ class WeblioSource implements OnlineDictionarySource {
         .replaceAll("'", r"\'")
         .replaceAll('\r', r'\r')
         .replaceAll('\n', r'\n');
+  }
+
+  String _messageForDio(DioException error) {
+    return switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.sendTimeout => 'connection timed out',
+      DioExceptionType.badResponse =>
+        'HTTP ${error.response?.statusCode ?? 'error'}',
+      DioExceptionType.connectionError => 'network connection failed',
+      _ => error.message ?? 'request failed',
+    };
   }
 
   @override

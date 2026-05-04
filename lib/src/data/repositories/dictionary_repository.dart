@@ -22,6 +22,8 @@ abstract class DictionaryRepository {
     String query,
   );
 
+  Future<List<String>> suggest(List<DictionaryConfig> configs, String query);
+
   Future<DictionarySearchResult> searchOnline(
     OnlineDictionarySource source,
     String query,
@@ -42,6 +44,10 @@ abstract class DictionaryRepository {
 
   Future<void> saveOnlineConfigs(List<OnlineDictionaryConfig> configs);
 
+  Future<List<String>> loadSearchHistory();
+
+  Future<List<String>> saveSearchHistory(List<String> history);
+
   Future<List<OnlineDictionaryConfig>> setOnlineEnabled(
     List<OnlineDictionaryConfig> configs,
     String id,
@@ -59,6 +65,8 @@ class LocalDictionaryRepository implements DictionaryRepository {
 
   static const _configsKey = 'dictionary.configs';
   static const _onlineConfigsKey = 'dictionary.onlineConfigs';
+  static const _searchHistoryKey = 'dictionary.searchHistory';
+  static const _maxSearchHistory = 30;
 
   @override
   bool get isSupported => _service.isSupported;
@@ -101,6 +109,11 @@ class LocalDictionaryRepository implements DictionaryRepository {
     String query,
   ) {
     return _service.search(configs, query);
+  }
+
+  @override
+  Future<List<String>> suggest(List<DictionaryConfig> configs, String query) {
+    return _service.suggest(configs, query);
   }
 
   @override
@@ -191,9 +204,58 @@ class LocalDictionaryRepository implements DictionaryRepository {
   }
 
   @override
+  Future<List<String>> loadSearchHistory() async {
+    final raw = await _preferences.getString(_searchHistoryKey);
+    if (raw == null || raw.isEmpty) {
+      return const [];
+    }
+
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    return decoded
+        .whereType<String>()
+        .where((item) => item.trim().isNotEmpty)
+        .take(_maxSearchHistory)
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<String>> saveSearchHistory(List<String> history) async {
+    final normalized = normalizeSearchHistory(
+      history,
+      maxItems: _maxSearchHistory,
+    );
+    final raw = jsonEncode(normalized);
+    await _preferences.setString(_searchHistoryKey, raw);
+    return normalized;
+  }
+
+  @override
   Future<void> dispose() {
     return _service.dispose();
   }
+}
+
+List<String> normalizeSearchHistory(
+  Iterable<String> history, {
+  int maxItems = 30,
+}) {
+  final normalized = <String>[];
+  final seen = <String>{};
+  for (final item in history) {
+    final trimmed = item.trim();
+    final key = trimmed.toLowerCase();
+    if (trimmed.isEmpty || seen.contains(key)) {
+      continue;
+    }
+
+    normalized.add(trimmed);
+    seen.add(key);
+    if (normalized.length >= maxItems) {
+      break;
+    }
+  }
+
+  return normalized;
 }
 
 class _SourceMeta {

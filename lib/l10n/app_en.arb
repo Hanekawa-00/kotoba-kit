@@ -2,7 +2,7 @@
   "@@locale": "en",
   "appTitle": "Kotoba Kit",
   "navHome": "Home",
-  "navDictionary": "Dictionary",
+  "navDictionary": "Lookup",
   "navSettings": "Settings",
   "navComponents": "Components",
   "navAbout": "About",
@@ -84,7 +84,7 @@
   "commandPaletteNoResults": "No matching actions",
   "commandPaletteExecuted": "Action executed",
   "commandGoHome": "Go to Home",
-  "commandGoDictionary": "Go to Dictionary",
+  "commandGoDictionary": "Go to Lookup",
   "commandGoSettings": "Go to Settings",
   "commandGoComponents": "Go to Components",
   "commandGoAbout": "Go to About",
@@ -119,7 +119,7 @@
   "stateEmptyMessage": "There is no data to show right now.",
   "stateErrorTitle": "Something went wrong",
   "stateErrorMessage": "Try again later or check the current environment configuration.",
-  "dictionaryTitle": "Dictionary",
+  "dictionaryTitle": "Lookup",
   "dictionarySubtitle": "Look up words across local dictionaries and online sources. Manage dictionaries in Settings.",
   "dictionarySettingsTitle": "Dictionaries",
   "dictionaryImport": "Import MDX",
@@ -154,6 +154,18 @@
     }
   },
   "dictionarySuggestionsTitle": "Prefix matches",
+  "dictionaryHistoryTitle": "Lookup history",
+  "dictionarySourceFailed": "{source} is temporarily unavailable: {error}",
+  "@dictionarySourceFailed": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "dictionaryImportSuccess": "Imported {name}",
   "@dictionaryImportSuccess": {
     "placeholders": {

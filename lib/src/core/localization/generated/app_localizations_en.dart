@@ -15,7 +15,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navHome => 'Home';
 
   @override
-  String get navDictionary => 'Dictionary';
+  String get navDictionary => 'Lookup';
 
   @override
   String get navSettings => 'Settings';
@@ -258,7 +258,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandGoHome => 'Go to Home';
 
   @override
-  String get commandGoDictionary => 'Go to Dictionary';
+  String get commandGoDictionary => 'Go to Lookup';
 
   @override
   String get commandGoSettings => 'Go to Settings';
@@ -369,7 +369,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Try again later or check the current environment configuration.';
 
   @override
-  String get dictionaryTitle => 'Dictionary';
+  String get dictionaryTitle => 'Lookup';
 
   @override
   String get dictionarySubtitle =>
@@ -438,6 +438,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dictionarySuggestionsTitle => 'Prefix matches';
+
+  @override
+  String get dictionaryHistoryTitle => 'Lookup history';
+
+  @override
+  String dictionarySourceFailed(String source, String error) {
+    return '$source is temporarily unavailable: $error';
+  }
 
   @override
   String dictionaryImportSuccess(String name) {

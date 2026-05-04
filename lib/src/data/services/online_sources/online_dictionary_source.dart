@@ -9,3 +9,13 @@ abstract class OnlineDictionarySource {
 
   Future<void> dispose() async {}
 }
+
+class OnlineDictionaryException implements Exception {
+  const OnlineDictionaryException(this.sourceName, this.message);
+
+  final String sourceName;
+  final String message;
+
+  @override
+  String toString() => '$sourceName: $message';
+}

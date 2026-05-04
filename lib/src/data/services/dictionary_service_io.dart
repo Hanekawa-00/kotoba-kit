@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dict_reader/dict_reader.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -16,11 +17,16 @@ class DictionaryService {
   bool get isSupported => true;
 
   Future<DictionaryImportResult?> importFromPicker() async {
-    const typeGroup = XTypeGroup(label: 'MDict', extensions: ['mdx']);
-    final selected = await openFile(acceptedTypeGroups: [typeGroup]);
+    const typeGroup = XTypeGroup(label: 'MDict', extensions: ['mdx', 'mdd']);
+    final selectedFiles = await openFiles(acceptedTypeGroups: [typeGroup]);
 
-    if (selected == null) {
+    if (selectedFiles.isEmpty) {
       return null;
+    }
+
+    final selected = selectMdxFileForImport(selectedFiles);
+    if (selected == null) {
+      throw const FormatException('Please select an .mdx dictionary file.');
     }
 
     final supportDir = await getApplicationSupportDirectory();
@@ -28,24 +34,43 @@ class DictionaryService {
     await dictionariesDir.create(recursive: true);
 
     final importedAt = DateTime.now();
-    final sourceName = p.basenameWithoutExtension(selected.name);
+    final selectedName = displayFileNameForImport(selected);
+    final sourceName = p.basenameWithoutExtension(selectedName);
     final id = _safeSegment(
       '${sourceName}_${importedAt.millisecondsSinceEpoch}',
     );
     final targetDir = Directory(p.join(dictionariesDir.path, id));
     await targetDir.create(recursive: true);
 
-    final mdxPath = p.join(targetDir.path, selected.name);
+    final mdxFileName = ensureFileExtensionForImport(selectedName, '.mdx');
+    final mdxPath = p.join(targetDir.path, mdxFileName);
     await selected.saveTo(mdxPath);
 
-    String? mddPath;
-    final sourcePath = selected.path;
-    if (sourcePath.isNotEmpty) {
-      final siblingMdd = File(p.setExtension(sourcePath, '.mdd'));
-      if (await siblingMdd.exists()) {
-        mddPath = p.join(targetDir.path, p.basename(siblingMdd.path));
-        await siblingMdd.copy(mddPath);
+    final mddPaths = <String>[];
+    final copiedMddNames = <String>{};
+    for (final selectedMdd in selectedFiles.where(
+      (file) => _selectedFileExtension(file) == '.mdd',
+    )) {
+      final mddName = ensureFileExtensionForImport(
+        displayFileNameForImport(selectedMdd),
+        '.mdd',
+      );
+      final targetPath = p.join(targetDir.path, mddName);
+      await selectedMdd.saveTo(targetPath);
+      mddPaths.add(targetPath);
+      copiedMddNames.add(mddName.toLowerCase());
+    }
+
+    for (final siblingMdd in await _siblingMddFiles(selected.path)) {
+      final name = p.basename(siblingMdd.path);
+      if (copiedMddNames.contains(name.toLowerCase())) {
+        continue;
       }
+
+      final targetPath = p.join(targetDir.path, name);
+      await siblingMdd.copy(targetPath);
+      mddPaths.add(targetPath);
+      copiedMddNames.add(name.toLowerCase());
     }
 
     final reader = DictReader(mdxPath);
@@ -56,7 +81,7 @@ class DictionaryService {
         id: id,
         name: title == null || title.isEmpty ? sourceName : title,
         mdxPath: mdxPath,
-        mddPath: mddPath,
+        mddPaths: mddPaths,
         importedAt: importedAt,
         enabled: true,
         entryCount: reader.numEntries,
@@ -64,7 +89,10 @@ class DictionaryService {
 
       _readers[mdxPath] = reader;
 
-      return DictionaryImportResult(config: config, copiedMdd: mddPath != null);
+      return DictionaryImportResult(
+        config: config,
+        copiedMdd: mddPaths.isNotEmpty,
+      );
     } catch (_) {
       await reader.close();
       await targetDir.delete(recursive: true);
@@ -115,13 +143,38 @@ class DictionaryService {
     );
   }
 
+  Future<List<String>> suggest(
+    List<DictionaryConfig> dictionaries,
+    String query,
+  ) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return const [];
+    }
+
+    final suggestions = <String>{};
+    for (final dictionary in dictionaries.where((item) => item.enabled)) {
+      final reader = await _readerFor(dictionary);
+      suggestions.addAll(
+        reader
+            .search(normalizedQuery, limit: 8)
+            .where((word) => word != normalizedQuery),
+      );
+      if (suggestions.length >= 12) {
+        break;
+      }
+    }
+
+    return suggestions.take(12).toList(growable: false);
+  }
+
   Future<void> deleteDictionaryFiles(DictionaryConfig config) async {
     final reader = _readers.remove(config.mdxPath);
     await reader?.close();
-    final mddReader = config.mddPath == null
-        ? null
-        : _mddReaders.remove(config.mddPath);
-    await mddReader?.close();
+    for (final mddPath in config.mddPaths) {
+      final mddReader = _mddReaders.remove(mddPath);
+      await mddReader?.close();
+    }
 
     final directory = Directory(p.dirname(config.mdxPath));
     if (await directory.exists()) {
@@ -356,44 +409,81 @@ class DictionaryService {
     DictionaryConfig dictionary,
     String url,
   ) async {
-    final reader = await _mddReaderFor(dictionary);
-    if (reader == null) {
+    final readers = await _mddReadersFor(dictionary);
+    if (readers.isEmpty) {
       return null;
     }
 
     final normalized = _normalizeMddKey(url);
-    for (final candidate in {
-      normalized,
-      normalized.replaceAll('/', '\\'),
-      normalized.replaceAll('\\', '/'),
-      normalized.startsWith('/') ? normalized.substring(1) : '/$normalized',
-      normalized.startsWith('\\') ? normalized.substring(1) : '\\$normalized',
-    }) {
-      final matches = await reader.locateAll(candidate);
-      if (matches.isNotEmpty) {
-        return reader.readOneMdd(matches.first);
+    for (final reader in readers) {
+      for (final candidate in {
+        normalized,
+        normalized.replaceAll('/', '\\'),
+        normalized.replaceAll('\\', '/'),
+        normalized.startsWith('/') ? normalized.substring(1) : '/$normalized',
+        normalized.startsWith('\\') ? normalized.substring(1) : '\\$normalized',
+      }) {
+        final matches = await reader.locateAll(candidate);
+        if (matches.isNotEmpty) {
+          return reader.readOneMdd(matches.first);
+        }
       }
     }
 
     return null;
   }
 
-  Future<DictReader?> _mddReaderFor(DictionaryConfig dictionary) async {
-    final mddPath = dictionary.mddPath;
-    if (mddPath == null || mddPath.isEmpty || !await File(mddPath).exists()) {
-      return null;
+  Future<List<DictReader>> _mddReadersFor(DictionaryConfig dictionary) async {
+    final readers = <DictReader>[];
+    for (final mddPath in dictionary.mddPaths) {
+      if (mddPath.isEmpty || !await File(mddPath).exists()) {
+        continue;
+      }
+
+      final cached = _mddReaders[mddPath];
+      if (cached != null) {
+        readers.add(cached);
+        continue;
+      }
+
+      final reader = DictReader(mddPath);
+      await reader.initDict();
+      _mddReaders[mddPath] = reader;
+      readers.add(reader);
     }
 
-    final cached = _mddReaders[mddPath];
-    if (cached != null) {
-      return cached;
-    }
-
-    final reader = DictReader(mddPath);
-    await reader.initDict();
-    _mddReaders[mddPath] = reader;
-    return reader;
+    return readers;
   }
+
+  Future<List<File>> _siblingMddFiles(String mdxSourcePath) async {
+    if (mdxSourcePath.isEmpty) {
+      return const [];
+    }
+
+    final mdxFile = File(mdxSourcePath);
+    final parent = mdxFile.parent;
+    if (!await parent.exists()) {
+      return const [];
+    }
+
+    final baseName = p.basenameWithoutExtension(mdxSourcePath);
+    final pattern = RegExp(
+      '^${RegExp.escape(baseName)}(?:\\.\\d+)?\\.mdd\$',
+      caseSensitive: false,
+    );
+    final files = <File>[];
+    await for (final entity in parent.list(followLinks: false)) {
+      if (entity is File && pattern.hasMatch(p.basename(entity.path))) {
+        files.add(entity);
+      }
+    }
+
+    files.sort((a, b) => p.basename(a.path).compareTo(p.basename(b.path)));
+    return files;
+  }
+
+  String _selectedFileExtension(XFile file) =>
+      selectedFileExtensionForImport(file);
 
   String _cleanRecord(String value) {
     return value.replaceAll('\u0000', '').trim();
@@ -479,4 +569,50 @@ class DictionaryService {
         .replaceAll('\r', r'\r')
         .replaceAll('\n', r'\n');
   }
+}
+
+@visibleForTesting
+XFile? selectMdxFileForImport(List<XFile> selectedFiles) {
+  for (final file in selectedFiles) {
+    if (selectedFileExtensionForImport(file) == '.mdx') {
+      return file;
+    }
+  }
+
+  if (selectedFiles.length == 1 &&
+      selectedFileExtensionForImport(selectedFiles.single) != '.mdd') {
+    return selectedFiles.single;
+  }
+
+  return null;
+}
+
+@visibleForTesting
+String selectedFileExtensionForImport(XFile file) {
+  final pathExtension = p.extension(file.path).toLowerCase();
+  if (pathExtension.isNotEmpty) {
+    return pathExtension;
+  }
+
+  return p.extension(file.name).toLowerCase();
+}
+
+@visibleForTesting
+String displayFileNameForImport(XFile file) {
+  final name = file.name.trim();
+  if (name.isNotEmpty) {
+    return name;
+  }
+
+  final pathName = p.basename(file.path).trim();
+  return pathName.isEmpty ? 'dictionary' : pathName;
+}
+
+@visibleForTesting
+String ensureFileExtensionForImport(String fileName, String extension) {
+  if (p.extension(fileName).isNotEmpty) {
+    return fileName;
+  }
+
+  return '$fileName$extension';
 }

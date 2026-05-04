@@ -15,7 +15,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get navHome => '首页';
 
   @override
-  String get navDictionary => '字典';
+  String get navDictionary => '查词';
 
   @override
   String get navSettings => '设置';
@@ -243,7 +243,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commandGoHome => '前往首页';
 
   @override
-  String get commandGoDictionary => '前往字典';
+  String get commandGoDictionary => '前往查词';
 
   @override
   String get commandGoSettings => '前往设置';
@@ -349,7 +349,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stateErrorMessage => '请稍后重试，或检查当前环境配置。';
 
   @override
-  String get dictionaryTitle => '字典';
+  String get dictionaryTitle => '查词';
 
   @override
   String get dictionarySubtitle => '跨本地词典和在线源查词。在设置中管理词典。';
@@ -414,6 +414,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get dictionarySuggestionsTitle => '前缀匹配';
+
+  @override
+  String get dictionaryHistoryTitle => '检索历史';
+
+  @override
+  String dictionarySourceFailed(String source, String error) {
+    return '$source 暂时不可用：$error';
+  }
 
   @override
   String dictionaryImportSuccess(String name) {

@@ -1,7 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:html/dom.dart' as dom;
-import 'package:html/parser.dart' as parser;
-
 import '../../../data/models/dictionary_entry.dart';
 import 'lru_cache.dart';
 import 'online_dictionary_source.dart';
@@ -17,11 +14,8 @@ class JishoSource implements OnlineDictionarySource {
       BaseOptions(
         connectTimeout: const Duration(seconds: 8),
         receiveTimeout: const Duration(seconds: 12),
-        responseType: ResponseType.plain,
-        headers: {
-          'User-Agent': 'KotobaKit/1.0',
-          'Accept': 'text/html,application/xhtml+xml',
-        },
+        responseType: ResponseType.json,
+        headers: {'User-Agent': 'KotobaKit/1.0', 'Accept': 'application/json'},
       ),
     );
   }
@@ -44,22 +38,11 @@ class JishoSource implements OnlineDictionarySource {
     if (cached != null) return cached;
 
     try {
-      final encoded = Uri.encodeComponent(trimmed);
-      final response = await _dio.get('$baseUrl/search/$encoded');
-      final document = parser.parse(response.data as String);
-
-      // Check for no matches
-      if (document.querySelector('#no-matches') != null) {
-        final result = DictionarySearchResult(
-          query: trimmed,
-          entries: const [],
-          suggestions: const [],
-        );
-        _cache.put(trimmed, result);
-        return result;
-      }
-
-      final entries = _extractEntries(document, trimmed);
+      final response = await _dio.get<Map<String, dynamic>>(
+        '$baseUrl/api/v1/search/words',
+        queryParameters: {'keyword': trimmed},
+      );
+      final entries = parseJishoSearchResponse(response.data, trimmed, name);
       final result = DictionarySearchResult(
         query: trimmed,
         entries: entries,
@@ -68,140 +51,23 @@ class JishoSource implements OnlineDictionarySource {
 
       _cache.put(trimmed, result);
       return result;
-    } on DioException {
-      return DictionarySearchResult(
-        query: trimmed,
-        entries: const [],
-        suggestions: const [],
-      );
+    } on DioException catch (error) {
+      throw OnlineDictionaryException(name, _messageForDio(error));
+    } on FormatException catch (error) {
+      throw OnlineDictionaryException(name, error.message);
     }
   }
 
-  List<DictionaryEntry> _extractEntries(dom.Document document, String query) {
-    final mainResults = document.querySelector('#main_results');
-    if (mainResults == null) return const [];
-
-    // Clean up unwanted content before extracting
-    _cleanContent(mainResults);
-
-    // Each result entry in Jisho is typically a row in the results
-    // Split by primary result blocks
-    final resultBlocks = mainResults.querySelectorAll(
-      'div.concept_light.clearfix',
-    );
-
-    if (resultBlocks.isEmpty) {
-      // Fallback: return entire main_results as one entry
-      final cleaned = mainResults.innerHtml;
-      if (cleaned.trim().isEmpty) return const [];
-      return [
-        DictionaryEntry(
-          word: query,
-          definitionHtml: _wrapHtml(cleaned),
-          sourceDictionary: name,
-        ),
-      ];
-    }
-
-    final entries = <DictionaryEntry>[];
-    for (final block in resultBlocks) {
-      // Extract the Japanese word for this entry
-      final kanjiEl = block.querySelector(
-        '.concept_light-representation .text',
-      );
-      final word = kanjiEl?.text.trim() ?? query;
-
-      final cleaned = block.innerHtml;
-      if (cleaned.trim().isEmpty) continue;
-
-      entries.add(
-        DictionaryEntry(
-          word: word,
-          definitionHtml: _wrapHtml(cleaned),
-          sourceDictionary: name,
-        ),
-      );
-    }
-
-    return entries;
-  }
-
-  void _cleanContent(dom.Element container) {
-    // Remove audio links
-    container.querySelectorAll('a.concept_audio').forEach((e) => e.remove());
-    container
-        .querySelectorAll('a.concept_light-status_link')
-        .forEach((e) => e.remove());
-
-    // Remove login prompts
-    container.querySelectorAll('a.signin').forEach((e) => e.remove());
-
-    // Remove "Discussions" heading
-    final h3s = container.querySelectorAll('h3');
-    for (final h3 in h3s) {
-      if (h3.text.contains('Discussions')) {
-        h3.remove();
-        // Also remove following sibling discussion section if present
-        var next = h3.nextElementSibling;
-        while (next != null &&
-            (next.classes.contains('discussions') ||
-                next.classes.contains('discussion'))) {
-          final toRemove = next;
-          next = next.nextElementSibling;
-          toRemove.remove();
-        }
-      }
-    }
-
-    // Remove other_dictionaries section
-    container.querySelector('#other_dictionaries')?.remove();
-
-    // Fix protocol-relative URLs
-    container.querySelectorAll('[src]').forEach((el) {
-      final src = el.attributes['src'] ?? '';
-      if (src.startsWith('//')) {
-        el.attributes['src'] = 'https:$src';
-      }
-    });
-
-    container.querySelectorAll('a[href]').forEach((a) {
-      final href = a.attributes['href'] ?? '';
-      if (href.startsWith('//')) {
-        a.attributes['href'] = 'https:$href';
-      }
-      // Rewrite Jisho search links
-      if (href.startsWith('/search/') || href.startsWith('/word/')) {
-        final parts = href.split('/');
-        if (parts.length >= 3) {
-          final word = Uri.decodeComponent(parts.last);
-          a.attributes['href'] =
-              "javascript:safe_mdict_search_word('${_escapeJs(word)}')";
-        }
-      }
-    });
-
-    // Remove script tags
-    container.querySelectorAll('script').forEach((e) => e.remove());
-  }
-
-  String _wrapHtml(String content) {
-    return '<style>'
-        'div.lunajisho { font-family: "Hiragino Sans", "Yu Gothic", sans-serif; }'
-        'div.lunajisho .concept_light { padding: 8px 0; border-bottom: 1px solid var(--outline-variant); }'
-        'div.lunajisho .concept_light-representation { font-size: 1.2em; font-weight: 600; }'
-        'div.lunajisho .concept_light-meanings { padding: 4px 0; }'
-        'div.lunajisho .meaning-tags { font-size: 0.85em; opacity: 0.7; }'
-        'div.lunajisho a { color: var(--primary); }'
-        '</style>'
-        '<div class="lunajisho">$content</div>';
-  }
-
-  String _escapeJs(String value) {
-    return value
-        .replaceAll('\\', r'\\')
-        .replaceAll("'", r"\'")
-        .replaceAll('\r', r'\r')
-        .replaceAll('\n', r'\n');
+  String _messageForDio(DioException error) {
+    return switch (error.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.receiveTimeout ||
+      DioExceptionType.sendTimeout => 'connection timed out',
+      DioExceptionType.badResponse =>
+        'HTTP ${error.response?.statusCode ?? 'error'}',
+      DioExceptionType.connectionError => 'network connection failed',
+      _ => error.message ?? 'request failed',
+    };
   }
 
   @override
@@ -209,4 +75,152 @@ class JishoSource implements OnlineDictionarySource {
     _cache.clear();
     _dio.close();
   }
+}
+
+List<DictionaryEntry> parseJishoSearchResponse(
+  Map<String, dynamic>? data,
+  String query,
+  String sourceName,
+) {
+  final rawEntries = data?['data'];
+  if (rawEntries is! List) {
+    throw const FormatException('Unexpected Jisho response.');
+  }
+
+  final entries = <DictionaryEntry>[];
+  for (final rawEntry in rawEntries.take(8)) {
+    if (rawEntry is! Map<String, dynamic>) {
+      continue;
+    }
+
+    final word = _primaryWord(rawEntry, query);
+    final html = _entryHtml(rawEntry);
+    if (html.trim().isEmpty) {
+      continue;
+    }
+
+    entries.add(
+      DictionaryEntry(
+        word: word,
+        definitionHtml: _wrapHtml(html),
+        sourceDictionary: sourceName,
+      ),
+    );
+  }
+
+  return entries;
+}
+
+String _primaryWord(Map<String, dynamic> entry, String fallback) {
+  final japanese = entry['japanese'];
+  if (japanese is! List || japanese.isEmpty) {
+    return fallback;
+  }
+
+  for (final raw in japanese) {
+    if (raw is Map<String, dynamic>) {
+      final word = raw['word']?.toString().trim();
+      if (word != null && word.isNotEmpty) {
+        return word;
+      }
+    }
+  }
+
+  for (final raw in japanese) {
+    if (raw is Map<String, dynamic>) {
+      final reading = raw['reading']?.toString().trim();
+      if (reading != null && reading.isNotEmpty) {
+        return reading;
+      }
+    }
+  }
+
+  return fallback;
+}
+
+String _entryHtml(Map<String, dynamic> entry) {
+  final parts = <String>[];
+  final japanese = entry['japanese'];
+  if (japanese is List && japanese.isNotEmpty) {
+    parts.add('<div class="jisho-forms">');
+    for (final raw in japanese) {
+      if (raw is! Map<String, dynamic>) {
+        continue;
+      }
+      final word = raw['word']?.toString();
+      final reading = raw['reading']?.toString();
+      if ((word == null || word.isEmpty) &&
+          (reading == null || reading.isEmpty)) {
+        continue;
+      }
+      parts.add('<div class="jisho-form">');
+      if (word != null && word.isNotEmpty) {
+        parts.add('<span class="jisho-word">${_escapeHtml(word)}</span>');
+      }
+      if (reading != null && reading.isNotEmpty && reading != word) {
+        parts.add('<span class="jisho-reading">${_escapeHtml(reading)}</span>');
+      }
+      parts.add('</div>');
+    }
+    parts.add('</div>');
+  }
+
+  final senses = entry['senses'];
+  if (senses is List && senses.isNotEmpty) {
+    parts.add('<ol class="jisho-senses">');
+    for (final rawSense in senses) {
+      if (rawSense is! Map<String, dynamic>) {
+        continue;
+      }
+      final tags = _stringList(rawSense['parts_of_speech']);
+      final definitions = _stringList(rawSense['english_definitions']);
+      if (definitions.isEmpty) {
+        continue;
+      }
+      parts.add('<li>');
+      if (tags.isNotEmpty) {
+        parts.add(
+          '<div class="jisho-tags">${_escapeHtml(tags.join(', '))}</div>',
+        );
+      }
+      parts.add(_escapeHtml(definitions.join('; ')));
+      parts.add('</li>');
+    }
+    parts.add('</ol>');
+  }
+
+  return parts.join();
+}
+
+List<String> _stringList(Object? value) {
+  if (value is! List) {
+    return const [];
+  }
+
+  return value
+      .map((item) => item.toString().trim())
+      .where((item) => item.isNotEmpty)
+      .toList(growable: false);
+}
+
+String _wrapHtml(String content) {
+  return '<style>'
+      'div.lunajisho { font-family: "Hiragino Sans", "Yu Gothic", sans-serif; }'
+      'div.lunajisho .jisho-form { display: flex; gap: 0.75em; align-items: baseline; margin: 0 0 0.35em; }'
+      'div.lunajisho .jisho-word { font-size: 1.25em; font-weight: 700; }'
+      'div.lunajisho .jisho-reading { color: var(--on-surface-variant); }'
+      'div.lunajisho .jisho-senses { margin: 0.75em 0 0; padding-left: 1.5em; }'
+      'div.lunajisho .jisho-tags { font-size: 0.85em; color: var(--on-surface-variant); margin-bottom: 0.2em; }'
+      'div.lunajisho a { color: var(--primary); }'
+      '</style>'
+      '<div class="lunajisho">$content</div>';
+}
+
+String _escapeHtml(String value) {
+  return value
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
 }

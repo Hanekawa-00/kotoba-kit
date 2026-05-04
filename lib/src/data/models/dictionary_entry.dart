@@ -27,11 +27,13 @@ class DictionarySearchResult {
     required this.query,
     required this.entries,
     required this.suggestions,
+    this.sourceErrors = const {},
   });
 
   final String query;
   final List<DictionaryEntry> entries;
   final List<String> suggestions;
+  final Map<String, String> sourceErrors;
 
   static const empty = DictionarySearchResult(
     query: '',
@@ -46,6 +48,8 @@ class DictionarySearchResult {
     }
     return grouped;
   }
+
+  bool get hasSourceErrors => sourceErrors.isNotEmpty;
 }
 
 @immutable

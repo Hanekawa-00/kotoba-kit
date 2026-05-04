@@ -14,12 +14,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
   testWidgets('renders the dictionary workspace first', (tester) async {
+    _setDesktopViewport(tester);
+
     await tester.pumpWidget(_buildTestApp());
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Dictionary'), findsWidgets);
-    expect(find.text('Lookup'), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('lookup-desktop-side-panel')),
+      findsOneWidget,
+    );
+    expect(find.text('Word'), findsOneWidget);
   });
 
   testWidgets('mobile top-level pages keep bottom navigation', (tester) async {
@@ -31,7 +36,99 @@ void main() {
 
     expect(find.byType(AppBar), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.text('Dictionary'), findsWidgets);
+    expect(find.text('Lookup'), findsWidgets);
+  });
+
+  testWidgets('mobile lookup keeps search fixed above visible results', (
+    tester,
+  ) async {
+    _setMobileViewport(tester);
+
+    await tester.pumpWidget(_buildTestApp());
+
+    await tester.pumpAndSettle();
+
+    final searchBar = find.byKey(const ValueKey('lookup-mobile-search-bar'));
+    final results = find.byKey(
+      const PageStorageKey<String>('lookup-mobile-results'),
+    );
+
+    expect(searchBar, findsOneWidget);
+    expect(results, findsOneWidget);
+    expect(
+      tester.getBottomLeft(searchBar).dy,
+      lessThanOrEqualTo(tester.getTopLeft(results).dy),
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mobile lookup search assist scrolls and can be dismissed', (
+    tester,
+  ) async {
+    _setMobileViewport(tester);
+
+    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final assist = find.byKey(const ValueKey('lookup-search-assist-list'));
+    final assistScroll = find.byKey(
+      const ValueKey('lookup-search-assist-scroll'),
+    );
+    expect(assist, findsOneWidget);
+    expect(assistScroll, findsOneWidget);
+    expect(tester.getSize(assist).height, lessThanOrEqualTo(236));
+
+    await tester.fling(assistScroll, const Offset(0, -120), 500);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const PageStorageKey<String>('lookup-mobile-results')),
+    );
+    await tester.pumpAndSettle();
+
+    expect(assist, findsNothing);
+  });
+
+  testWidgets('compact mobile lookup avoids bottom overflow with assist open', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 560);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final assist = find.byKey(const ValueKey('lookup-search-assist-list'));
+    expect(assist, findsOneWidget);
+    expect(tester.getSize(assist).height, lessThanOrEqualTo(172));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('desktop lookup uses side panel and reading column', (
+    tester,
+  ) async {
+    _setDesktopViewport(tester);
+
+    await tester.pumpWidget(_buildTestApp());
+
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('lookup-desktop-side-panel')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const PageStorageKey<String>('lookup-desktop-results')),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('mobile settings subpage hides bottom navigation', (
@@ -265,6 +362,14 @@ class _FakeDictionaryRepository implements DictionaryRepository {
   }
 
   @override
+  Future<List<String>> suggest(
+    List<DictionaryConfig> configs,
+    String query,
+  ) async {
+    return const [];
+  }
+
+  @override
   Future<List<DictionaryConfig>> setEnabled(
     List<DictionaryConfig> configs,
     String id,
@@ -287,7 +392,9 @@ class _FakeDictionaryRepository implements DictionaryRepository {
   }
 
   @override
-  Future<List<OnlineDictionaryConfig>> loadOnlineConfigs() async => const [];
+  Future<List<OnlineDictionaryConfig>> loadOnlineConfigs() async => const [
+    OnlineDictionaryConfig(id: 'jisho', name: 'Jisho', enabled: true),
+  ];
 
   @override
   Future<void> saveOnlineConfigs(List<OnlineDictionaryConfig> configs) async {}
@@ -299,5 +406,29 @@ class _FakeDictionaryRepository implements DictionaryRepository {
     bool enabled,
   ) async {
     return configs;
+  }
+
+  @override
+  Future<List<String>> loadSearchHistory() async => const [
+    '食べる',
+    '食べ物',
+    '食堂',
+    '見る',
+    '見える',
+    '行く',
+    '来る',
+    'する',
+    '読む',
+    '書く',
+    '話す',
+    '聞く',
+    '飲む',
+    '買う',
+    '帰る',
+  ];
+
+  @override
+  Future<List<String>> saveSearchHistory(List<String> history) async {
+    return history;
   }
 }
