@@ -335,8 +335,10 @@ $grammarInstruction
 
 $_fullOutline
 
+重要：必须将正确选项随机放在任意位置（0-3），不要总是放在第一个。
 你必须只返回一个JSON对象，不要包含markdown代码块、注释或其他文本。
-格式：{"chineseSentence": "...", "options": ["...", "..."], "correctOptionIndex": 0, "explanation": "..."}''';
+格式：{"chineseSentence": "...", "options": ["...", "..."], "correctOptionIndex": 2, "explanation": "..."}
+注意：示例中correctOptionIndex=2，但你的正确答案应该随机选择索引位置。''';
   }
 
   static const _sentenceSystemPrompt =

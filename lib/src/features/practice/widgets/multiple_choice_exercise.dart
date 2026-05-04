@@ -142,7 +142,7 @@ class MultipleChoiceExercise extends ConsumerWidget {
                             color: bgColor ?? scheme.surfaceContainerLow,
                             borderRadius: BorderRadius.circular(theme.radii.lg),
                             child: InkWell(
-                              onTap: selected == null && !submitted
+                              onTap: !submitted
                                   ? () => controller.selectOption(index)
                                   : null,
                               borderRadius: BorderRadius.circular(
