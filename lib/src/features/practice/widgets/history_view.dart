@@ -60,11 +60,13 @@ class HistoryView extends ConsumerWidget {
                   )
                 : ListView.separated(
                     padding: EdgeInsets.fromLTRB(
-                      spacing.lg, spacing.md, spacing.lg, spacing.xxl,
+                      spacing.lg,
+                      spacing.md,
+                      spacing.lg,
+                      spacing.xxl,
                     ),
                     itemCount: items.length,
-                    separatorBuilder: (_, _) =>
-                        SizedBox(height: spacing.sm),
+                    separatorBuilder: (_, _) => SizedBox(height: spacing.sm),
                     itemBuilder: (context, index) {
                       final item = items[index];
                       return _HistoryCard(item: item);
@@ -99,8 +101,8 @@ class _HistoryCardState extends State<_HistoryCard> {
     final scoreColor = item.score >= 80
         ? Colors.green
         : item.score >= 60
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
 
     final date = DateTime.fromMillisecondsSinceEpoch(item.timestamp);
     final dateStr =

@@ -11,14 +11,18 @@ class GeminiProvider implements LlmProvider {
     required String model,
     String baseUrl = 'https://generativelanguage.googleapis.com',
     Dio? dio,
-  })  : _apiKey = apiKey,
-        _model = model,
-        _baseUrl = baseUrl,
-        _dio = dio ?? Dio(BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          contentType: Headers.jsonContentType,
-        ));
+  }) : _apiKey = apiKey,
+       _model = model,
+       _baseUrl = baseUrl,
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 120),
+               contentType: Headers.jsonContentType,
+             ),
+           );
 
   final String _apiKey;
   final String _model;
@@ -34,7 +38,11 @@ class GeminiProvider implements LlmProvider {
     String? systemPrompt,
     Map<String, dynamic>? jsonSchema,
   }) async {
-    final body = _buildBody(prompt, systemPrompt: systemPrompt, jsonSchema: jsonSchema);
+    final body = _buildBody(
+      prompt,
+      systemPrompt: systemPrompt,
+      jsonSchema: jsonSchema,
+    );
     final response = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/v1beta/models/$_model:generateContent?key=$_apiKey',
       data: body,
@@ -137,12 +145,10 @@ class GeminiProvider implements LlmProvider {
       );
       final models = response.data?['models'] as List?;
       if (models == null) return [];
-      return models
-          .map((m) {
-            final name = (m as Map<String, dynamic>)['name'] as String? ?? '';
-            return name.replaceFirst('models/', '');
-          })
-          .toList();
+      return models.map((m) {
+        final name = (m as Map<String, dynamic>)['name'] as String? ?? '';
+        return name.replaceFirst('models/', '');
+      }).toList();
     } catch (_) {
       return [];
     }

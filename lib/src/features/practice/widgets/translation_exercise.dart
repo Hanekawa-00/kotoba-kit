@@ -61,7 +61,10 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: EdgeInsets.fromLTRB(
-                      spacing.lg, spacing.lg, spacing.lg, spacing.md,
+                      spacing.lg,
+                      spacing.lg,
+                      spacing.lg,
+                      spacing.md,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,8 +81,9 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                                 l10n.practiceModeTranslation,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
@@ -97,8 +101,9 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                           width: double.infinity,
                           padding: EdgeInsets.all(spacing.lg),
                           decoration: BoxDecoration(
-                            color: scheme.primaryContainer
-                                .withValues(alpha: 0.32),
+                            color: scheme.primaryContainer.withValues(
+                              alpha: 0.32,
+                            ),
                             borderRadius: BorderRadius.circular(theme.radii.lg),
                             border: Border.all(color: scheme.primaryContainer),
                           ),
@@ -115,16 +120,20 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                           Container(
                             padding: EdgeInsets.all(spacing.md),
                             decoration: BoxDecoration(
-                              color: scheme.tertiaryContainer
-                                  .withValues(alpha: 0.4),
-                              borderRadius:
-                                  BorderRadius.circular(theme.radii.md),
+                              color: scheme.tertiaryContainer.withValues(
+                                alpha: 0.4,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                theme.radii.md,
+                              ),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.lightbulb_outline,
-                                    color: scheme.onTertiaryContainer,
-                                    size: 18),
+                                Icon(
+                                  Icons.lightbulb_outline,
+                                  color: scheme.onTertiaryContainer,
+                                  size: 18,
+                                ),
                                 SizedBox(width: spacing.sm),
                                 Expanded(
                                   child: Text(
@@ -157,8 +166,9 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                           decoration: InputDecoration(
                             hintText: l10n.practiceJapaneseInputHint,
                             border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(theme.radii.md),
+                              borderRadius: BorderRadius.circular(
+                                theme.radii.md,
+                              ),
                             ),
                           ),
                           onChanged: controller.updateUserInput,
@@ -178,7 +188,8 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                     width: double.infinity,
                     height: 52,
                     child: FilledButton.icon(
-                      onPressed: _controller.text.trim().isNotEmpty &&
+                      onPressed:
+                          _controller.text.trim().isNotEmpty &&
                               !state.isEvaluating
                           ? () {
                               _focusNode.unfocus();
@@ -189,8 +200,7 @@ class _TranslationExerciseState extends ConsumerState<TranslationExercise> {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.send_rounded),
                       label: Text(

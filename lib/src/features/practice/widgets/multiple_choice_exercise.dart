@@ -44,7 +44,10 @@ class MultipleChoiceExercise extends ConsumerWidget {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.fromLTRB(
-                    spacing.lg, spacing.lg, spacing.lg, spacing.md,
+                    spacing.lg,
+                    spacing.lg,
+                    spacing.lg,
+                    spacing.md,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,10 +76,10 @@ class MultipleChoiceExercise extends ConsumerWidget {
                         width: double.infinity,
                         padding: EdgeInsets.all(spacing.lg),
                         decoration: BoxDecoration(
-                          color: scheme.primaryContainer
-                              .withValues(alpha: 0.32),
-                          borderRadius:
-                              BorderRadius.circular(theme.radii.lg),
+                          color: scheme.primaryContainer.withValues(
+                            alpha: 0.32,
+                          ),
+                          borderRadius: BorderRadius.circular(theme.radii.lg),
                           border: Border.all(color: scheme.primaryContainer),
                         ),
                         child: Text(
@@ -91,22 +94,23 @@ class MultipleChoiceExercise extends ConsumerWidget {
                         Container(
                           padding: EdgeInsets.all(spacing.md),
                           decoration: BoxDecoration(
-                            color: scheme.tertiaryContainer
-                                .withValues(alpha: 0.4),
-                            borderRadius:
-                                BorderRadius.circular(theme.radii.md),
+                            color: scheme.tertiaryContainer.withValues(
+                              alpha: 0.4,
+                            ),
+                            borderRadius: BorderRadius.circular(theme.radii.md),
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.lightbulb_outline,
-                                  color: scheme.onTertiaryContainer,
-                                  size: 18),
+                              Icon(
+                                Icons.lightbulb_outline,
+                                color: scheme.onTertiaryContainer,
+                                size: 18,
+                              ),
                               SizedBox(width: spacing.sm),
                               Expanded(
                                 child: Text(
                                   '${grammarPoint.grammarPoint}: ${grammarPoint.meaningCn}',
-                                  style: theme.textTheme.bodyMedium
-                                      ?.copyWith(
+                                  style: theme.textTheme.bodyMedium?.copyWith(
                                     color: scheme.onTertiaryContainer,
                                   ),
                                 ),
@@ -122,29 +126,28 @@ class MultipleChoiceExercise extends ConsumerWidget {
                         Color? bgColor;
                         if (submitted) {
                           if (index == task.correctOptionIndex) {
-                            bgColor =
-                                Colors.green.withValues(alpha: 0.18);
+                            bgColor = Colors.green.withValues(alpha: 0.18);
                           } else if (isSelected) {
-                            bgColor =
-                                Colors.red.withValues(alpha: 0.18);
+                            bgColor = Colors.red.withValues(alpha: 0.18);
                           }
                         } else if (isSelected) {
-                          bgColor = scheme.primaryContainer
-                              .withValues(alpha: 0.42);
+                          bgColor = scheme.primaryContainer.withValues(
+                            alpha: 0.42,
+                          );
                         }
 
                         return Padding(
                           padding: EdgeInsets.only(bottom: spacing.sm),
                           child: Material(
                             color: bgColor ?? scheme.surfaceContainerLow,
-                            borderRadius:
-                                BorderRadius.circular(theme.radii.lg),
+                            borderRadius: BorderRadius.circular(theme.radii.lg),
                             child: InkWell(
                               onTap: selected == null && !submitted
                                   ? () => controller.selectOption(index)
                                   : null,
-                              borderRadius:
-                                  BorderRadius.circular(theme.radii.lg),
+                              borderRadius: BorderRadius.circular(
+                                theme.radii.lg,
+                              ),
                               child: Padding(
                                 padding: EdgeInsets.all(spacing.md),
                                 child: Row(
@@ -231,8 +234,7 @@ class MultipleChoiceExercise extends ConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () => controller.submitChoice(),
                       icon: const Icon(Icons.arrow_forward_rounded),
-                      label: Text(
-                          l10n.practiceMultipleChoiceViewExplanation),
+                      label: Text(l10n.practiceMultipleChoiceViewExplanation),
                     ),
                   ),
                 ),

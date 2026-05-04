@@ -20,7 +20,10 @@ class GrammarRepository {
     return _cache!;
   }
 
-  List<GrammarPoint> filterByLevel(List<GrammarPoint> points, Difficulty level) {
+  List<GrammarPoint> filterByLevel(
+    List<GrammarPoint> points,
+    Difficulty level,
+  ) {
     return points.where((p) => p.level == level).toList(growable: false);
   }
 

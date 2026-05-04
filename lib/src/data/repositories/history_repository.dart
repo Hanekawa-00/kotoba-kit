@@ -16,7 +16,9 @@ class HistoryRepository {
   }
 
   List<HistoryItem> loadByMode(String gameMode) {
-    return loadAll().where((h) => h.gameMode == gameMode).toList(growable: false);
+    return loadAll()
+        .where((h) => h.gameMode == gameMode)
+        .toList(growable: false);
   }
 
   Future<void> addItem(HistoryItem item) async {

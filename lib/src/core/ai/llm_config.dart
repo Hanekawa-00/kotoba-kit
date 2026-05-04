@@ -83,13 +83,13 @@ class LlmConfig {
       apiKey.isNotEmpty || provider == LlmProviderType.ollama;
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'provider': provider.name,
-        'apiKey': apiKey,
-        'model': model,
-        'baseUrl': baseUrl,
-      };
+    'id': id,
+    'name': name,
+    'provider': provider.name,
+    'apiKey': apiKey,
+    'model': model,
+    'baseUrl': baseUrl,
+  };
 
   LlmConfig copyWith({
     String? name,

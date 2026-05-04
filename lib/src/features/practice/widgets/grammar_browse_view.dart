@@ -175,17 +175,11 @@ class _GrammarCardState extends State<_GrammarCard> {
               ),
               if (_expanded) ...[
                 SizedBox(height: spacing.md),
-                _InfoRow(
-                  label: '含义',
-                  value: widget.point.meaningCn,
-                ),
+                _InfoRow(label: '含义', value: widget.point.meaningCn),
                 SizedBox(height: spacing.sm),
                 _InfoRow(label: '用法', value: widget.point.usage),
                 SizedBox(height: spacing.sm),
-                _InfoRow(
-                  label: '例句',
-                  value: widget.point.exampleJa,
-                ),
+                _InfoRow(label: '例句', value: widget.point.exampleJa),
                 SizedBox(height: 2),
                 Text(
                   widget.point.exampleCn,
@@ -234,9 +228,7 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
         ),
-        Expanded(
-          child: Text(value, style: theme.textTheme.bodyMedium),
-        ),
+        Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
       ],
     );
   }

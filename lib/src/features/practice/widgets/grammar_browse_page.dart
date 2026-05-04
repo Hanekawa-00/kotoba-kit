@@ -12,8 +12,7 @@ class GrammarBrowsePage extends ConsumerStatefulWidget {
   const GrammarBrowsePage({super.key});
 
   @override
-  ConsumerState<GrammarBrowsePage> createState() =>
-      _GrammarBrowsePageState();
+  ConsumerState<GrammarBrowsePage> createState() => _GrammarBrowsePageState();
 }
 
 class _GrammarBrowsePageState extends ConsumerState<GrammarBrowsePage> {

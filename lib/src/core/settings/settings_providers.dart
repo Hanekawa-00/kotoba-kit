@@ -62,7 +62,10 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
       final activeId = settings.activeLlmConfigId == id
           ? (configs.isNotEmpty ? configs.first.id : null)
           : settings.activeLlmConfigId;
-      return settings.copyWith(llmConfigs: configs, activeLlmConfigId: activeId);
+      return settings.copyWith(
+        llmConfigs: configs,
+        activeLlmConfigId: activeId,
+      );
     });
   }
 

@@ -11,14 +11,18 @@ class OpenAiProvider implements LlmProvider {
     required String model,
     String baseUrl = 'https://api.openai.com/v1',
     Dio? dio,
-  })  : _apiKey = apiKey,
-        _model = model,
-        _baseUrl = baseUrl,
-        _dio = dio ?? Dio(BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          contentType: Headers.jsonContentType,
-        ));
+  }) : _apiKey = apiKey,
+       _model = model,
+       _baseUrl = baseUrl,
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 120),
+               contentType: Headers.jsonContentType,
+             ),
+           );
 
   final String _apiKey;
   final String _model;
@@ -34,21 +38,29 @@ class OpenAiProvider implements LlmProvider {
     String? systemPrompt,
     Map<String, dynamic>? jsonSchema,
   }) async {
-    final body = _buildBody(prompt, systemPrompt: systemPrompt, stream: false, jsonSchema: jsonSchema);
+    final body = _buildBody(
+      prompt,
+      systemPrompt: systemPrompt,
+      stream: false,
+      jsonSchema: jsonSchema,
+    );
     try {
       final response = await _dio.post<Map<String, dynamic>>(
         '$_baseUrl/chat/completions',
         data: body,
         options: Options(headers: _headers()),
       );
-      final content = response.data?['choices']?[0]?['message']?['content'] as String?;
+      final content =
+          response.data?['choices']?[0]?['message']?['content'] as String?;
       if (content == null) {
         throw LlmException('OpenAI returned empty response: ${response.data}');
       }
       return content.trim();
     } on DioException catch (e) {
       final detail = e.response?.data?.toString() ?? e.message ?? '';
-      throw LlmException('OpenAI API error (${e.response?.statusCode}): $detail');
+      throw LlmException(
+        'OpenAI API error (${e.response?.statusCode}): $detail',
+      );
     }
   }
 
@@ -87,7 +99,9 @@ class OpenAiProvider implements LlmProvider {
       }
     } on DioException catch (e) {
       final detail = e.response?.data?.toString() ?? e.message ?? '';
-      throw LlmException('OpenAI streaming error (${e.response?.statusCode}): $detail');
+      throw LlmException(
+        'OpenAI streaming error (${e.response?.statusCode}): $detail',
+      );
     }
   }
 

@@ -52,7 +52,9 @@ class AppSettings {
   final String? activeLlmConfigId;
 
   LlmConfig? get activeLlmConfig {
-    if (activeLlmConfigId == null) return llmConfigs.isNotEmpty ? llmConfigs.first : null;
+    if (activeLlmConfigId == null) {
+      return llmConfigs.isNotEmpty ? llmConfigs.first : null;
+    }
     return llmConfigs.where((c) => c.id == activeLlmConfigId).firstOrNull;
   }
 

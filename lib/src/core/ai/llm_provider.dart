@@ -7,10 +7,7 @@ abstract class LlmProvider {
     Map<String, dynamic>? jsonSchema,
   });
 
-  Stream<String> generateStream({
-    required String prompt,
-    String? systemPrompt,
-  });
+  Stream<String> generateStream({required String prompt, String? systemPrompt});
 
   Future<bool> testConnection();
 

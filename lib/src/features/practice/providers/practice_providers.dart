@@ -57,16 +57,18 @@ class PracticeController extends AsyncNotifier<PracticeState> {
 
   // Navigation
   void goToWelcome() {
-    state = AsyncData(_current.copyWith(
-      gameState: GameState.welcome,
-      currentSentenceTask: null,
-      currentMultipleChoiceTask: null,
-      feedback: null,
-      feedbackExplanation: '',
-      userInput: '',
-      selectedOptionIndex: null,
-      isEvaluating: false,
-    ));
+    state = AsyncData(
+      _current.copyWith(
+        gameState: GameState.welcome,
+        currentSentenceTask: null,
+        currentMultipleChoiceTask: null,
+        feedback: null,
+        feedbackExplanation: '',
+        userInput: '',
+        selectedOptionIndex: null,
+        isEvaluating: false,
+      ),
+    );
   }
 
   void goToGrammar() {
@@ -92,23 +94,27 @@ class PracticeController extends AsyncNotifier<PracticeState> {
   // Task generation
   Future<void> startNewTask() async {
     final current = _current;
-    state = AsyncData(current.copyWith(
-      gameState: GameState.loading,
-      errorMessage: null,
-      feedback: null,
-      feedbackExplanation: '',
-      userInput: '',
-      selectedOptionIndex: null,
-      submitted: false,
-      isEvaluating: false,
-    ));
+    state = AsyncData(
+      current.copyWith(
+        gameState: GameState.loading,
+        errorMessage: null,
+        feedback: null,
+        feedbackExplanation: '',
+        userInput: '',
+        selectedOptionIndex: null,
+        submitted: false,
+        isEvaluating: false,
+      ),
+    );
 
     final aiService = ref.read(practiceAiServiceProvider);
     if (aiService == null) {
-      state = AsyncData(current.copyWith(
-        gameState: GameState.welcome,
-        errorMessage: 'AI model not configured',
-      ));
+      state = AsyncData(
+        current.copyWith(
+          gameState: GameState.welcome,
+          errorMessage: 'AI model not configured',
+        ),
+      );
       return;
     }
 
@@ -125,34 +131,42 @@ class PracticeController extends AsyncNotifier<PracticeState> {
           length: current.sentenceLength,
           grammarPoint: grammarPoint,
         );
-        state = AsyncData(_current.copyWith(
-          gameState: GameState.practicing,
-          currentMultipleChoiceTask: task,
-          errorMessage: null,
-        ));
+        state = AsyncData(
+          _current.copyWith(
+            gameState: GameState.practicing,
+            currentMultipleChoiceTask: task,
+            errorMessage: null,
+          ),
+        );
       } else if (current.gameMode == GameMode.translation) {
         final task = await aiService.generateSentenceTask(
           difficulty: current.difficulty,
           length: current.sentenceLength,
           grammarPoint: grammarPoint,
         );
-        state = AsyncData(_current.copyWith(
-          gameState: GameState.practicing,
-          currentSentenceTask: task,
-          errorMessage: null,
-        ));
+        state = AsyncData(
+          _current.copyWith(
+            gameState: GameState.practicing,
+            currentSentenceTask: task,
+            errorMessage: null,
+          ),
+        );
       } else {
         // Sentence check mode — no AI generation needed
-        state = AsyncData(_current.copyWith(
-          gameState: GameState.practicing,
-          errorMessage: null,
-        ));
+        state = AsyncData(
+          _current.copyWith(
+            gameState: GameState.practicing,
+            errorMessage: null,
+          ),
+        );
       }
     } catch (error) {
-      state = AsyncData(_current.copyWith(
-        gameState: GameState.welcome,
-        errorMessage: error.toString(),
-      ));
+      state = AsyncData(
+        _current.copyWith(
+          gameState: GameState.welcome,
+          errorMessage: error.toString(),
+        ),
+      );
     }
   }
 
@@ -175,16 +189,20 @@ class PracticeController extends AsyncNotifier<PracticeState> {
         grammarPoint: task.grammarPoint,
         onExplanationChunk: (chunk) {
           final current = _current;
-          state = AsyncData(current.copyWith(
-            feedbackExplanation: current.feedbackExplanation + chunk,
-          ));
+          state = AsyncData(
+            current.copyWith(
+              feedbackExplanation: current.feedbackExplanation + chunk,
+            ),
+          );
         },
       );
-      state = AsyncData(_current.copyWith(
-        gameState: GameState.feedback,
-        feedback: feedback,
-        isEvaluating: false,
-      ));
+      state = AsyncData(
+        _current.copyWith(
+          gameState: GameState.feedback,
+          feedback: feedback,
+          isEvaluating: false,
+        ),
+      );
 
       _saveHistory(
         gameMode: 'translation',
@@ -194,16 +212,18 @@ class PracticeController extends AsyncNotifier<PracticeState> {
         feedback: feedback,
       );
     } catch (error) {
-      state = AsyncData(_current.copyWith(
-        gameState: GameState.feedback,
-        feedback: PracticeFeedback(
-          score: 0,
-          evaluation: 'Error',
-          correctedSentence: '',
-          explanation: 'Failed to get feedback: $error',
+      state = AsyncData(
+        _current.copyWith(
+          gameState: GameState.feedback,
+          feedback: PracticeFeedback(
+            score: 0,
+            evaluation: 'Error',
+            correctedSentence: '',
+            explanation: 'Failed to get feedback: $error',
+          ),
+          isEvaluating: false,
         ),
-        isEvaluating: false,
-      ));
+      );
     }
   }
 
@@ -221,16 +241,20 @@ class PracticeController extends AsyncNotifier<PracticeState> {
         userSentence: latest.userInput,
         onExplanationChunk: (chunk) {
           final current = _current;
-          state = AsyncData(current.copyWith(
-            feedbackExplanation: current.feedbackExplanation + chunk,
-          ));
+          state = AsyncData(
+            current.copyWith(
+              feedbackExplanation: current.feedbackExplanation + chunk,
+            ),
+          );
         },
       );
-      state = AsyncData(_current.copyWith(
-        gameState: GameState.feedback,
-        feedback: feedback,
-        isEvaluating: false,
-      ));
+      state = AsyncData(
+        _current.copyWith(
+          gameState: GameState.feedback,
+          feedback: feedback,
+          isEvaluating: false,
+        ),
+      );
 
       _saveHistory(
         gameMode: 'sentenceCheck',
@@ -239,16 +263,18 @@ class PracticeController extends AsyncNotifier<PracticeState> {
         feedback: feedback,
       );
     } catch (error) {
-      state = AsyncData(_current.copyWith(
-        gameState: GameState.feedback,
-        feedback: PracticeFeedback(
-          score: 0,
-          evaluation: 'Error',
-          correctedSentence: '',
-          explanation: 'Failed to get feedback: $error',
+      state = AsyncData(
+        _current.copyWith(
+          gameState: GameState.feedback,
+          feedback: PracticeFeedback(
+            score: 0,
+            evaluation: 'Error',
+            correctedSentence: '',
+            explanation: 'Failed to get feedback: $error',
+          ),
+          isEvaluating: false,
         ),
-        isEvaluating: false,
-      ));
+      );
     }
   }
 
@@ -266,25 +292,33 @@ class PracticeController extends AsyncNotifier<PracticeState> {
           ? (isCorrect ? '正确！' : '不正确')
           : '跳过';
 
-      state = AsyncData(current.copyWith(
-        gameState: GameState.feedback,
-        feedback: PracticeFeedback(
-          score: score,
-          evaluation: evaluation,
-          correctedSentence: isCorrect ? '' : task.options[task.correctOptionIndex],
-          explanation: task.explanation,
+      state = AsyncData(
+        current.copyWith(
+          gameState: GameState.feedback,
+          feedback: PracticeFeedback(
+            score: score,
+            evaluation: evaluation,
+            correctedSentence: isCorrect
+                ? ''
+                : task.options[task.correctOptionIndex],
+            explanation: task.explanation,
+          ),
         ),
-      ));
+      );
 
       _saveHistory(
         gameMode: 'multipleChoice',
         difficulty: current.difficulty.name,
         chineseSentence: task.chineseSentence,
-        userSentence: selectedIndex != null ? task.options[selectedIndex] : null,
+        userSentence: selectedIndex != null
+            ? task.options[selectedIndex]
+            : null,
         feedback: PracticeFeedback(
           score: score,
           evaluation: evaluation,
-          correctedSentence: isCorrect ? '' : task.options[task.correctOptionIndex],
+          correctedSentence: isCorrect
+              ? ''
+              : task.options[task.correctOptionIndex],
           explanation: task.explanation,
         ),
       );
@@ -303,17 +337,19 @@ class PracticeController extends AsyncNotifier<PracticeState> {
     required PracticeFeedback feedback,
   }) {
     final repo = ref.read(historyRepositoryProvider);
-    repo.addItem(HistoryItem(
-      timestamp: DateTime.now().millisecondsSinceEpoch,
-      gameMode: gameMode,
-      difficulty: difficulty,
-      chineseSentence: chineseSentence,
-      userSentence: userSentence,
-      correctedSentence: feedback.correctedSentence,
-      score: feedback.score,
-      evaluation: feedback.evaluation,
-      explanation: feedback.explanation,
-    ));
+    repo.addItem(
+      HistoryItem(
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        gameMode: gameMode,
+        difficulty: difficulty,
+        chineseSentence: chineseSentence,
+        userSentence: userSentence,
+        correctedSentence: feedback.correctedSentence,
+        score: feedback.score,
+        evaluation: feedback.evaluation,
+        explanation: feedback.explanation,
+      ),
+    );
   }
 }
 

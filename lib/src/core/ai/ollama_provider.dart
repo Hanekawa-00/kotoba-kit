@@ -10,13 +10,17 @@ class OllamaProvider implements LlmProvider {
     required String model,
     String baseUrl = 'http://localhost:11434',
     Dio? dio,
-  })  : _model = model,
-        _baseUrl = baseUrl,
-        _dio = dio ?? Dio(BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          contentType: Headers.jsonContentType,
-        ));
+  }) : _model = model,
+       _baseUrl = baseUrl,
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 120),
+               contentType: Headers.jsonContentType,
+             ),
+           );
 
   final String _model;
   final String _baseUrl;
@@ -31,7 +35,11 @@ class OllamaProvider implements LlmProvider {
     String? systemPrompt,
     Map<String, dynamic>? jsonSchema,
   }) async {
-    final body = _buildBody(prompt, systemPrompt: systemPrompt, jsonSchema: jsonSchema);
+    final body = _buildBody(
+      prompt,
+      systemPrompt: systemPrompt,
+      jsonSchema: jsonSchema,
+    );
     final response = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/api/chat',
       data: body,

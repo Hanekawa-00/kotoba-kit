@@ -40,8 +40,9 @@ class AppBootstrap extends ConsumerWidget {
           child: DesktopWindowFrame(
             child: AppCommandPalette(
               router: router,
-              child:
-                  _AppScrollBehavior(child: child ?? const SizedBox.shrink()),
+              child: _AppScrollBehavior(
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );

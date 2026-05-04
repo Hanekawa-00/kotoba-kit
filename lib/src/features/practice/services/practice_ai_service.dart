@@ -36,9 +36,11 @@ class PracticeAiService {
       systemPrompt: _mcSystemPrompt,
     );
     final data = _parseJson(jsonText);
-    final options = (data['options'] as List?)
-        ?.map((e) => e.toString())
-        .toList(growable: false) ?? [];
+    final options =
+        (data['options'] as List?)
+            ?.map((e) => e.toString())
+            .toList(growable: false) ??
+        [];
     final correctIndex = data['correctOptionIndex'] as num?;
     if (correctIndex == null) {
       throw FormatException('Missing correctOptionIndex in MCQ response');
@@ -68,7 +70,8 @@ Your explanation should pay special attention to whether the student used this g
 '''
         : '';
 
-    final prompt = '''You are a helpful and patient Japanese language teacher. Your core task is to evaluate a student's translation based on the provided "Japanese Expression Specification Outline". Your feedback must be precise, constructive, and educational.
+    final prompt =
+        '''You are a helpful and patient Japanese language teacher. Your core task is to evaluate a student's translation based on the provided "Japanese Expression Specification Outline". Your feedback must be precise, constructive, and educational.
 
 The original Chinese sentence is: "$chineseSentence"
 The student's Japanese translation is: "${userTranslation.isEmpty ? '(No answer provided)' : userTranslation}".
@@ -99,7 +102,8 @@ correctedSentence: 私の猫はとても可愛いです。
     required String userSentence,
     required void Function(String chunk) onExplanationChunk,
   }) async {
-    final prompt = '''You are a helpful and patient Japanese language teacher. Your core task is to evaluate a student's Japanese sentence based on the provided "Japanese Expression Specification Outline". Your feedback must be precise, constructive, and educational.
+    final prompt =
+        '''You are a helpful and patient Japanese language teacher. Your core task is to evaluate a student's Japanese sentence based on the provided "Japanese Expression Specification Outline". Your feedback must be precise, constructive, and educational.
 
 The student's Japanese sentence is: "${userSentence.isEmpty ? '(No answer provided)' : userSentence}".
 
@@ -153,8 +157,10 @@ correctedSentence: 私の猫はとても可愛いです。
           headerParsed = true;
           final header = text.substring(0, separatorIndex);
 
-          final scoreMatch = RegExp(r'^score:\s*(\d+)', multiLine: true)
-              .firstMatch(header);
+          final scoreMatch = RegExp(
+            r'^score:\s*(\d+)',
+            multiLine: true,
+          ).firstMatch(header);
           final evaluationMatch = RegExp(
             r'^evaluation:\s*(.*)',
             multiLine: true,
@@ -164,7 +170,9 @@ correctedSentence: 私の猫はとても可愛いです。
             multiLine: true,
           ).firstMatch(header);
 
-          score = scoreMatch != null ? int.tryParse(scoreMatch.group(1)!) ?? 0 : 0;
+          score = scoreMatch != null
+              ? int.tryParse(scoreMatch.group(1)!) ?? 0
+              : 0;
           evaluation = evaluationMatch?.group(1)?.trim() ?? '';
           correctedSentence = correctedMatch?.group(1)?.trim() ?? '';
 
@@ -182,16 +190,22 @@ correctedSentence: 私の猫はとても可愛いです。
         final sepIdx = text.indexOf('\n--- \n');
         final headers = sepIdx != -1 ? text.substring(0, sepIdx) : text;
 
-        final scoreMatch = RegExp(r'^score:\s*(\d+)', multiLine: true)
-            .firstMatch(headers);
-        final evaluationMatch = RegExp(r'^evaluation:\s*(.*)', multiLine: true)
-            .firstMatch(headers);
+        final scoreMatch = RegExp(
+          r'^score:\s*(\d+)',
+          multiLine: true,
+        ).firstMatch(headers);
+        final evaluationMatch = RegExp(
+          r'^evaluation:\s*(.*)',
+          multiLine: true,
+        ).firstMatch(headers);
         final correctedMatch = RegExp(
           r'^correctedSentence:\s*(.*)',
           multiLine: true,
         ).firstMatch(headers);
 
-        score = scoreMatch != null ? int.tryParse(scoreMatch.group(1)!) ?? 0 : 0;
+        score = scoreMatch != null
+            ? int.tryParse(scoreMatch.group(1)!) ?? 0
+            : 0;
         evaluation = evaluationMatch?.group(1)?.trim() ?? '';
         correctedSentence = correctedMatch?.group(1)?.trim() ?? '';
 
@@ -205,7 +219,10 @@ correctedSentence: 私の猫はとても可愛いです。
           );
           if (correctedLineIndex != -1 &&
               correctedLineIndex + 1 < lines.length) {
-            explanation = lines.sublist(correctedLineIndex + 1).join('\n').trim();
+            explanation = lines
+                .sublist(correctedLineIndex + 1)
+                .join('\n')
+                .trim();
           }
         }
         if (explanation.isNotEmpty) {
@@ -214,14 +231,17 @@ correctedSentence: 私の猫はとても可愛いです。
         }
       }
     } catch (error) {
-      onExplanationChunk('\n\n**Error:** Failed to get feedback from the AI. Please try again.');
+      onExplanationChunk(
+        '\n\n**Error:** Failed to get feedback from the AI. Please try again.',
+      );
     }
 
     return PracticeFeedback(
       score: score.clamp(0, 100),
       evaluation: evaluation.isNotEmpty ? evaluation : '评价未提供',
-      correctedSentence:
-          correctedSentence.isNotEmpty ? correctedSentence : '(AI did not provide a correction.)',
+      correctedSentence: correctedSentence.isNotEmpty
+          ? correctedSentence
+          : '(AI did not provide a correction.)',
       explanation: explanationBuffer.toString(),
     );
   }
@@ -324,7 +344,6 @@ $_fullOutline
 
   static const _mcSystemPrompt =
       'You are an expert Japanese teacher designing multiple-choice questions.';
-
 }
 
 const _fullOutline = r'''

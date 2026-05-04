@@ -14,8 +14,7 @@ class HistoryBrowsePage extends ConsumerStatefulWidget {
   const HistoryBrowsePage({super.key});
 
   @override
-  ConsumerState<HistoryBrowsePage> createState() =>
-      _HistoryBrowsePageState();
+  ConsumerState<HistoryBrowsePage> createState() => _HistoryBrowsePageState();
 }
 
 class _HistoryBrowsePageState extends ConsumerState<HistoryBrowsePage> {
@@ -54,8 +53,9 @@ class _HistoryBrowsePageState extends ConsumerState<HistoryBrowsePage> {
     return PageFrame(
       storageId: 'practice-history',
       title: l10n.practiceHistoryTitle,
-      subtitle:
-          _items.isEmpty ? l10n.practiceHistoryEmpty : '${_items.length} records',
+      subtitle: _items.isEmpty
+          ? l10n.practiceHistoryEmpty
+          : '${_items.length} records',
       trailing: OutlinedButton.icon(
         onPressed: () {
           if (context.canPop()) {
@@ -79,10 +79,8 @@ class _HistoryBrowsePageState extends ConsumerState<HistoryBrowsePage> {
           )
         else
           ..._items.map(
-            (item) => _HistoryCard(
-              item: item,
-              onDelete: () => _confirmDelete(item),
-            ),
+            (item) =>
+                _HistoryCard(item: item, onDelete: () => _confirmDelete(item)),
           ),
       ],
     );
@@ -112,8 +110,8 @@ class _HistoryCardState extends State<_HistoryCard> {
     final scoreColor = item.score >= 80
         ? Colors.green
         : item.score >= 60
-            ? Colors.orange
-            : Colors.red;
+        ? Colors.orange
+        : Colors.red;
 
     final date = DateTime.fromMillisecondsSinceEpoch(item.timestamp);
     final dateStr =
@@ -177,8 +175,10 @@ class _HistoryCardState extends State<_HistoryCard> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.delete_outline_rounded,
-                          color: scheme.error),
+                      icon: Icon(
+                        Icons.delete_outline_rounded,
+                        color: scheme.error,
+                      ),
                       tooltip: 'Delete',
                       onPressed: widget.onDelete,
                     ),
@@ -224,10 +224,9 @@ class _HistoryCardState extends State<_HistoryCard> {
                     SizedBox(height: 4),
                     MarkdownBody(
                       data: item.explanation,
-                      styleSheet:
-                          MarkdownStyleSheet.fromTheme(theme).copyWith(
-                        p: theme.textTheme.bodyMedium,
-                      ),
+                      styleSheet: MarkdownStyleSheet.fromTheme(
+                        theme,
+                      ).copyWith(p: theme.textTheme.bodyMedium),
                     ),
                   ],
                 ],

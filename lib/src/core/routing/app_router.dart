@@ -48,8 +48,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'history',
                     name: 'practice-history',
-                    builder: (context, state) =>
-                        const HistoryBrowsePage(),
+                    builder: (context, state) => const HistoryBrowsePage(),
                   ),
                 ],
               ),

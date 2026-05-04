@@ -54,10 +54,7 @@ class GrammarPoint {
 
 @immutable
 class SentenceTask {
-  const SentenceTask({
-    required this.chineseSentence,
-    this.grammarPoint,
-  });
+  const SentenceTask({required this.chineseSentence, this.grammarPoint});
 
   final String chineseSentence;
   final GrammarPoint? grammarPoint;

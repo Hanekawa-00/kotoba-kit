@@ -11,32 +11,32 @@ class LlmFactory {
   static LlmProvider create(LlmConfig config) {
     return switch (config.provider) {
       LlmProviderType.openai => OpenAiProvider(
-          apiKey: config.apiKey,
-          model: config.model,
-          baseUrl: config.baseUrl.isNotEmpty
-              ? config.baseUrl
-              : LlmProviderType.openai.defaultBaseUrl,
-        ),
+        apiKey: config.apiKey,
+        model: config.model,
+        baseUrl: config.baseUrl.isNotEmpty
+            ? config.baseUrl
+            : LlmProviderType.openai.defaultBaseUrl,
+      ),
       LlmProviderType.anthropic => AnthropicProvider(
-          apiKey: config.apiKey,
-          model: config.model,
-          baseUrl: config.baseUrl.isNotEmpty
-              ? config.baseUrl
-              : LlmProviderType.anthropic.defaultBaseUrl,
-        ),
+        apiKey: config.apiKey,
+        model: config.model,
+        baseUrl: config.baseUrl.isNotEmpty
+            ? config.baseUrl
+            : LlmProviderType.anthropic.defaultBaseUrl,
+      ),
       LlmProviderType.gemini => GeminiProvider(
-          apiKey: config.apiKey,
-          model: config.model,
-          baseUrl: config.baseUrl.isNotEmpty
-              ? config.baseUrl
-              : 'https://generativelanguage.googleapis.com',
-        ),
+        apiKey: config.apiKey,
+        model: config.model,
+        baseUrl: config.baseUrl.isNotEmpty
+            ? config.baseUrl
+            : 'https://generativelanguage.googleapis.com',
+      ),
       LlmProviderType.ollama => OllamaProvider(
-          model: config.model,
-          baseUrl: config.baseUrl.isNotEmpty
-              ? config.baseUrl
-              : LlmProviderType.ollama.defaultBaseUrl,
-        ),
+        model: config.model,
+        baseUrl: config.baseUrl.isNotEmpty
+            ? config.baseUrl
+            : LlmProviderType.ollama.defaultBaseUrl,
+      ),
     };
   }
 }

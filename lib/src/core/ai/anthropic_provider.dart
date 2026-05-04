@@ -11,14 +11,18 @@ class AnthropicProvider implements LlmProvider {
     required String model,
     String baseUrl = 'https://api.anthropic.com',
     Dio? dio,
-  })  : _apiKey = apiKey,
-        _model = model,
-        _baseUrl = baseUrl,
-        _dio = dio ?? Dio(BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 120),
-          contentType: Headers.jsonContentType,
-        ));
+  }) : _apiKey = apiKey,
+       _model = model,
+       _baseUrl = baseUrl,
+       _dio =
+           dio ??
+           Dio(
+             BaseOptions(
+               connectTimeout: const Duration(seconds: 30),
+               receiveTimeout: const Duration(seconds: 120),
+               contentType: Headers.jsonContentType,
+             ),
+           );
 
   final String _apiKey;
   final String _model;
@@ -34,7 +38,11 @@ class AnthropicProvider implements LlmProvider {
     String? systemPrompt,
     Map<String, dynamic>? jsonSchema,
   }) async {
-    final body = _buildBody(prompt, systemPrompt: systemPrompt, jsonSchema: jsonSchema);
+    final body = _buildBody(
+      prompt,
+      systemPrompt: systemPrompt,
+      jsonSchema: jsonSchema,
+    );
     final response = await _dio.post<Map<String, dynamic>>(
       '$_baseUrl/v1/messages',
       data: body,
@@ -57,10 +65,7 @@ class AnthropicProvider implements LlmProvider {
     final response = await _dio.post<ResponseBody>(
       '$_baseUrl/v1/messages',
       data: body,
-      options: Options(
-        headers: _headers(),
-        responseType: ResponseType.stream,
-      ),
+      options: Options(headers: _headers(), responseType: ResponseType.stream),
     );
 
     final stream = response.data!.stream
@@ -112,10 +117,7 @@ class AnthropicProvider implements LlmProvider {
   }
 
   Map<String, String> _headers() {
-    return {
-      'x-api-key': _apiKey,
-      'anthropic-version': '2023-06-01',
-    };
+    return {'x-api-key': _apiKey, 'anthropic-version': '2023-06-01'};
   }
 
   @override

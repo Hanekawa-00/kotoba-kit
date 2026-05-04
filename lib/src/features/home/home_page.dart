@@ -250,15 +250,14 @@ class _RecentActivity extends ConsumerWidget {
             final scoreColor = item.score >= 80
                 ? Colors.green
                 : item.score >= 60
-                    ? Colors.orange
-                    : Colors.red;
+                ? Colors.orange
+                : Colors.red;
 
             return Padding(
               padding: EdgeInsets.only(bottom: spacing.sm),
               child: Material(
                 color: theme.colorScheme.surfaceContainerLow,
-                borderRadius:
-                    BorderRadius.circular(theme.radii.lg),
+                borderRadius: BorderRadius.circular(theme.radii.lg),
                 child: Padding(
                   padding: EdgeInsets.all(spacing.md),
                   child: Row(
@@ -283,9 +282,7 @@ class _RecentActivity extends ConsumerWidget {
                       SizedBox(width: spacing.sm),
                       Expanded(
                         child: Text(
-                          item.chineseSentence ??
-                              item.userSentence ??
-                              '',
+                          item.chineseSentence ?? item.userSentence ?? '',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodyMedium,

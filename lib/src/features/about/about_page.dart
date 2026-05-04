@@ -35,9 +35,7 @@ class AboutPage extends ConsumerWidget {
         SectionCard(
           title: l10n.aboutDescriptionTitle,
           icon: Icons.info_outline,
-          children: [
-            _DescriptionText(l10n.aboutDescriptionText),
-          ],
+          children: [_DescriptionText(l10n.aboutDescriptionText)],
         ),
         SectionCard(
           title: l10n.aboutVersionTitle,
@@ -79,7 +77,10 @@ class AboutPage extends ConsumerWidget {
             _InfoRow(label: 'Design', value: 'Material 3'),
             _InfoRow(label: 'State', value: 'Riverpod'),
             _InfoRow(label: 'Routing', value: 'GoRouter'),
-            _InfoRow(label: 'Platforms', value: 'Windows, macOS, Linux, Android, iOS, Web'),
+            _InfoRow(
+              label: 'Platforms',
+              value: 'Windows, macOS, Linux, Android, iOS, Web',
+            ),
           ],
         ),
         SectionCard(
@@ -107,8 +108,8 @@ class _DescriptionText extends StatelessWidget {
     return Text(
       text,
       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
   }
 }

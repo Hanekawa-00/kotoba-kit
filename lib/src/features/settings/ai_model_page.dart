@@ -84,9 +84,7 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
   }
 
   void _save() {
-    final settingsController = ref.read(
-      appSettingsControllerProvider.notifier,
-    );
+    final settingsController = ref.read(appSettingsControllerProvider.notifier);
     final config = LlmConfig(
       id: _editingId ?? '',
       name: _nameController.text.trim(),
@@ -118,7 +116,9 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
 
   void _delete() {
     if (_editingId == null) return;
-    ref.read(appSettingsControllerProvider.notifier).removeLlmConfig(_editingId!);
+    ref
+        .read(appSettingsControllerProvider.notifier)
+        .removeLlmConfig(_editingId!);
     AppMessenger.showSuccess(context, context.l10n.settingsSaved);
     setState(() {
       _showEditor = false;
@@ -177,22 +177,13 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
       if (!mounted) return;
       setState(() => _models = models);
       if (models.isNotEmpty) {
-        AppMessenger.showSuccess(
-          context,
-          'Found ${models.length} models',
-        );
+        AppMessenger.showSuccess(context, 'Found ${models.length} models');
       } else {
-        AppMessenger.showError(
-          context,
-          context.l10n.settingsAiNoModelsFound,
-        );
+        AppMessenger.showError(context, context.l10n.settingsAiNoModelsFound);
       }
     } catch (_) {
       if (!mounted) return;
-      AppMessenger.showError(
-        context,
-        context.l10n.settingsAiNoModelsFound,
-      );
+      AppMessenger.showError(context, context.l10n.settingsAiNoModelsFound);
     } finally {
       if (mounted) setState(() => _fetchingModels = false);
     }
@@ -262,8 +253,9 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                   padding: EdgeInsets.only(bottom: spacing.sm),
                   child: Material(
                     color: isActive
-                        ? theme.colorScheme.primaryContainer
-                            .withValues(alpha: 0.42)
+                        ? theme.colorScheme.primaryContainer.withValues(
+                            alpha: 0.42,
+                          )
                         : theme.colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(theme.radii.lg),
                     child: InkWell(
@@ -283,10 +275,10 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                                         config.name.isNotEmpty
                                             ? config.name
                                             : config.provider.label,
-                                        style:
-                                            theme.textTheme.titleSmall?.copyWith(
-                                          fontWeight: FontWeight.w600,
-                                        ),
+                                        style: theme.textTheme.titleSmall
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                       ),
                                       if (isActive) ...[
                                         SizedBox(width: spacing.sm),
@@ -320,8 +312,7 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: theme.textTheme.bodySmall?.copyWith(
-                                      color: theme
-                                          .colorScheme.onSurfaceVariant,
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
                                 ],
@@ -380,8 +371,7 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                           setState(() {
                             _provider = value;
                             _modelController.text = _provider.defaultModel;
-                            _baseUrlController.text =
-                                _provider.defaultBaseUrl;
+                            _baseUrlController.text = _provider.defaultBaseUrl;
                           });
                         },
                       );
@@ -399,8 +389,7 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                         setState(() {
                           _provider = value.first;
                           _modelController.text = _provider.defaultModel;
-                          _baseUrlController.text =
-                              _provider.defaultBaseUrl;
+                          _baseUrlController.text = _provider.defaultBaseUrl;
                         });
                       },
                     );
@@ -445,14 +434,11 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                       Padding(
                         padding: EdgeInsets.only(bottom: spacing.sm),
                         child: DropdownButtonFormField<String>(
-                          initialValue: _models.contains(
-                                  _modelController.text)
+                          initialValue: _models.contains(_modelController.text)
                               ? _modelController.text
                               : null,
                           isExpanded: true,
-                          decoration: const InputDecoration(
-                            isDense: true,
-                          ),
+                          decoration: const InputDecoration(isDense: true),
                           hint: const Text('Select model...'),
                           items: [
                             for (final m in _models)
@@ -528,9 +514,7 @@ class _AiModelPageState extends ConsumerState<AiModelPage> {
                           ? const SizedBox(
                               width: 16,
                               height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.wifi_find_outlined),
                       label: Text(l10n.settingsAiTestConnection),

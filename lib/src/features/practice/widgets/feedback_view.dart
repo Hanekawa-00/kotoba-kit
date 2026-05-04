@@ -33,7 +33,11 @@ class FeedbackView extends ConsumerWidget {
               // Back button row
               Padding(
                 padding: EdgeInsets.fromLTRB(
-                    spacing.sm, spacing.sm, spacing.lg, 0),
+                  spacing.sm,
+                  spacing.sm,
+                  spacing.lg,
+                  0,
+                ),
                 child: Row(
                   children: [
                     IconButton(
@@ -57,7 +61,11 @@ class FeedbackView extends ConsumerWidget {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(
-                      spacing.lg, 0, spacing.lg, spacing.md),
+                    spacing.lg,
+                    0,
+                    spacing.lg,
+                    spacing.md,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -71,8 +79,9 @@ class FeedbackView extends ConsumerWidget {
                                 height: 100,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: _scoreColor(feedback.score)
-                                      .withValues(alpha: 0.15),
+                                  color: _scoreColor(
+                                    feedback.score,
+                                  ).withValues(alpha: 0.15),
                                   border: Border.all(
                                     color: _scoreColor(feedback.score),
                                     width: 3,
@@ -83,9 +92,9 @@ class FeedbackView extends ConsumerWidget {
                                     '${feedback.score}',
                                     style: theme.textTheme.headlineLarge
                                         ?.copyWith(
-                                      color: _scoreColor(feedback.score),
-                                      fontWeight: FontWeight.w800,
-                                    ),
+                                          color: _scoreColor(feedback.score),
+                                          fontWeight: FontWeight.w800,
+                                        ),
                                   ),
                                 ),
                               ),
@@ -115,10 +124,12 @@ class FeedbackView extends ConsumerWidget {
                             width: double.infinity,
                             padding: EdgeInsets.all(spacing.md),
                             decoration: BoxDecoration(
-                              color: scheme.primaryContainer
-                                  .withValues(alpha: 0.28),
-                              borderRadius:
-                                  BorderRadius.circular(theme.radii.md),
+                              color: scheme.primaryContainer.withValues(
+                                alpha: 0.28,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                theme.radii.md,
+                              ),
                             ),
                             child: Text(
                               feedback.correctedSentence,
@@ -142,10 +153,9 @@ class FeedbackView extends ConsumerWidget {
                           data: feedback.explanation.isNotEmpty
                               ? feedback.explanation
                               : 'No detailed explanation available.',
-                          styleSheet:
-                              MarkdownStyleSheet.fromTheme(theme).copyWith(
-                            p: theme.textTheme.bodyMedium,
-                          ),
+                          styleSheet: MarkdownStyleSheet.fromTheme(
+                            theme,
+                          ).copyWith(p: theme.textTheme.bodyMedium),
                         ),
                       ] else if (isEvaluating) ...[
                         // Streaming progress
@@ -155,16 +165,16 @@ class FeedbackView extends ConsumerWidget {
                         if (streamingText.isNotEmpty)
                           MarkdownBody(
                             data: streamingText,
-                            styleSheet:
-                                MarkdownStyleSheet.fromTheme(theme).copyWith(
-                              p: theme.textTheme.bodyMedium,
-                            ),
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              theme,
+                            ).copyWith(p: theme.textTheme.bodyMedium),
                           )
                         else
                           Center(
                             child: Padding(
                               padding: EdgeInsets.symmetric(
-                                  vertical: spacing.xxl),
+                                vertical: spacing.xxl,
+                              ),
                               child: Text(
                                 l10n.practiceEvaluating,
                                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -190,16 +200,18 @@ class FeedbackView extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed:
-                            isEvaluating ? null : () => controller.goToWelcome(),
+                        onPressed: isEvaluating
+                            ? null
+                            : () => controller.goToWelcome(),
                         child: Text(l10n.practiceBackToMenu),
                       ),
                     ),
                     SizedBox(width: spacing.md),
                     Expanded(
                       child: FilledButton(
-                        onPressed:
-                            isEvaluating ? null : () => controller.startNewTask(),
+                        onPressed: isEvaluating
+                            ? null
+                            : () => controller.startNewTask(),
                         child: Text(l10n.practiceNextTask),
                       ),
                     ),

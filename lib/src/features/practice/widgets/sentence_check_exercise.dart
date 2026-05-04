@@ -58,7 +58,10 @@ class _SentenceCheckExerciseState extends ConsumerState<SentenceCheckExercise> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     padding: EdgeInsets.fromLTRB(
-                      spacing.lg, spacing.lg, spacing.lg, spacing.md,
+                      spacing.lg,
+                      spacing.lg,
+                      spacing.lg,
+                      spacing.md,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,8 +78,9 @@ class _SentenceCheckExerciseState extends ConsumerState<SentenceCheckExercise> {
                                 l10n.practiceModeSentenceCheck,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
+                                style: theme.textTheme.headlineSmall?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ],
@@ -99,8 +103,9 @@ class _SentenceCheckExerciseState extends ConsumerState<SentenceCheckExercise> {
                           decoration: InputDecoration(
                             hintText: l10n.practiceSentenceCheckInputHint,
                             border: OutlineInputBorder(
-                              borderRadius:
-                                  BorderRadius.circular(theme.radii.md),
+                              borderRadius: BorderRadius.circular(
+                                theme.radii.md,
+                              ),
                             ),
                           ),
                           onChanged: controller.updateUserInput,
@@ -120,7 +125,8 @@ class _SentenceCheckExerciseState extends ConsumerState<SentenceCheckExercise> {
                     width: double.infinity,
                     height: 52,
                     child: FilledButton.icon(
-                      onPressed: _controller.text.trim().isNotEmpty &&
+                      onPressed:
+                          _controller.text.trim().isNotEmpty &&
                               !state.isEvaluating
                           ? () {
                               _focusNode.unfocus();
@@ -131,8 +137,7 @@ class _SentenceCheckExerciseState extends ConsumerState<SentenceCheckExercise> {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2),
+                              child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.check_circle_outline),
                       label: Text(

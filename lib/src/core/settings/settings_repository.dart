@@ -73,7 +73,10 @@ class SettingsRepository implements AppSettingsRepository {
       _preferences.setBool(_compactDensityKey, settings.compactDensity),
       _preferences.setString(_llmConfigsKey, configsJson),
       if (settings.activeLlmConfigId != null)
-        _preferences.setString(_activeLlmConfigIdKey, settings.activeLlmConfigId!)
+        _preferences.setString(
+          _activeLlmConfigIdKey,
+          settings.activeLlmConfigId!,
+        )
       else
         _preferences.remove(_activeLlmConfigIdKey),
     ]);
