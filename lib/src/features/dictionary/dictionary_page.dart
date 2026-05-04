@@ -627,20 +627,15 @@ class _SearchAssistList extends StatelessWidget {
       ),
       child: SizedBox(
         height: height,
-        child: ListView(
-          key: const ValueKey('lookup-search-assist-scroll'),
-          padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
-          children: items
-              .map(
-                (item) => SizedBox(
-                  height: 38,
-                  child: _SearchAssistTile(
-                    item: item,
-                    onSearch: onSearch,
-                  ),
-                ),
-              )
-              .toList(growable: false),
+        child: Scrollbar(
+          child: ListView.builder(
+            key: const ValueKey('lookup-search-assist-scroll'),
+            padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
+            itemExtent: 38,
+            itemBuilder: (context, index) =>
+                _SearchAssistTile(item: items[index], onSearch: onSearch),
+            itemCount: items.length,
+          ),
         ),
       ),
     );
@@ -659,9 +654,11 @@ class _SearchAssistTile extends StatelessWidget {
     return InkWell(
       onTap: () => onSearch(item.value),
       borderRadius: BorderRadius.circular(theme.radii.sm),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
-        child: Row(
+      child: SizedBox(
+        height: 38,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
+          child: Row(
             children: [
               Icon(
                 item.fromHistory
@@ -686,6 +683,7 @@ class _SearchAssistTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
     );
   }
 }
@@ -796,25 +794,7 @@ class _ResultPane extends ConsumerWidget {
         .toInt();
     final currentEntry = entriesForSource[safeEntryIndex];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (sourceKeys.length > 1)
-          Padding(
-            padding: EdgeInsets.only(bottom: Theme.of(context).spacing.md),
-            child: _SourceSwitcher(
-              sourceKeys: sourceKeys,
-              selectedIndex: safeSourceIndex,
-              entriesBySource: state.result.entriesBySource,
-              onSelected: (index) {
-                ref
-                    .read(dictionaryControllerProvider.notifier)
-                    .selectSource(index);
-              },
-            ),
-          ),
-        Expanded(
-          child: _ReadingPanel(
+    return _ReadingPanel(
       entry: currentEntry,
       result: state.result,
       sourceKeys: sourceKeys,
@@ -828,9 +808,6 @@ class _ResultPane extends ConsumerWidget {
         ref.read(dictionaryControllerProvider.notifier).selectEntry(index);
       },
       onSearch: onSearch,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -986,6 +963,15 @@ class _ReadingPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SourceErrors(errors: result.sourceErrors),
+                      if (sourceKeys.length > 1) ...[
+                        _SourceSwitcher(
+                          sourceKeys: sourceKeys,
+                          selectedIndex: selectedSourceIndex,
+                          entriesBySource: result.entriesBySource,
+                          onSelected: onSourceSelected,
+                        ),
+                        SizedBox(height: spacing.md),
+                      ],
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
