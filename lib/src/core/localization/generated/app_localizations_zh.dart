@@ -432,4 +432,233 @@ class AppLocalizationsZh extends AppLocalizations {
   String dictionaryOperationFailed(String error) {
     return '字典操作失败：$error';
   }
+
+  @override
+  String get settingsAiServiceTitle => 'AI 服务';
+
+  @override
+  String get settingsAiModelTitle => 'AI 模型';
+
+  @override
+  String get settingsAiModelSubtitle => '配置造句练习使用的 LLM 提供商和模型。';
+
+  @override
+  String get settingsAiProviderTitle => '提供商';
+
+  @override
+  String get settingsAiProviderLabel => 'LLM 提供商';
+
+  @override
+  String get settingsAiProviderDesc => '选择用于造句练习的 AI 提供商。';
+
+  @override
+  String get settingsAiCredentialsTitle => '凭证';
+
+  @override
+  String get settingsAiApiKeyLabel => 'API 密钥';
+
+  @override
+  String get settingsAiApiKeyDesc => 'API 密钥仅存储在本地，只发送到所选提供商的 API。';
+
+  @override
+  String get settingsAiModelLabel => '模型';
+
+  @override
+  String get settingsAiModelDesc => '用于生成和评估的模型名称。';
+
+  @override
+  String get settingsAiBaseUrlLabel => '基础 URL';
+
+  @override
+  String get settingsAiBaseUrlDesc => '自托管或兼容 API 的自定义端点 URL。';
+
+  @override
+  String get settingsAiActionsTitle => '操作';
+
+  @override
+  String get settingsAiTestConnection => '测试连接';
+
+  @override
+  String get settingsAiSave => '保存';
+
+  @override
+  String get settingsTestConnectionSuccess => '配置看起来有效。';
+
+  @override
+  String settingsTestConnectionFailed(String error) {
+    return '连接测试失败：$error';
+  }
+
+  @override
+  String get settingsTestConnectionNoConfig => '请输入 API 密钥或配置本地端点。';
+
+  @override
+  String get settingsSaved => '设置已保存。';
+
+  @override
+  String get navPractice => '练习';
+
+  @override
+  String get commandGoPractice => '前往练习';
+
+  @override
+  String get practiceTitle => '造句练习';
+
+  @override
+  String get practiceSubtitle => '使用 AI 反馈练习日语句子构造。';
+
+  @override
+  String get practiceModeTranslation => '翻译造句';
+
+  @override
+  String get practiceModeTranslationDesc => '阅读中文，写出日语，获取评分。';
+
+  @override
+  String get practiceModeMultipleChoice => '选择题';
+
+  @override
+  String get practiceModeMultipleChoiceDesc => '选择正确的日语翻译。';
+
+  @override
+  String get practiceModeSentenceCheck => '自由造句';
+
+  @override
+  String get practiceModeSentenceCheckDesc => '自由输入日语，获取语法反馈。';
+
+  @override
+  String get practiceDifficulty => '难度';
+
+  @override
+  String get practiceSentenceLength => '句子长度';
+
+  @override
+  String get practiceStartButton => '开始练习';
+
+  @override
+  String get practiceNoApiKey => '请先在设置中配置 AI 模型。';
+
+  @override
+  String get practiceSubmit => '提交';
+
+  @override
+  String get practiceNextTask => '下一题';
+
+  @override
+  String get practiceTryAgain => '再试一次';
+
+  @override
+  String get practiceBackToMenu => '返回菜单';
+
+  @override
+  String get practiceScore => '评分';
+
+  @override
+  String get practiceEvaluation => '评价';
+
+  @override
+  String get practiceCorrectedSentence => '修正后的句子';
+
+  @override
+  String get practiceExplanation => '详细解释';
+
+  @override
+  String get practiceYourTranslation => '你的翻译';
+
+  @override
+  String get practiceGenerating => '正在生成练习...';
+
+  @override
+  String get practiceEvaluating => '正在评估...';
+
+  @override
+  String get practiceNoGrammarPoints => '此等级暂无语法点。';
+
+  @override
+  String get practiceGrammarTitle => '语法库';
+
+  @override
+  String get practiceGrammarBrowse => '语法库';
+
+  @override
+  String get practiceHistoryTitle => '练习历史';
+
+  @override
+  String get practiceHistoryEmpty => '暂无练习记录。';
+
+  @override
+  String practiceHistoryScore(int score) {
+    return '评分：$score';
+  }
+
+  @override
+  String get practiceHistoryDeleteConfirm => '删除这条记录？';
+
+  @override
+  String get practiceSentenceLengthShort => '短';
+
+  @override
+  String get practiceSentenceLengthMedium => '中';
+
+  @override
+  String get practiceSentenceLengthLong => '长';
+
+  @override
+  String get practiceModeLabel => '练习模式';
+
+  @override
+  String get practiceChineseOriginal => '中文原文';
+
+  @override
+  String get practiceJapaneseInputHint => '在这里输入你的日语翻译';
+
+  @override
+  String get practiceSentenceCheckInstruction => '在下方自由输入日语，AI 会检查语法和自然度。';
+
+  @override
+  String get practiceSentenceCheckInputHint => '在这里自由输入日语';
+
+  @override
+  String get practiceFeedbackTitle => '练习结果';
+
+  @override
+  String get practiceGrammarSubtitle => '浏览 JLPT N5-N1 语法点';
+
+  @override
+  String get practiceMultipleChoiceContinue => '继续';
+
+  @override
+  String get practiceMultipleChoiceViewExplanation => '查看解释';
+
+  @override
+  String get settingsAiBackToSettings => '返回设置';
+
+  @override
+  String get settingsAiFetchModels => '获取模型列表';
+
+  @override
+  String get settingsAiFetchingModels => '正在获取模型列表...';
+
+  @override
+  String get settingsAiNoModelsFound => '未找到模型';
+
+  @override
+  String get settingsAiAddConfig => '添加配置';
+
+  @override
+  String get settingsAiDeleteConfig => '删除配置';
+
+  @override
+  String get settingsAiConfigName => '配置名称';
+
+  @override
+  String get settingsAiConfigNameHint => '例如：DeepSeek、OpenAI 官方';
+
+  @override
+  String get settingsAiSelectConfig => '选择配置';
+
+  @override
+  String get practiceNotSure => '不确定';
+
+  @override
+  String get practiceSelectOption => '请选择一个选项';
 }

@@ -919,6 +919,456 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'字典操作失败：{error}'**
   String dictionaryOperationFailed(String error);
+
+  /// No description provided for @settingsAiServiceTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 服务'**
+  String get settingsAiServiceTitle;
+
+  /// No description provided for @settingsAiModelTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'AI 模型'**
+  String get settingsAiModelTitle;
+
+  /// No description provided for @settingsAiModelSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置造句练习使用的 LLM 提供商和模型。'**
+  String get settingsAiModelSubtitle;
+
+  /// No description provided for @settingsAiProviderTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'提供商'**
+  String get settingsAiProviderTitle;
+
+  /// No description provided for @settingsAiProviderLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'LLM 提供商'**
+  String get settingsAiProviderLabel;
+
+  /// No description provided for @settingsAiProviderDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择用于造句练习的 AI 提供商。'**
+  String get settingsAiProviderDesc;
+
+  /// No description provided for @settingsAiCredentialsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'凭证'**
+  String get settingsAiCredentialsTitle;
+
+  /// No description provided for @settingsAiApiKeyLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'API 密钥'**
+  String get settingsAiApiKeyLabel;
+
+  /// No description provided for @settingsAiApiKeyDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'API 密钥仅存储在本地，只发送到所选提供商的 API。'**
+  String get settingsAiApiKeyDesc;
+
+  /// No description provided for @settingsAiModelLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'模型'**
+  String get settingsAiModelLabel;
+
+  /// No description provided for @settingsAiModelDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'用于生成和评估的模型名称。'**
+  String get settingsAiModelDesc;
+
+  /// No description provided for @settingsAiBaseUrlLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'基础 URL'**
+  String get settingsAiBaseUrlLabel;
+
+  /// No description provided for @settingsAiBaseUrlDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'自托管或兼容 API 的自定义端点 URL。'**
+  String get settingsAiBaseUrlDesc;
+
+  /// No description provided for @settingsAiActionsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'操作'**
+  String get settingsAiActionsTitle;
+
+  /// No description provided for @settingsAiTestConnection.
+  ///
+  /// In zh, this message translates to:
+  /// **'测试连接'**
+  String get settingsAiTestConnection;
+
+  /// No description provided for @settingsAiSave.
+  ///
+  /// In zh, this message translates to:
+  /// **'保存'**
+  String get settingsAiSave;
+
+  /// No description provided for @settingsTestConnectionSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置看起来有效。'**
+  String get settingsTestConnectionSuccess;
+
+  /// No description provided for @settingsTestConnectionFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'连接测试失败：{error}'**
+  String settingsTestConnectionFailed(String error);
+
+  /// No description provided for @settingsTestConnectionNoConfig.
+  ///
+  /// In zh, this message translates to:
+  /// **'请输入 API 密钥或配置本地端点。'**
+  String get settingsTestConnectionNoConfig;
+
+  /// No description provided for @settingsSaved.
+  ///
+  /// In zh, this message translates to:
+  /// **'设置已保存。'**
+  String get settingsSaved;
+
+  /// No description provided for @navPractice.
+  ///
+  /// In zh, this message translates to:
+  /// **'练习'**
+  String get navPractice;
+
+  /// No description provided for @commandGoPractice.
+  ///
+  /// In zh, this message translates to:
+  /// **'前往练习'**
+  String get commandGoPractice;
+
+  /// No description provided for @practiceTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'造句练习'**
+  String get practiceTitle;
+
+  /// No description provided for @practiceSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用 AI 反馈练习日语句子构造。'**
+  String get practiceSubtitle;
+
+  /// No description provided for @practiceModeTranslation.
+  ///
+  /// In zh, this message translates to:
+  /// **'翻译造句'**
+  String get practiceModeTranslation;
+
+  /// No description provided for @practiceModeTranslationDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'阅读中文，写出日语，获取评分。'**
+  String get practiceModeTranslationDesc;
+
+  /// No description provided for @practiceModeMultipleChoice.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择题'**
+  String get practiceModeMultipleChoice;
+
+  /// No description provided for @practiceModeMultipleChoiceDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择正确的日语翻译。'**
+  String get practiceModeMultipleChoiceDesc;
+
+  /// No description provided for @practiceModeSentenceCheck.
+  ///
+  /// In zh, this message translates to:
+  /// **'自由造句'**
+  String get practiceModeSentenceCheck;
+
+  /// No description provided for @practiceModeSentenceCheckDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'自由输入日语，获取语法反馈。'**
+  String get practiceModeSentenceCheckDesc;
+
+  /// No description provided for @practiceDifficulty.
+  ///
+  /// In zh, this message translates to:
+  /// **'难度'**
+  String get practiceDifficulty;
+
+  /// No description provided for @practiceSentenceLength.
+  ///
+  /// In zh, this message translates to:
+  /// **'句子长度'**
+  String get practiceSentenceLength;
+
+  /// No description provided for @practiceStartButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始练习'**
+  String get practiceStartButton;
+
+  /// No description provided for @practiceNoApiKey.
+  ///
+  /// In zh, this message translates to:
+  /// **'请先在设置中配置 AI 模型。'**
+  String get practiceNoApiKey;
+
+  /// No description provided for @practiceSubmit.
+  ///
+  /// In zh, this message translates to:
+  /// **'提交'**
+  String get practiceSubmit;
+
+  /// No description provided for @practiceNextTask.
+  ///
+  /// In zh, this message translates to:
+  /// **'下一题'**
+  String get practiceNextTask;
+
+  /// No description provided for @practiceTryAgain.
+  ///
+  /// In zh, this message translates to:
+  /// **'再试一次'**
+  String get practiceTryAgain;
+
+  /// No description provided for @practiceBackToMenu.
+  ///
+  /// In zh, this message translates to:
+  /// **'返回菜单'**
+  String get practiceBackToMenu;
+
+  /// No description provided for @practiceScore.
+  ///
+  /// In zh, this message translates to:
+  /// **'评分'**
+  String get practiceScore;
+
+  /// No description provided for @practiceEvaluation.
+  ///
+  /// In zh, this message translates to:
+  /// **'评价'**
+  String get practiceEvaluation;
+
+  /// No description provided for @practiceCorrectedSentence.
+  ///
+  /// In zh, this message translates to:
+  /// **'修正后的句子'**
+  String get practiceCorrectedSentence;
+
+  /// No description provided for @practiceExplanation.
+  ///
+  /// In zh, this message translates to:
+  /// **'详细解释'**
+  String get practiceExplanation;
+
+  /// No description provided for @practiceYourTranslation.
+  ///
+  /// In zh, this message translates to:
+  /// **'你的翻译'**
+  String get practiceYourTranslation;
+
+  /// No description provided for @practiceGenerating.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在生成练习...'**
+  String get practiceGenerating;
+
+  /// No description provided for @practiceEvaluating.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在评估...'**
+  String get practiceEvaluating;
+
+  /// No description provided for @practiceNoGrammarPoints.
+  ///
+  /// In zh, this message translates to:
+  /// **'此等级暂无语法点。'**
+  String get practiceNoGrammarPoints;
+
+  /// No description provided for @practiceGrammarTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'语法库'**
+  String get practiceGrammarTitle;
+
+  /// No description provided for @practiceGrammarBrowse.
+  ///
+  /// In zh, this message translates to:
+  /// **'语法库'**
+  String get practiceGrammarBrowse;
+
+  /// No description provided for @practiceHistoryTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'练习历史'**
+  String get practiceHistoryTitle;
+
+  /// No description provided for @practiceHistoryEmpty.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无练习记录。'**
+  String get practiceHistoryEmpty;
+
+  /// No description provided for @practiceHistoryScore.
+  ///
+  /// In zh, this message translates to:
+  /// **'评分：{score}'**
+  String practiceHistoryScore(int score);
+
+  /// No description provided for @practiceHistoryDeleteConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除这条记录？'**
+  String get practiceHistoryDeleteConfirm;
+
+  /// No description provided for @practiceSentenceLengthShort.
+  ///
+  /// In zh, this message translates to:
+  /// **'短'**
+  String get practiceSentenceLengthShort;
+
+  /// No description provided for @practiceSentenceLengthMedium.
+  ///
+  /// In zh, this message translates to:
+  /// **'中'**
+  String get practiceSentenceLengthMedium;
+
+  /// No description provided for @practiceSentenceLengthLong.
+  ///
+  /// In zh, this message translates to:
+  /// **'长'**
+  String get practiceSentenceLengthLong;
+
+  /// No description provided for @practiceModeLabel.
+  ///
+  /// In zh, this message translates to:
+  /// **'练习模式'**
+  String get practiceModeLabel;
+
+  /// No description provided for @practiceChineseOriginal.
+  ///
+  /// In zh, this message translates to:
+  /// **'中文原文'**
+  String get practiceChineseOriginal;
+
+  /// No description provided for @practiceJapaneseInputHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在这里输入你的日语翻译'**
+  String get practiceJapaneseInputHint;
+
+  /// No description provided for @practiceSentenceCheckInstruction.
+  ///
+  /// In zh, this message translates to:
+  /// **'在下方自由输入日语，AI 会检查语法和自然度。'**
+  String get practiceSentenceCheckInstruction;
+
+  /// No description provided for @practiceSentenceCheckInputHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'在这里自由输入日语'**
+  String get practiceSentenceCheckInputHint;
+
+  /// No description provided for @practiceFeedbackTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'练习结果'**
+  String get practiceFeedbackTitle;
+
+  /// No description provided for @practiceGrammarSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'浏览 JLPT N5-N1 语法点'**
+  String get practiceGrammarSubtitle;
+
+  /// No description provided for @practiceMultipleChoiceContinue.
+  ///
+  /// In zh, this message translates to:
+  /// **'继续'**
+  String get practiceMultipleChoiceContinue;
+
+  /// No description provided for @practiceMultipleChoiceViewExplanation.
+  ///
+  /// In zh, this message translates to:
+  /// **'查看解释'**
+  String get practiceMultipleChoiceViewExplanation;
+
+  /// No description provided for @settingsAiBackToSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'返回设置'**
+  String get settingsAiBackToSettings;
+
+  /// No description provided for @settingsAiFetchModels.
+  ///
+  /// In zh, this message translates to:
+  /// **'获取模型列表'**
+  String get settingsAiFetchModels;
+
+  /// No description provided for @settingsAiFetchingModels.
+  ///
+  /// In zh, this message translates to:
+  /// **'正在获取模型列表...'**
+  String get settingsAiFetchingModels;
+
+  /// No description provided for @settingsAiNoModelsFound.
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到模型'**
+  String get settingsAiNoModelsFound;
+
+  /// No description provided for @settingsAiAddConfig.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加配置'**
+  String get settingsAiAddConfig;
+
+  /// No description provided for @settingsAiDeleteConfig.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除配置'**
+  String get settingsAiDeleteConfig;
+
+  /// No description provided for @settingsAiConfigName.
+  ///
+  /// In zh, this message translates to:
+  /// **'配置名称'**
+  String get settingsAiConfigName;
+
+  /// No description provided for @settingsAiConfigNameHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'例如：DeepSeek、OpenAI 官方'**
+  String get settingsAiConfigNameHint;
+
+  /// No description provided for @settingsAiSelectConfig.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择配置'**
+  String get settingsAiSelectConfig;
+
+  /// No description provided for @practiceNotSure.
+  ///
+  /// In zh, this message translates to:
+  /// **'不确定'**
+  String get practiceNotSure;
+
+  /// No description provided for @practiceSelectOption.
+  ///
+  /// In zh, this message translates to:
+  /// **'请选择一个选项'**
+  String get practiceSelectOption;
 }
 
 class _AppLocalizationsDelegate

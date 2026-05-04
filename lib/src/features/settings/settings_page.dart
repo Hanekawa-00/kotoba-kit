@@ -135,6 +135,19 @@ class SettingsPage extends ConsumerWidget {
         // Dictionary management
         _DictionaryManagementSection(),
         SectionCard(
+          title: l10n.settingsAiServiceTitle,
+          icon: Icons.smart_toy_outlined,
+          children: [
+            _PreferenceTile(
+              icon: Icons.psychology_outlined,
+              title: Text(l10n.settingsAiModelTitle),
+              subtitle: Text(l10n.settingsAiModelSubtitle),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => context.push('/settings/ai-model'),
+            ),
+          ],
+        ),
+        SectionCard(
           title: l10n.settingsOtherTitle,
           icon: Icons.more_horiz_rounded,
           children: [

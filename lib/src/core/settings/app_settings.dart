@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../ai/llm_config.dart';
+
 enum AppColorPreset {
   ocean('Ocean', Color(0xFF1565C0)),
   forest('Forest', Color(0xFF4A672D)),
@@ -27,6 +29,8 @@ class AppSettings {
     required this.colorPreset,
     required this.pureBlackDarkMode,
     required this.compactDensity,
+    required this.llmConfigs,
+    required this.activeLlmConfigId,
   });
 
   factory AppSettings.defaults() {
@@ -35,6 +39,8 @@ class AppSettings {
       colorPreset: AppColorPreset.ocean,
       pureBlackDarkMode: false,
       compactDensity: false,
+      llmConfigs: [],
+      activeLlmConfigId: null,
     );
   }
 
@@ -42,18 +48,29 @@ class AppSettings {
   final AppColorPreset colorPreset;
   final bool pureBlackDarkMode;
   final bool compactDensity;
+  final List<LlmConfig> llmConfigs;
+  final String? activeLlmConfigId;
+
+  LlmConfig? get activeLlmConfig {
+    if (activeLlmConfigId == null) return llmConfigs.isNotEmpty ? llmConfigs.first : null;
+    return llmConfigs.where((c) => c.id == activeLlmConfigId).firstOrNull;
+  }
 
   AppSettings copyWith({
     ThemeMode? themeMode,
     AppColorPreset? colorPreset,
     bool? pureBlackDarkMode,
     bool? compactDensity,
+    List<LlmConfig>? llmConfigs,
+    String? activeLlmConfigId,
   }) {
     return AppSettings(
       themeMode: themeMode ?? this.themeMode,
       colorPreset: colorPreset ?? this.colorPreset,
       pureBlackDarkMode: pureBlackDarkMode ?? this.pureBlackDarkMode,
       compactDensity: compactDensity ?? this.compactDensity,
+      llmConfigs: llmConfigs ?? this.llmConfigs,
+      activeLlmConfigId: activeLlmConfigId ?? this.activeLlmConfigId,
     );
   }
 }

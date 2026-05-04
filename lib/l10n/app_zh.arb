@@ -181,5 +181,94 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsAiServiceTitle": "AI 服务",
+  "settingsAiModelTitle": "AI 模型",
+  "settingsAiModelSubtitle": "配置造句练习使用的 LLM 提供商和模型。",
+  "settingsAiProviderTitle": "提供商",
+  "settingsAiProviderLabel": "LLM 提供商",
+  "settingsAiProviderDesc": "选择用于造句练习的 AI 提供商。",
+  "settingsAiCredentialsTitle": "凭证",
+  "settingsAiApiKeyLabel": "API 密钥",
+  "settingsAiApiKeyDesc": "API 密钥仅存储在本地，只发送到所选提供商的 API。",
+  "settingsAiModelLabel": "模型",
+  "settingsAiModelDesc": "用于生成和评估的模型名称。",
+  "settingsAiBaseUrlLabel": "基础 URL",
+  "settingsAiBaseUrlDesc": "自托管或兼容 API 的自定义端点 URL。",
+  "settingsAiActionsTitle": "操作",
+  "settingsAiTestConnection": "测试连接",
+  "settingsAiSave": "保存",
+  "settingsTestConnectionSuccess": "配置看起来有效。",
+  "settingsTestConnectionFailed": "连接测试失败：{error}",
+  "@settingsTestConnectionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTestConnectionNoConfig": "请输入 API 密钥或配置本地端点。",
+  "settingsSaved": "设置已保存。",
+  "navPractice": "练习",
+  "commandGoPractice": "前往练习",
+  "practiceTitle": "造句练习",
+  "practiceSubtitle": "使用 AI 反馈练习日语句子构造。",
+  "practiceModeTranslation": "翻译造句",
+  "practiceModeTranslationDesc": "阅读中文，写出日语，获取评分。",
+  "practiceModeMultipleChoice": "选择题",
+  "practiceModeMultipleChoiceDesc": "选择正确的日语翻译。",
+  "practiceModeSentenceCheck": "自由造句",
+  "practiceModeSentenceCheckDesc": "自由输入日语，获取语法反馈。",
+  "practiceDifficulty": "难度",
+  "practiceSentenceLength": "句子长度",
+  "practiceStartButton": "开始练习",
+  "practiceNoApiKey": "请先在设置中配置 AI 模型。",
+  "practiceSubmit": "提交",
+  "practiceNextTask": "下一题",
+  "practiceTryAgain": "再试一次",
+  "practiceBackToMenu": "返回菜单",
+  "practiceScore": "评分",
+  "practiceEvaluation": "评价",
+  "practiceCorrectedSentence": "修正后的句子",
+  "practiceExplanation": "详细解释",
+  "practiceYourTranslation": "你的翻译",
+  "practiceGenerating": "正在生成练习...",
+  "practiceEvaluating": "正在评估...",
+  "practiceNoGrammarPoints": "此等级暂无语法点。",
+  "practiceGrammarTitle": "语法库",
+  "practiceGrammarBrowse": "语法库",
+  "practiceHistoryTitle": "练习历史",
+  "practiceHistoryEmpty": "暂无练习记录。",
+  "practiceHistoryScore": "评分：{score}",
+  "@practiceHistoryScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceHistoryDeleteConfirm": "删除这条记录？",
+  "practiceSentenceLengthShort": "短",
+  "practiceSentenceLengthMedium": "中",
+  "practiceSentenceLengthLong": "长",
+  "practiceModeLabel": "练习模式",
+  "practiceChineseOriginal": "中文原文",
+  "practiceJapaneseInputHint": "在这里输入你的日语翻译",
+  "practiceSentenceCheckInstruction": "在下方自由输入日语，AI 会检查语法和自然度。",
+  "practiceSentenceCheckInputHint": "在这里自由输入日语",
+  "practiceFeedbackTitle": "练习结果",
+  "practiceGrammarSubtitle": "浏览 JLPT N5-N1 语法点",
+  "practiceMultipleChoiceContinue": "继续",
+  "practiceMultipleChoiceViewExplanation": "查看解释",
+  "settingsAiBackToSettings": "返回设置",
+  "settingsAiFetchModels": "获取模型列表",
+  "settingsAiFetchingModels": "正在获取模型列表...",
+  "settingsAiNoModelsFound": "未找到模型",
+  "settingsAiAddConfig": "添加配置",
+  "settingsAiDeleteConfig": "删除配置",
+  "settingsAiConfigName": "配置名称",
+  "settingsAiConfigNameHint": "例如：DeepSeek、OpenAI 官方",
+  "settingsAiSelectConfig": "选择配置",
+  "practiceNotSure": "不确定",
+  "practiceSelectOption": "请选择一个选项"
 }

@@ -456,4 +456,245 @@ class AppLocalizationsEn extends AppLocalizations {
   String dictionaryOperationFailed(String error) {
     return 'Dictionary operation failed: $error';
   }
+
+  @override
+  String get settingsAiServiceTitle => 'AI Service';
+
+  @override
+  String get settingsAiModelTitle => 'AI Model';
+
+  @override
+  String get settingsAiModelSubtitle =>
+      'Configure the LLM provider and model for practice features.';
+
+  @override
+  String get settingsAiProviderTitle => 'Provider';
+
+  @override
+  String get settingsAiProviderLabel => 'LLM Provider';
+
+  @override
+  String get settingsAiProviderDesc =>
+      'Select which AI provider to use for sentence practice.';
+
+  @override
+  String get settingsAiCredentialsTitle => 'Credentials';
+
+  @override
+  String get settingsAiApiKeyLabel => 'API Key';
+
+  @override
+  String get settingsAiApiKeyDesc =>
+      'Your API key is stored locally and never sent anywhere except to the provider\'s API.';
+
+  @override
+  String get settingsAiModelLabel => 'Model';
+
+  @override
+  String get settingsAiModelDesc =>
+      'The model name to use for generation and evaluation.';
+
+  @override
+  String get settingsAiBaseUrlLabel => 'Base URL';
+
+  @override
+  String get settingsAiBaseUrlDesc =>
+      'Custom endpoint URL for self-hosted or compatible APIs.';
+
+  @override
+  String get settingsAiActionsTitle => 'Actions';
+
+  @override
+  String get settingsAiTestConnection => 'Test Connection';
+
+  @override
+  String get settingsAiSave => 'Save';
+
+  @override
+  String get settingsTestConnectionSuccess => 'Configuration looks valid.';
+
+  @override
+  String settingsTestConnectionFailed(String error) {
+    return 'Connection test failed: $error';
+  }
+
+  @override
+  String get settingsTestConnectionNoConfig =>
+      'Please enter an API key or configure a local endpoint.';
+
+  @override
+  String get settingsSaved => 'Settings saved.';
+
+  @override
+  String get navPractice => 'Practice';
+
+  @override
+  String get commandGoPractice => 'Go to Practice';
+
+  @override
+  String get practiceTitle => 'Sentence Practice';
+
+  @override
+  String get practiceSubtitle =>
+      'Practice Japanese sentence construction with AI feedback.';
+
+  @override
+  String get practiceModeTranslation => 'Translation';
+
+  @override
+  String get practiceModeTranslationDesc =>
+      'Read Chinese, write Japanese, get scored.';
+
+  @override
+  String get practiceModeMultipleChoice => 'Multiple Choice';
+
+  @override
+  String get practiceModeMultipleChoiceDesc =>
+      'Pick the correct Japanese translation.';
+
+  @override
+  String get practiceModeSentenceCheck => 'Free Sentence Check';
+
+  @override
+  String get practiceModeSentenceCheckDesc =>
+      'Write freely in Japanese and get grammar feedback.';
+
+  @override
+  String get practiceDifficulty => 'Difficulty';
+
+  @override
+  String get practiceSentenceLength => 'Sentence Length';
+
+  @override
+  String get practiceStartButton => 'Start Practice';
+
+  @override
+  String get practiceNoApiKey => 'Configure an AI model in Settings first.';
+
+  @override
+  String get practiceSubmit => 'Submit';
+
+  @override
+  String get practiceNextTask => 'Next Task';
+
+  @override
+  String get practiceTryAgain => 'Try Again';
+
+  @override
+  String get practiceBackToMenu => 'Back to Menu';
+
+  @override
+  String get practiceScore => 'Score';
+
+  @override
+  String get practiceEvaluation => 'Evaluation';
+
+  @override
+  String get practiceCorrectedSentence => 'Corrected Sentence';
+
+  @override
+  String get practiceExplanation => 'Explanation';
+
+  @override
+  String get practiceYourTranslation => 'Your translation';
+
+  @override
+  String get practiceGenerating => 'Generating exercise...';
+
+  @override
+  String get practiceEvaluating => 'Evaluating...';
+
+  @override
+  String get practiceNoGrammarPoints => 'No grammar points for this level.';
+
+  @override
+  String get practiceGrammarTitle => 'Grammar Library';
+
+  @override
+  String get practiceGrammarBrowse => 'Grammar Library';
+
+  @override
+  String get practiceHistoryTitle => 'Practice History';
+
+  @override
+  String get practiceHistoryEmpty => 'No practice history yet.';
+
+  @override
+  String practiceHistoryScore(int score) {
+    return 'Score: $score';
+  }
+
+  @override
+  String get practiceHistoryDeleteConfirm => 'Delete this record?';
+
+  @override
+  String get practiceSentenceLengthShort => 'Short';
+
+  @override
+  String get practiceSentenceLengthMedium => 'Medium';
+
+  @override
+  String get practiceSentenceLengthLong => 'Long';
+
+  @override
+  String get practiceModeLabel => 'Practice Mode';
+
+  @override
+  String get practiceChineseOriginal => 'Chinese Original';
+
+  @override
+  String get practiceJapaneseInputHint =>
+      'Enter your Japanese translation here';
+
+  @override
+  String get practiceSentenceCheckInstruction =>
+      'Enter Japanese below and AI will check grammar and naturalness.';
+
+  @override
+  String get practiceSentenceCheckInputHint => 'Enter Japanese freely here';
+
+  @override
+  String get practiceFeedbackTitle => 'Practice Result';
+
+  @override
+  String get practiceGrammarSubtitle => 'Browse JLPT N5-N1 grammar points';
+
+  @override
+  String get practiceMultipleChoiceContinue => 'Continue';
+
+  @override
+  String get practiceMultipleChoiceViewExplanation => 'View Explanation';
+
+  @override
+  String get settingsAiBackToSettings => 'Back to settings';
+
+  @override
+  String get settingsAiFetchModels => 'Fetch Models';
+
+  @override
+  String get settingsAiFetchingModels => 'Fetching models...';
+
+  @override
+  String get settingsAiNoModelsFound => 'No models found';
+
+  @override
+  String get settingsAiAddConfig => 'Add Configuration';
+
+  @override
+  String get settingsAiDeleteConfig => 'Delete Configuration';
+
+  @override
+  String get settingsAiConfigName => 'Configuration Name';
+
+  @override
+  String get settingsAiConfigNameHint => 'e.g. DeepSeek, OpenAI Official';
+
+  @override
+  String get settingsAiSelectConfig => 'Select Configuration';
+
+  @override
+  String get practiceNotSure => 'I\'m not sure';
+
+  @override
+  String get practiceSelectOption => 'Select an option';
 }

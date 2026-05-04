@@ -181,5 +181,94 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsAiServiceTitle": "AI Service",
+  "settingsAiModelTitle": "AI Model",
+  "settingsAiModelSubtitle": "Configure the LLM provider and model for practice features.",
+  "settingsAiProviderTitle": "Provider",
+  "settingsAiProviderLabel": "LLM Provider",
+  "settingsAiProviderDesc": "Select which AI provider to use for sentence practice.",
+  "settingsAiCredentialsTitle": "Credentials",
+  "settingsAiApiKeyLabel": "API Key",
+  "settingsAiApiKeyDesc": "Your API key is stored locally and never sent anywhere except to the provider's API.",
+  "settingsAiModelLabel": "Model",
+  "settingsAiModelDesc": "The model name to use for generation and evaluation.",
+  "settingsAiBaseUrlLabel": "Base URL",
+  "settingsAiBaseUrlDesc": "Custom endpoint URL for self-hosted or compatible APIs.",
+  "settingsAiActionsTitle": "Actions",
+  "settingsAiTestConnection": "Test Connection",
+  "settingsAiSave": "Save",
+  "settingsTestConnectionSuccess": "Configuration looks valid.",
+  "settingsTestConnectionFailed": "Connection test failed: {error}",
+  "@settingsTestConnectionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTestConnectionNoConfig": "Please enter an API key or configure a local endpoint.",
+  "settingsSaved": "Settings saved.",
+  "navPractice": "Practice",
+  "commandGoPractice": "Go to Practice",
+  "practiceTitle": "Sentence Practice",
+  "practiceSubtitle": "Practice Japanese sentence construction with AI feedback.",
+  "practiceModeTranslation": "Translation",
+  "practiceModeTranslationDesc": "Read Chinese, write Japanese, get scored.",
+  "practiceModeMultipleChoice": "Multiple Choice",
+  "practiceModeMultipleChoiceDesc": "Pick the correct Japanese translation.",
+  "practiceModeSentenceCheck": "Free Sentence Check",
+  "practiceModeSentenceCheckDesc": "Write freely in Japanese and get grammar feedback.",
+  "practiceDifficulty": "Difficulty",
+  "practiceSentenceLength": "Sentence Length",
+  "practiceStartButton": "Start Practice",
+  "practiceNoApiKey": "Configure an AI model in Settings first.",
+  "practiceSubmit": "Submit",
+  "practiceNextTask": "Next Task",
+  "practiceTryAgain": "Try Again",
+  "practiceBackToMenu": "Back to Menu",
+  "practiceScore": "Score",
+  "practiceEvaluation": "Evaluation",
+  "practiceCorrectedSentence": "Corrected Sentence",
+  "practiceExplanation": "Explanation",
+  "practiceYourTranslation": "Your translation",
+  "practiceGenerating": "Generating exercise...",
+  "practiceEvaluating": "Evaluating...",
+  "practiceNoGrammarPoints": "No grammar points for this level.",
+  "practiceGrammarTitle": "Grammar Library",
+  "practiceGrammarBrowse": "Grammar Library",
+  "practiceHistoryTitle": "Practice History",
+  "practiceHistoryEmpty": "No practice history yet.",
+  "practiceHistoryScore": "Score: {score}",
+  "@practiceHistoryScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "practiceHistoryDeleteConfirm": "Delete this record?",
+  "practiceSentenceLengthShort": "Short",
+  "practiceSentenceLengthMedium": "Medium",
+  "practiceSentenceLengthLong": "Long",
+  "practiceModeLabel": "Practice Mode",
+  "practiceChineseOriginal": "Chinese Original",
+  "practiceJapaneseInputHint": "Enter your Japanese translation here",
+  "practiceSentenceCheckInstruction": "Enter Japanese below and AI will check grammar and naturalness.",
+  "practiceSentenceCheckInputHint": "Enter Japanese freely here",
+  "practiceFeedbackTitle": "Practice Result",
+  "practiceGrammarSubtitle": "Browse JLPT N5-N1 grammar points",
+  "practiceMultipleChoiceContinue": "Continue",
+  "practiceMultipleChoiceViewExplanation": "View Explanation",
+  "settingsAiBackToSettings": "Back to settings",
+  "settingsAiFetchModels": "Fetch Models",
+  "settingsAiFetchingModels": "Fetching models...",
+  "settingsAiNoModelsFound": "No models found",
+  "settingsAiAddConfig": "Add Configuration",
+  "settingsAiDeleteConfig": "Delete Configuration",
+  "settingsAiConfigName": "Configuration Name",
+  "settingsAiConfigNameHint": "e.g. DeepSeek, OpenAI Official",
+  "settingsAiSelectConfig": "Select Configuration",
+  "practiceNotSure": "I'm not sure",
+  "practiceSelectOption": "Select an option"
 }

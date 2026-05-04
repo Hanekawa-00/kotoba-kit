@@ -23,6 +23,11 @@ class AppShell extends StatefulWidget {
       selectedIcon: Icons.dashboard,
     ),
     _ShellDestination(
+      path: '/practice',
+      icon: Icons.edit_note_outlined,
+      selectedIcon: Icons.edit_note,
+    ),
+    _ShellDestination(
       path: '/dictionary',
       icon: Icons.menu_book_outlined,
       selectedIcon: Icons.menu_book_rounded,
@@ -206,6 +211,18 @@ class _AppShellState extends State<AppShell> {
       return l10n.homeTitle;
     }
 
+    if (location.startsWith('/practice/grammar')) {
+      return l10n.practiceGrammarTitle;
+    }
+
+    if (location.startsWith('/practice/history')) {
+      return l10n.practiceHistoryTitle;
+    }
+
+    if (location.startsWith('/practice')) {
+      return l10n.practiceTitle;
+    }
+
     if (location.startsWith('/dictionary')) {
       return l10n.dictionaryTitle;
     }
@@ -236,6 +253,10 @@ class _AppShellState extends State<AppShell> {
   String _parentPathFor(String location) {
     if (location.startsWith('/settings/')) {
       return '/settings';
+    }
+
+    if (location.startsWith('/practice/')) {
+      return '/practice';
     }
 
     return '/';
@@ -607,6 +628,7 @@ class _ShellDestination {
 
     return switch (path) {
       '/dictionary' => l10n.navDictionary,
+      '/practice' => l10n.navPractice,
       '/settings' => l10n.navSettings,
       // '/components' => l10n.navComponents,
       _ => l10n.navHome,
