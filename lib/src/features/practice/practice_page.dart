@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/localization/localization_extensions.dart';
 import '../../core/theme/app_design_tokens.dart';
 import '../../shared/widgets/app_state_views.dart';
+import '../../shared/widgets/page_frame.dart';
 import 'models/practice_types.dart';
 import 'providers/practice_providers.dart';
 import 'widgets/feedback_view.dart';
@@ -24,18 +25,18 @@ class _PracticePageState extends ConsumerState<PracticePage> {
   Widget build(BuildContext context) {
     final asyncState = ref.watch(practiceControllerProvider);
 
-    return asyncState.when(
-      data: (state) => _buildForState(state),
-      loading: () => const SafeArea(
-        top: false,
-        bottom: false,
-        child: Center(child: AppLoadingView()),
-      ),
-      error: (error, _) => SafeArea(
-        top: false,
-        bottom: false,
-        child: Center(
-          child: AppErrorView(message: error.toString()),
+    return _PracticePageShell(
+      child: asyncState.when(
+        data: (state) => _buildForState(state),
+        loading: () => const SafeArea(
+          top: false,
+          bottom: false,
+          child: Center(child: AppLoadingView()),
+        ),
+        error: (error, _) => SafeArea(
+          top: false,
+          bottom: false,
+          child: Center(child: AppErrorView(message: error.toString())),
         ),
       ),
     );
@@ -46,13 +47,46 @@ class _PracticePageState extends ConsumerState<PracticePage> {
       GameState.welcome => PracticeWelcomeView(state: state),
       GameState.loading => _LoadingView(),
       GameState.practicing => switch (state.gameMode) {
-          GameMode.translation => TranslationExercise(state: state),
-          GameMode.multipleChoice => MultipleChoiceExercise(state: state),
-          GameMode.sentenceCheck => SentenceCheckExercise(state: state),
-        },
+        GameMode.translation => TranslationExercise(state: state),
+        GameMode.multipleChoice => MultipleChoiceExercise(state: state),
+        GameMode.sentenceCheck => SentenceCheckExercise(state: state),
+      },
       GameState.feedback => FeedbackView(state: state),
       _ => PracticeWelcomeView(state: state),
     };
+  }
+}
+
+class _PracticePageShell extends StatelessWidget {
+  const _PracticePageShell({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth < 760) {
+          return child;
+        }
+
+        return SafeArea(
+          top: true,
+          bottom: false,
+          child: Column(
+            children: [
+              PageHeaderBar(
+                title: l10n.practiceTitle,
+                subtitle: l10n.practiceSubtitle,
+              ),
+              Expanded(child: child),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -76,4 +110,3 @@ class _LoadingView extends StatelessWidget {
     );
   }
 }
-

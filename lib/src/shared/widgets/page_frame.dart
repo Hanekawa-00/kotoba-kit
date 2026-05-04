@@ -58,6 +58,58 @@ class PageFrame extends StatelessWidget {
   }
 }
 
+class PageHeaderBar extends StatelessWidget {
+  const PageHeaderBar({
+    super.key,
+    required this.title,
+    this.subtitle,
+    this.trailing,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final spacing = theme.spacing;
+    final scheme = theme.colorScheme;
+    final height = subtitle == null ? 104.0 : 144.0;
+
+    return SizedBox(
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: scheme.surface.withValues(alpha: 0.96),
+          border: Border(
+            bottom: BorderSide(
+              color: scheme.outlineVariant.withValues(alpha: 0.24),
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.xl,
+            spacing.lg,
+            spacing.xl,
+            spacing.md,
+          ),
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: _PageHeader(
+              title: title,
+              subtitle: subtitle,
+              trailing: trailing,
+              maxHeight: height - spacing.lg - spacing.md,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _PageHeaderDelegate extends SliverPersistentHeaderDelegate {
   const _PageHeaderDelegate({
     required this.title,

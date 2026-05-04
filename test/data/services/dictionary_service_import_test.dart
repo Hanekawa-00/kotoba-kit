@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kotoba_kit/src/data/services/dictionary_service_io.dart';
@@ -29,6 +31,13 @@ void main() {
       final mdd = XFile('daijisen.mdd');
 
       expect(selectMdxFileForImport([mdd]), isNull);
+    });
+
+    test('repairs common utf8 decoded as latin1 mojibake', () {
+      final mojibakeKana = latin1.decode(utf8.encode('うえる'));
+
+      expect(repairCommonMojibake('ï¼»pronunciationï¼½'), '［pronunciation］');
+      expect(repairCommonMojibake(mojibakeKana), 'うえる');
     });
   });
 }

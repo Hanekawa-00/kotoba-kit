@@ -6,6 +6,7 @@ import '../../core/theme/app_design_tokens.dart';
 import '../../data/models/dictionary_entry.dart';
 import '../../shared/services/app_messenger.dart';
 import '../../shared/widgets/app_state_views.dart';
+import '../../shared/widgets/page_frame.dart';
 import 'dictionary_providers.dart';
 import 'mdict_web_view.dart';
 
@@ -265,45 +266,66 @@ class _DesktopLookupLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final spacing = Theme.of(context).spacing;
 
     return SafeArea(
       top: true,
       bottom: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(spacing.xl, spacing.lg, spacing.xl, 0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              width: 316,
-              child: _LookupSidePanel(
-                state: state,
-                controller: searchController,
-                focusNode: searchFocusNode,
-                showAssist: searchHasFocus,
-                onDraftChanged: onDraftChanged,
-                onSearch: onSearch,
+      child: Column(
+        children: [
+          PageHeaderBar(
+            title: l10n.dictionaryTitle,
+            subtitle: l10n.dictionarySubtitle,
+          ),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                spacing.xl,
+                spacing.sm,
+                spacing.xl,
+                0,
               ),
-            ),
-            SizedBox(width: spacing.lg),
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: onDismissSearchFocus,
-                    child: Padding(
-                      key: ValueKey('lookup-desktop-${constraints.maxWidth.toInt()}'),
-                      padding: EdgeInsets.only(bottom: spacing.xxl),
-                      child: _ResultPane(state: state, onSearch: onSearch),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 316,
+                    child: _LookupSidePanel(
+                      state: state,
+                      controller: searchController,
+                      focusNode: searchFocusNode,
+                      showAssist: searchHasFocus,
+                      onDraftChanged: onDraftChanged,
+                      onSearch: onSearch,
                     ),
-                  );
-                },
+                  ),
+                  SizedBox(width: spacing.lg),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: onDismissSearchFocus,
+                          child: Padding(
+                            key: ValueKey(
+                              'lookup-desktop-${constraints.maxWidth.toInt()}',
+                            ),
+                            padding: EdgeInsets.only(bottom: spacing.xxl),
+                            child: _ResultPane(
+                              state: state,
+                              onSearch: onSearch,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -350,36 +372,38 @@ class _TopSearchBar extends StatelessWidget {
           spacing.lg,
           spacing.sm,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SearchRow(
-              state: state,
-              controller: controller,
-              focusNode: focusNode,
-              onDraftChanged: onDraftChanged,
-              onSearch: onSearch,
-              compact: true,
-            ),
-            if (showAssist &&
-                _searchAssistItems(state, controller.text).isNotEmpty) ...[
-              SizedBox(height: spacing.sm),
-              _SearchAssistList(
+        child: TextFieldTapRegion(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SearchRow(
                 state: state,
-                query: controller.text,
+                controller: controller,
+                focusNode: focusNode,
+                onDraftChanged: onDraftChanged,
                 onSearch: onSearch,
-                maxItems: 18,
-                maxHeight: assistMaxHeight,
+                compact: true,
               ),
+              if (showAssist &&
+                  _searchAssistItems(state, controller.text).isNotEmpty) ...[
+                SizedBox(height: spacing.sm),
+                _SearchAssistList(
+                  state: state,
+                  query: controller.text,
+                  onSearch: onSearch,
+                  maxItems: 18,
+                  maxHeight: assistMaxHeight,
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _LookupSidePanel extends ConsumerWidget {
+class _LookupSidePanel extends StatelessWidget {
   const _LookupSidePanel({
     required this.state,
     required this.controller,
@@ -397,13 +421,11 @@ class _LookupSidePanel extends ConsumerWidget {
   final ValueChanged<String> onSearch;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final spacing = theme.spacing;
     final scheme = theme.colorScheme;
-    final entriesBySource = state.result.entriesBySource;
-    final sourceKeys = entriesBySource.keys.toList();
 
     return DecoratedBox(
       key: const ValueKey('lookup-desktop-side-panel'),
@@ -416,90 +438,51 @@ class _LookupSidePanel extends ConsumerWidget {
       ),
       child: Padding(
         padding: EdgeInsets.all(spacing.lg),
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Text(
-              l10n.dictionaryTitle,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            SizedBox(height: spacing.xs),
-            Text(
-              l10n.dictionarySubtitle,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-            SizedBox(height: spacing.lg),
-            _SearchRow(
-              state: state,
-              controller: controller,
-              focusNode: focusNode,
-              onDraftChanged: onDraftChanged,
-              onSearch: onSearch,
-              compact: false,
-            ),
-            if (showAssist &&
-                _searchAssistItems(state, controller.text).isNotEmpty) ...[
-              SizedBox(height: spacing.md),
-              _SearchAssistList(
+        child: TextFieldTapRegion(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              _SearchRow(
                 state: state,
-                query: controller.text,
+                controller: controller,
+                focusNode: focusNode,
+                onDraftChanged: onDraftChanged,
                 onSearch: onSearch,
-                maxItems: 18,
-                maxHeight: 236,
+                compact: false,
               ),
-            ],
-            if (sourceKeys.isNotEmpty) ...[
-              SizedBox(height: spacing.xl),
-              Text(
-                l10n.dictionaryResultsTitle,
-                style: theme.textTheme.titleSmall,
-              ),
-              SizedBox(height: spacing.sm),
-              for (var i = 0; i < sourceKeys.length; i++)
-                Padding(
-                  padding: EdgeInsets.only(bottom: spacing.xs),
-                  child: ChoiceChip(
-                    label: Text(
-                      '${sourceKeys[i]} (${entriesBySource[sourceKeys[i]]!.length})',
+              if (showAssist &&
+                  _searchAssistItems(state, controller.text).isNotEmpty) ...[
+                SizedBox(height: spacing.md),
+                _SearchAssistList(
+                  state: state,
+                  query: controller.text,
+                  onSearch: onSearch,
+                  maxItems: 18,
+                  maxHeight: 236,
+                ),
+              ],
+              if (state.searchHistory.isNotEmpty) ...[
+                SizedBox(height: spacing.xl),
+                Text(
+                  l10n.dictionaryHistoryTitle,
+                  style: theme.textTheme.titleSmall,
+                ),
+                SizedBox(height: spacing.sm),
+                for (final item in state.searchHistory.take(10))
+                  ListTile(
+                    dense: true,
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.history_rounded),
+                    title: Text(
+                      item,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    selected:
-                        i ==
-                        state.selectedSourceIndex
-                            .clamp(0, sourceKeys.length - 1)
-                            .toInt(),
-                    onSelected: (_) {
-                      ref
-                          .read(dictionaryControllerProvider.notifier)
-                          .selectSource(i);
-                    },
+                    onTap: () => onSearch(item),
                   ),
-                ),
+              ],
             ],
-            if (state.searchHistory.isNotEmpty) ...[
-              SizedBox(height: spacing.xl),
-              Text(
-                l10n.dictionaryHistoryTitle,
-                style: theme.textTheme.titleSmall,
-              ),
-              SizedBox(height: spacing.sm),
-              for (final item in state.searchHistory.take(10))
-                ListTile(
-                  dense: true,
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.history_rounded),
-                  title: Text(
-                    item,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  onTap: () => onSearch(item),
-                ),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -627,15 +610,17 @@ class _SearchAssistList extends StatelessWidget {
       ),
       child: SizedBox(
         height: height,
-        child: Scrollbar(
-          child: ListView.builder(
-            key: const ValueKey('lookup-search-assist-scroll'),
-            padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
-            itemExtent: 38,
-            itemBuilder: (context, index) =>
-                _SearchAssistTile(item: items[index], onSearch: onSearch),
-            itemCount: items.length,
+        child: ListView.separated(
+          key: const ValueKey('lookup-search-assist-scroll'),
+          padding: EdgeInsets.symmetric(vertical: theme.spacing.xs),
+          primary: false,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
+          itemBuilder: (context, index) => SizedBox(
+            height: 38,
+            child: _SearchAssistTile(item: items[index], onSearch: onSearch),
           ),
+          separatorBuilder: (context, index) => const SizedBox.shrink(),
+          itemCount: items.length,
         ),
       ),
     );
@@ -651,11 +636,14 @@ class _SearchAssistTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: () => onSearch(item.value),
-      borderRadius: BorderRadius.circular(theme.radii.sm),
-      child: SizedBox(
-        height: 38,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          FocusManager.instance.primaryFocus?.unfocus();
+          onSearch(item.value);
+        },
+        borderRadius: BorderRadius.circular(theme.radii.sm),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: theme.spacing.sm),
           child: Row(
@@ -794,20 +782,38 @@ class _ResultPane extends ConsumerWidget {
         .toInt();
     final currentEntry = entriesForSource[safeEntryIndex];
 
-    return _ReadingPanel(
-      entry: currentEntry,
-      result: state.result,
-      sourceKeys: sourceKeys,
-      selectedSourceIndex: safeSourceIndex,
-      entriesForSource: entriesForSource,
-      selectedEntryIndex: safeEntryIndex,
-      onSourceSelected: (index) {
-        ref.read(dictionaryControllerProvider.notifier).selectSource(index);
-      },
-      onEntrySelected: (index) {
-        ref.read(dictionaryControllerProvider.notifier).selectEntry(index);
-      },
-      onSearch: onSearch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (sourceKeys.length > 1)
+          Padding(
+            padding: EdgeInsets.only(bottom: Theme.of(context).spacing.md),
+            child: _SourceSwitcher(
+              sourceKeys: sourceKeys,
+              selectedIndex: safeSourceIndex,
+              entriesBySource: state.result.entriesBySource,
+              onSelected: (index) {
+                ref
+                    .read(dictionaryControllerProvider.notifier)
+                    .selectSource(index);
+              },
+            ),
+          ),
+        Expanded(
+          child: _ReadingPanel(
+            entry: currentEntry,
+            result: state.result,
+            entriesForSource: entriesForSource,
+            selectedEntryIndex: safeEntryIndex,
+            onEntrySelected: (index) {
+              ref
+                  .read(dictionaryControllerProvider.notifier)
+                  .selectEntry(index);
+            },
+            onSearch: onSearch,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -919,22 +925,16 @@ class _ReadingPanel extends StatelessWidget {
   const _ReadingPanel({
     required this.entry,
     required this.result,
-    required this.sourceKeys,
-    required this.selectedSourceIndex,
     required this.entriesForSource,
     required this.selectedEntryIndex,
-    required this.onSourceSelected,
     required this.onEntrySelected,
     required this.onSearch,
   });
 
   final DictionaryEntry entry;
   final DictionarySearchResult result;
-  final List<String> sourceKeys;
-  final int selectedSourceIndex;
   final List<DictionaryEntry> entriesForSource;
   final int selectedEntryIndex;
-  final ValueChanged<int> onSourceSelected;
   final ValueChanged<int> onEntrySelected;
   final ValueChanged<String> onSearch;
 
@@ -963,15 +963,6 @@ class _ReadingPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _SourceErrors(errors: result.sourceErrors),
-                      if (sourceKeys.length > 1) ...[
-                        _SourceSwitcher(
-                          sourceKeys: sourceKeys,
-                          selectedIndex: selectedSourceIndex,
-                          entriesBySource: result.entriesBySource,
-                          onSelected: onSourceSelected,
-                        ),
-                        SizedBox(height: spacing.md),
-                      ],
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

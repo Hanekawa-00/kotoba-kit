@@ -486,7 +486,7 @@ class DictionaryService {
       selectedFileExtensionForImport(file);
 
   String _cleanRecord(String value) {
-    return value.replaceAll('\u0000', '').trim();
+    return repairCommonMojibake(value.replaceAll('\u0000', '')).trim();
   }
 
   String? _extractMdictLink(String value) {
@@ -615,4 +615,25 @@ String ensureFileExtensionForImport(String fileName, String extension) {
   }
 
   return '$fileName$extension';
+}
+
+@visibleForTesting
+String repairCommonMojibake(String value) {
+  final suspiciousRun = RegExp(r'[\u0080-\u00FF]{2,}');
+  final repaired = value.replaceAllMapped(suspiciousRun, (match) {
+    final segment = match.group(0)!;
+    try {
+      final decoded = utf8.decode(
+        latin1.encode(segment),
+        allowMalformed: false,
+      );
+      return decoded == segment ? segment : decoded;
+    } on FormatException {
+      return segment;
+    }
+  });
+
+  return repaired
+      .replaceAll(RegExp(r'ï¼[□\uFFFD]'), '')
+      .replaceAll(RegExp(r'ï½[□\uFFFD]'), '');
 }

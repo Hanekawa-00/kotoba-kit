@@ -91,6 +91,27 @@ void main() {
     expect(assist, findsNothing);
   });
 
+  testWidgets('lookup search assist items can be tapped', (tester) async {
+    _setMobileViewport(tester);
+
+    await tester.pumpWidget(_buildTestApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    final assist = find.byKey(const ValueKey('lookup-search-assist-list'));
+    final suggestion = find.descendant(of: assist, matching: find.text('食べ物'));
+    expect(suggestion, findsOneWidget);
+
+    await tester.tap(suggestion);
+    await tester.pumpAndSettle();
+
+    expect(assist, findsNothing);
+    expect(find.text('食べ物'), findsWidgets);
+    expect(find.text('No exact match for "食べ物".'), findsOneWidget);
+  });
+
   testWidgets('compact mobile lookup avoids bottom overflow with assist open', (
     tester,
   ) async {
@@ -124,10 +145,7 @@ void main() {
       find.byKey(const ValueKey('lookup-desktop-side-panel')),
       findsOneWidget,
     );
-    expect(
-      find.byKey(const ValueKey('lookup-desktop-588')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('lookup-desktop-588')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -393,6 +411,7 @@ class _FakeDictionaryRepository implements DictionaryRepository {
 
   @override
   Future<List<OnlineDictionaryConfig>> loadOnlineConfigs() async => const [
+    OnlineDictionaryConfig(id: 'weblio', name: 'Weblio', enabled: true),
     OnlineDictionaryConfig(id: 'jisho', name: 'Jisho', enabled: true),
   ];
 

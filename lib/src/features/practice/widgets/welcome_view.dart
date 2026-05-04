@@ -53,7 +53,7 @@ class _DesktopLayout extends ConsumerWidget {
   const _DesktopLayout({
     required this.state,
     required this.llmConfigured,
-    required String? this.error,
+    required this.error,
   });
 
   final PracticeState state;
@@ -101,16 +101,14 @@ class _DesktopLayout extends ConsumerWidget {
                       title: l10n.practiceModeTranslation,
                       subtitle: l10n.practiceModeTranslationDesc,
                       selected: state.gameMode == GameMode.translation,
-                      onTap: () =>
-                          controller.selectMode(GameMode.translation),
+                      onTap: () => controller.selectMode(GameMode.translation),
                     ),
                     SizedBox(height: spacing.sm),
                     _ModeCard(
                       icon: Icons.quiz_outlined,
                       title: l10n.practiceModeMultipleChoice,
                       subtitle: l10n.practiceModeMultipleChoiceDesc,
-                      selected:
-                          state.gameMode == GameMode.multipleChoice,
+                      selected: state.gameMode == GameMode.multipleChoice,
                       onTap: () =>
                           controller.selectMode(GameMode.multipleChoice),
                     ),
@@ -119,8 +117,7 @@ class _DesktopLayout extends ConsumerWidget {
                       icon: Icons.edit_outlined,
                       title: l10n.practiceModeSentenceCheck,
                       subtitle: l10n.practiceModeSentenceCheckDesc,
-                      selected:
-                          state.gameMode == GameMode.sentenceCheck,
+                      selected: state.gameMode == GameMode.sentenceCheck,
                       onTap: () =>
                           controller.selectMode(GameMode.sentenceCheck),
                     ),
@@ -168,24 +165,20 @@ class _DesktopLayout extends ConsumerWidget {
                             segments: [
                               ButtonSegment(
                                 value: SentenceLength.short,
-                                label: Text(
-                                    l10n.practiceSentenceLengthShort),
+                                label: Text(l10n.practiceSentenceLengthShort),
                               ),
                               ButtonSegment(
                                 value: SentenceLength.medium,
-                                label: Text(
-                                    l10n.practiceSentenceLengthMedium),
+                                label: Text(l10n.practiceSentenceLengthMedium),
                               ),
                               ButtonSegment(
                                 value: SentenceLength.long,
-                                label: Text(
-                                    l10n.practiceSentenceLengthLong),
+                                label: Text(l10n.practiceSentenceLengthLong),
                               ),
                             ],
                             selected: {state.sentenceLength},
                             onSelectionChanged: (value) {
-                              controller
-                                  .selectSentenceLength(value.first);
+                              controller.selectSentenceLength(value.first);
                             },
                           ),
                         ),
@@ -256,7 +249,7 @@ class _MobileLayout extends ConsumerWidget {
   const _MobileLayout({
     required this.state,
     required this.llmConfigured,
-    required String? this.error,
+    required this.error,
   });
 
   final PracticeState state;
@@ -310,8 +303,7 @@ class _MobileLayout extends ConsumerWidget {
                   title: l10n.practiceModeMultipleChoice,
                   subtitle: l10n.practiceModeMultipleChoiceDesc,
                   selected: state.gameMode == GameMode.multipleChoice,
-                  onTap: () =>
-                      controller.selectMode(GameMode.multipleChoice),
+                  onTap: () => controller.selectMode(GameMode.multipleChoice),
                 ),
                 SizedBox(height: spacing.sm),
                 _ModeCard(
@@ -319,8 +311,7 @@ class _MobileLayout extends ConsumerWidget {
                   title: l10n.practiceModeSentenceCheck,
                   subtitle: l10n.practiceModeSentenceCheckDesc,
                   selected: state.gameMode == GameMode.sentenceCheck,
-                  onTap: () =>
-                      controller.selectMode(GameMode.sentenceCheck),
+                  onTap: () => controller.selectMode(GameMode.sentenceCheck),
                 ),
               ],
             ),
@@ -391,8 +382,7 @@ class _MobileLayout extends ConsumerWidget {
           padding: EdgeInsets.fromLTRB(spacing.lg, spacing.lg, spacing.lg, 0),
           sliver: SliverToBoxAdapter(
             child: FilledButton.icon(
-              onPressed:
-                  llmConfigured ? () => controller.startNewTask() : null,
+              onPressed: llmConfigured ? () => controller.startNewTask() : null,
               icon: const Icon(Icons.play_arrow_rounded),
               label: Text(l10n.practiceStartButton),
               style: FilledButton.styleFrom(
@@ -403,15 +393,12 @@ class _MobileLayout extends ConsumerWidget {
         ),
         if (!llmConfigured)
           SliverPadding(
-            padding:
-                EdgeInsets.fromLTRB(spacing.lg, spacing.md, spacing.lg, 0),
+            padding: EdgeInsets.fromLTRB(spacing.lg, spacing.md, spacing.lg, 0),
             sliver: SliverToBoxAdapter(
               child: Text(
                 l10n.practiceNoApiKey,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: scheme.error,
-                ),
+                style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
               ),
             ),
           ),
@@ -493,8 +480,9 @@ class _ModeCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight:
-                            selected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         color: selected
                             ? scheme.onPrimaryContainer
                             : scheme.onSurface,
@@ -549,8 +537,7 @@ class _LinkTile extends StatelessWidget {
         onTap: onTap,
         leading: Icon(icon, color: scheme.primary),
         title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-        subtitle:
-            Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+        subtitle: Text(subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
         trailing: const Icon(Icons.chevron_right_rounded),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(theme.radii.lg),
