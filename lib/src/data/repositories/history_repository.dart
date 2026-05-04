@@ -21,23 +21,24 @@ class HistoryRepository {
 
   Future<void> addItem(HistoryItem item) async {
     if (_box == null) return;
-    await _box!.put(item.id, item);
+    final box = _box;
+    await box.put(item.id, item);
     // Cap at 100 entries
-    final all = _box.values.toList();
+    final all = box.values.toList();
     if (all.length > 100) {
       all.sort((a, b) => a.timestamp.compareTo(b.timestamp));
       final toRemove = all.sublist(0, all.length - 100);
-      if (_box != null) await _box!.deleteAll(toRemove.map((e) => e.id));
+      await box.deleteAll(toRemove.map((e) => e.id));
     }
   }
 
   Future<void> deleteItem(String id) async {
     if (_box == null) return;
-    await _box!.delete(id);
+    await _box.delete(id);
   }
 
   Future<void> clear() async {
     if (_box == null) return;
-    await _box!.clear();
+    await _box.clear();
   }
 }

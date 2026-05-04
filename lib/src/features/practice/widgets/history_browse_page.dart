@@ -1,28 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/localization_extensions.dart';
 import '../../../core/theme/app_design_tokens.dart';
+import '../../../shared/widgets/confirm_action_dialog.dart';
 import '../../../shared/widgets/page_frame.dart';
 import '../models/history_item.dart';
 import '../providers/practice_providers.dart';
 
-class HistoryBrowsePage extends ConsumerWidget {
+class HistoryBrowsePage extends ConsumerStatefulWidget {
   const HistoryBrowsePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryBrowsePage> createState() =>
+      _HistoryBrowsePageState();
+}
+
+class _HistoryBrowsePageState extends ConsumerState<HistoryBrowsePage> {
+  late List<HistoryItem> _items;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
+
+  void _loadItems() {
+    _items = ref.read(historyRepositoryProvider).loadAll();
+  }
+
+  Future<void> _confirmDelete(HistoryItem item) async {
+    final confirmed = await ConfirmActionDialog.show(
+      context,
+      title: context.l10n.practiceHistoryDeleteConfirm,
+      message: item.chineseSentence ?? item.userSentence ?? '',
+      confirmLabel: context.l10n.dictionaryDelete,
+      cancelLabel: context.l10n.commonCancel,
+    );
+    if (confirmed != true || !mounted) return;
+
+    await ref.read(historyRepositoryProvider).deleteItem(item.id);
+    setState(() => _loadItems());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final repository = ref.read(historyRepositoryProvider);
-    final items = repository.loadAll();
 
     return PageFrame(
       storageId: 'practice-history',
       title: l10n.practiceHistoryTitle,
-      subtitle: items.isEmpty ? l10n.practiceHistoryEmpty : '${items.length} records',
+      subtitle:
+          _items.isEmpty ? l10n.practiceHistoryEmpty : '${_items.length} records',
       trailing: OutlinedButton.icon(
         onPressed: () {
           if (context.canPop()) {
@@ -35,7 +68,7 @@ class HistoryBrowsePage extends ConsumerWidget {
         label: Text(l10n.practiceBackToMenu),
       ),
       children: [
-        if (items.isEmpty)
+        if (_items.isEmpty)
           Center(
             child: Text(
               l10n.practiceHistoryEmpty,
@@ -45,16 +78,22 @@ class HistoryBrowsePage extends ConsumerWidget {
             ),
           )
         else
-          ...items.map((item) => _HistoryCard(item: item)),
+          ..._items.map(
+            (item) => _HistoryCard(
+              item: item,
+              onDelete: () => _confirmDelete(item),
+            ),
+          ),
       ],
     );
   }
 }
 
 class _HistoryCard extends StatefulWidget {
-  const _HistoryCard({required this.item});
+  const _HistoryCard({required this.item, required this.onDelete});
 
   final HistoryItem item;
+  final VoidCallback onDelete;
 
   @override
   State<_HistoryCard> createState() => _HistoryCardState();
@@ -137,6 +176,12 @@ class _HistoryCardState extends State<_HistoryCard> {
                         ],
                       ),
                     ),
+                    IconButton(
+                      icon: Icon(Icons.delete_outline_rounded,
+                          color: scheme.error),
+                      tooltip: 'Delete',
+                      onPressed: widget.onDelete,
+                    ),
                     Icon(
                       _expanded
                           ? Icons.expand_less_rounded
@@ -177,7 +222,13 @@ class _HistoryCardState extends State<_HistoryCard> {
                       ),
                     ),
                     SizedBox(height: 4),
-                    Text(item.explanation),
+                    MarkdownBody(
+                      data: item.explanation,
+                      styleSheet:
+                          MarkdownStyleSheet.fromTheme(theme).copyWith(
+                        p: theme.textTheme.bodyMedium,
+                      ),
+                    ),
                   ],
                 ],
               ],
