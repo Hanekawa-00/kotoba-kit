@@ -44,8 +44,8 @@ git push origin v0.1.0
 
 The workflow builds and uploads these assets:
 
-- `flutter-template-web.zip`
-- `flutter-template-windows-x64.zip`
+- `kotoba-kit-web.zip`
+- `kotoba-kit-windows-x64.zip`
 - `app-arm64-v8a-release.apk`
 - `app-armeabi-v7a-release.apk`
 - `app-x86_64-release.apk`
