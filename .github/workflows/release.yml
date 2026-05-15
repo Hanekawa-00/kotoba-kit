@@ -40,13 +40,13 @@ jobs:
       - name: Package web
         run: |
           cd build/web
-          zip -r ../../flutter-template-web.zip .
+          zip -r ../../kotoba-kit-web.zip .
 
       - name: Upload web artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-web
-          path: flutter-template-web.zip
+          path: kotoba-kit-web.zip
 
   build-android:
     name: Build Android APKs
@@ -111,13 +111,13 @@ jobs:
         run: |
           Compress-Archive `
             -Path build\windows\x64\runner\Release\* `
-            -DestinationPath flutter-template-windows-x64.zip
+            -DestinationPath kotoba-kit-windows-x64.zip
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
         with:
           name: release-windows
-          path: flutter-template-windows-x64.zip
+          path: kotoba-kit-windows-x64.zip
 
   publish-release:
     name: Publish GitHub Release
